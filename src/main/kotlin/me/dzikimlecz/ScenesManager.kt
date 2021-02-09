@@ -28,11 +28,14 @@ class ScenesManager(private val stage: Stage) {
         val columnsLabel = Label("L. kolumn:")
         columnsLabel.font = font
         val columnsField = TextField()
+        columnsField.promptText = "1"
         columnsField.font = font
         columnsField.filterContent()
         val rowsLabel = Label("L. rzędów:")
         rowsLabel.font = font
         val rowsField = TextField()
+        rowsField.promptText = "1"
+        rowsField.font = font
         rowsField.filterContent()
         val proceedButton = Button("Ok")
         proceedButton.font = font
@@ -48,6 +51,7 @@ class ScenesManager(private val stage: Stage) {
         stage.centerOnScreen()
         stage.isResizable = false
         stage.show()
+        proceedButton.requestFocus()
     }
 
     private fun TextField.filterContent() {
