@@ -55,4 +55,17 @@ class TimeTable(columns: Int, rows: Int) : Iterable<ObservableList<Cell>> {
 
     override fun iterator() : Iterator<ObservableList<Cell>> = table.iterator()
 
+    fun list(): List<List<Cell>> {
+        return table.toList()
     }
+}
+
+fun timeTableOf(table: List<List<Cell>>) : TimeTable {
+    require(table.isNotEmpty() && table.stream().allMatch {it.size == table[0].size})
+        {"This list is not a table!"}
+    val timeTable = TimeTable(table[0].size, table.size)
+    for ((y, row) in table.withIndex())
+        for((x, cell) in row.withIndex())
+            timeTable[y][x] = cell
+    return timeTable
+}
