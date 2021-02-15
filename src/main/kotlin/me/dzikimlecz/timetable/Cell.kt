@@ -2,7 +2,10 @@ package me.dzikimlecz.timetable
 
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleStringProperty
+import kotlinx.serialization.Serializable
+import me.dzikimlecz.timetable.json.CellSerializer
 
+@Serializable(with = CellSerializer::class)
 class Cell(isDivided : Boolean = false) {
     private val contents = arrayOf(
         SimpleStringProperty(this, ""),
