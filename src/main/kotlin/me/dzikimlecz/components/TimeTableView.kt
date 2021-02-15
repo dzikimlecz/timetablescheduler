@@ -1,4 +1,4 @@
-package me.dzikimlecz.timetable
+package me.dzikimlecz.components
 
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleIntegerProperty
@@ -8,6 +8,8 @@ import javafx.scene.control.Label
 import javafx.scene.control.TextField
 import javafx.scene.layout.BorderPane
 import javafx.scene.layout.GridPane
+import me.dzikimlecz.timetable.Cell
+import me.dzikimlecz.timetable.TimeTable
 
 class TimeTableView(private val timeTable: TimeTable) : GridPane() {
     private val viewModeProperty = SimpleObjectProperty<ViewMode>()
