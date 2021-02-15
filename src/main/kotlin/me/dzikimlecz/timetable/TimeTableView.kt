@@ -72,7 +72,7 @@ class TimeTableView(private val timeTable: TimeTable) : GridPane() {
         EDIT, VIEW
     }
 
-    private inner class CellView(cell: TimeTable.Cell) : BorderPane() {
+    private inner class CellView(cell: Cell) : BorderPane() {
         val labels = arrayOf(Label(), Label())
         val fields = arrayOf(TextField(), TextField())
         private val divisionProperty = SimpleBooleanProperty()
