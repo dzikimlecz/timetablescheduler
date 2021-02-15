@@ -3,7 +3,10 @@ package me.dzikimlecz.timetable
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
+import kotlinx.serialization.Serializable
+import me.dzikimlecz.timetable.json.TimeTableSerializer
 
+@Serializable(with = TimeTableSerializer::class)
 class TimeTable(columns: Int, rows: Int) : Iterable<ObservableList<Cell>> {
     var columns = 0
         set(value) {
