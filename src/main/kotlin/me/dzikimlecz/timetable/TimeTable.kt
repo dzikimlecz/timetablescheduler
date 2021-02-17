@@ -58,9 +58,7 @@ class TimeTable(columns: Int, rows: Int) : Iterable<ObservableList<Cell>> {
 
     override fun iterator() : Iterator<ObservableList<Cell>> = table.iterator()
 
-    fun list(): List<List<Cell>> {
-        return table.toList()
-    }
+    fun list(): List<List<Cell>> = table.toList()
 }
 
 fun timeTableOf(table: List<List<Cell>>) : TimeTable {
