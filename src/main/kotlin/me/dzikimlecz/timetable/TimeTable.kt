@@ -3,11 +3,18 @@ package me.dzikimlecz.timetable
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
+import kotlinx.serialization.Required
 import kotlinx.serialization.Serializable
 import me.dzikimlecz.timetable.json.TimeTableSerializer
+import java.time.LocalDateTime
 
 @Serializable(with = TimeTableSerializer::class)
-class TimeTable(columns: Int, rows: Int) : Iterable<ObservableList<Cell>> {
+class TimeTable(
+    columns: Int,
+    rows: Int,
+    @Required val dateCreated: LocalDateTime = LocalDateTime.now(),
+    var name: String = ""
+) : Iterable<ObservableList<Cell>> {
     var columns = 0
         set(value) {
             if (value <= 0) throw IllegalArgumentException("Illegal Table Size")
@@ -61,10 +68,10 @@ class TimeTable(columns: Int, rows: Int) : Iterable<ObservableList<Cell>> {
     fun list(): List<List<Cell>> = table.toList()
 }
 
-fun timeTableOf(table: List<List<Cell>>) : TimeTable {
+fun timeTableOf(table: List<List<Cell>>, date: LocalDateTime = LocalDateTime.now()) : TimeTable {
     require(table.isNotEmpty() && table.stream().allMatch {it.size == table[0].size})
         {"This list is not a table!"}
-    val timeTable = TimeTable(table[0].size, table.size)
+    val timeTable = TimeTable(table[0].size, table.size, date)
     for ((y, row) in table.withIndex())
         for((x, cell) in row.withIndex())
             timeTable[y][x] = cell
