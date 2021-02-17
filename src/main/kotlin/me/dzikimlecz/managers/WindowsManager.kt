@@ -8,11 +8,12 @@ import javafx.scene.layout.GridPane
 import javafx.scene.text.Font
 import javafx.stage.Stage
 import java.util.*
+import java.util.concurrent.atomic.AtomicInteger
 
 class WindowsManager(private val mainStage: Stage) {
     private val dialogStage = Stage()
 
-    fun showTimeTableSetUp(properties: Properties) {
+    fun showTimeTableSetUp(dimensionsContainer: Pair<AtomicInteger, AtomicInteger>) {
         dialogStage.title = "Nowy Plan"
         val pane = GridPane()
         pane.hgap = 10.0
@@ -39,10 +40,10 @@ class WindowsManager(private val mainStage: Stage) {
         proceedButton.font = font
 
         proceedButton.onAction = EventHandler {
-            var text = columnsField.text
-            properties.setProperty("ColumnsAmount", if (text.isNotEmpty()) text else "1")
-            text = rowsField.text
-            properties.setProperty("RowsAmount", if (text.isNotEmpty()) text else "1")
+            var text = rowsField.text
+            dimensionsContainer.first.set(if (text.isNotEmpty()) Integer.parseInt(text) else 1)
+            text = columnsField.text
+            dimensionsContainer.second.set(if (text.isNotEmpty()) Integer.parseInt(text) else 1)
             dialogStage.close()
         }
 
