@@ -1,4 +1,4 @@
-package me.dzikimlecz.timetable.json
+package me.dzikimlecz.timetables.timetable.json
 
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Required
@@ -8,9 +8,9 @@ import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.descriptors.buildClassSerialDescriptor
 import kotlinx.serialization.descriptors.element
 import kotlinx.serialization.encoding.*
-import me.dzikimlecz.timetable.Cell
-import me.dzikimlecz.timetable.TimeTable
-import me.dzikimlecz.timetable.timeTableOf
+import me.dzikimlecz.timetables.timetable.Cell
+import me.dzikimlecz.timetables.timetable.TimeTable
+import me.dzikimlecz.timetables.timetable.timeTableOf
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 

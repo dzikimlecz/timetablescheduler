@@ -1,7 +1,7 @@
-package me.dzikimlecz.managers
+package me.dzikimlecz.timetables.managers
 
 import kotlinx.serialization.json.Json
-import me.dzikimlecz.timetable.TimeTable
+import me.dzikimlecz.timetables.timetable.TimeTable
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException

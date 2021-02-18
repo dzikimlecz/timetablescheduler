@@ -1,11 +1,11 @@
-package me.dzikimlecz.timetable
+package me.dzikimlecz.timetables.timetable
 
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import kotlinx.serialization.Required
 import kotlinx.serialization.Serializable
-import me.dzikimlecz.timetable.json.TimeTableSerializer
+import me.dzikimlecz.timetables.timetable.json.TimeTableSerializer
 import java.time.LocalDateTime
 
 @Serializable(with = TimeTableSerializer::class)

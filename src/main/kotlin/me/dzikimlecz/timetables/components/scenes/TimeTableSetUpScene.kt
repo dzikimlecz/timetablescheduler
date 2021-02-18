@@ -1,28 +1,30 @@
-package me.dzikimlecz.managers
+package me.dzikimlecz.timetables.components.scenes
 
 import javafx.event.EventHandler
 import javafx.geometry.Pos
 import javafx.scene.Scene
-import javafx.scene.control.*
+import javafx.scene.control.Button
+import javafx.scene.control.Label
+import javafx.scene.control.TextField
+import javafx.scene.control.TextFormatter
 import javafx.scene.layout.GridPane
 import javafx.scene.text.Font
-import javafx.stage.Stage
-import java.util.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicInteger
 
-class WindowsManager(private val mainStage: Stage) {
-    private val dialogStage = Stage()
-
-    fun showTimeTableSetUp(dimensionsContainer: Pair<AtomicInteger, AtomicInteger>) {
-        dialogStage.title = "Nowy Plan"
-        val pane = GridPane()
+class TimeTableSetUpScene private constructor(private val pane: GridPane) :
+    Scene(pane, 400.0, 180.0) {
+    init {
         pane.hgap = 10.0
         pane.vgap = 10.0
         pane.alignment = Pos.CENTER
+    }
 
+    constructor(dimensionsContainer: Pair<AtomicInteger, AtomicInteger>) : this(GridPane()) {
         val font = Font.font(14.0)
-        val infoLabel =
-            Label("Początkowe wymiary siatki godzin:")
+        val infoLabel = Label("Początkowe wymiary siatki godzin:")
         infoLabel.font = font
         val columnsLabel = Label("L. kolumn:")
         columnsLabel.font = font
@@ -41,30 +43,26 @@ class WindowsManager(private val mainStage: Stage) {
 
         proceedButton.onAction = EventHandler {
             var text = rowsField.text
-            dimensionsContainer.first.set(if (text.isNotEmpty()) Integer.parseInt(text) else 1)
+            dimensionsContainer.first.set(Integer.parseInt(text.ifBlank { "1" }))
             text = columnsField.text
-            dimensionsContainer.second.set(if (text.isNotEmpty()) Integer.parseInt(text) else 1)
-            dialogStage.close()
+            dimensionsContainer.second.set(Integer.parseInt(text.ifBlank { "1" }))
+            window.hide()
+        }
+        GlobalScope.launch {
+            delay(500)
+            proceedButton.requestFocus()
         }
 
         pane.add(infoLabel, 0, 0, 5, 1)
         pane.addRow(1, columnsLabel, columnsField)
         pane.addRow(2, rowsLabel, rowsField)
         pane.add(proceedButton, 5, 2, 2, 1)
-
-        dialogStage.scene = Scene(pane, 400.0, 180.0)
-        dialogStage.sizeToScene()
-        dialogStage.centerOnScreen()
-        dialogStage.isResizable = false
-        dialogStage.showAndWait()
-        proceedButton.requestFocus()
     }
-
-    private fun TextField.filterContent() {
-        textFormatter = TextFormatter<String> {
-            if (it.text.matches(Regex("\\D")) || this.text.length >= 2)
-                it.text = ""
-            it
-        }
+}
+private fun TextField.filterContent() {
+    textFormatter = TextFormatter<String> {
+        if (it.text.matches(Regex("\\D")) || this.text.length >= 2)
+            it.text = ""
+        it
     }
 }

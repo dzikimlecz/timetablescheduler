@@ -1,9 +1,9 @@
-package me.dzikimlecz.timetable
+package me.dzikimlecz.timetables.timetable
 
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleStringProperty
 import kotlinx.serialization.Serializable
-import me.dzikimlecz.timetable.json.CellSerializer
+import me.dzikimlecz.timetables.timetable.json.CellSerializer
 
 @Serializable(with = CellSerializer::class)
 class Cell(isDivided : Boolean = false) {

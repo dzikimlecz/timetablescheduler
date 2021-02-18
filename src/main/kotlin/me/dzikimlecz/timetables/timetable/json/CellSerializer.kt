@@ -1,4 +1,4 @@
-package me.dzikimlecz.timetable.json
+package me.dzikimlecz.timetables.timetable.json
 
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.SerialName
@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
-import me.dzikimlecz.timetable.Cell
+import me.dzikimlecz.timetables.timetable.Cell
 
 @Serializable
 @SerialName("Cell")
