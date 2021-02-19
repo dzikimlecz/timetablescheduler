@@ -8,7 +8,7 @@ import tornadofx.*
 import java.lang.Integer.parseInt
 import java.util.concurrent.atomic.AtomicInteger
 
-class TimeTableSetUpView : Fragment("Nowy Plan") {
+class TimeTableSetUpView : View("Nowy Plan") {
 
     private var rowsField: TextField by singleAssign()
     private var columnsField: TextField by singleAssign()
