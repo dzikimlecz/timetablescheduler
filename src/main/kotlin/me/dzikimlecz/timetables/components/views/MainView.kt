@@ -8,7 +8,7 @@ import javafx.scene.paint.Color
 import javafx.stage.StageStyle
 import me.dzikimlecz.timetables.managers.Manager
 import tornadofx.*
-import java.util.concurrent.atomic.AtomicInteger as BoxedInt
+import java.time.LocalDate
 import me.dzikimlecz.timetables.components.views.TimeTableSetUpView as SetUpView
 
 
@@ -25,10 +25,9 @@ class MainView : View("Układacz planów 3tysionce !!!") {
                 val buttonHeight = 5E1
                 button("Nowy Plan") {
                     action {
-                        val dimensions = Pair(BoxedInt(), BoxedInt())
-                        find<SetUpView>(mapOf(SetUpView::dimensions to dimensions))
+                        val map = mutableMapOf<String, String>()
+                        find<SetUpView>(mapOf(SetUpView::tableProperties to map))
                             .openModal(StageStyle.UTILITY, resizable = false, block = true)
-
                     }
                 }
                 button("Otwórz Plan")
