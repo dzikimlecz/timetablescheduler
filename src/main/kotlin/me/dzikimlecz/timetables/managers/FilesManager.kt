@@ -18,10 +18,10 @@ class FilesManager(
 
 
     fun saveTable(timeTable: TimeTable, path: String = defaultSavePath) {
-        val filename = (if (timeTable.name.isBlank())
-            timeTable.dateCreated.format(DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT))
-                .replace(Regex("[-:.]"), "_")
-        else timeTable.name) + ".json"
+        val filename = timeTable.name.ifBlank {
+            timeTable.date.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT))
+            .replace(Regex("[-:.]"), "_")
+        } + ".json"
         val file = File(path, filename)
         val resultStatus = if (file.exists()) checkIdentity(file, timeTable)
         else serialize(timeTable, file)
@@ -57,7 +57,7 @@ class FilesManager(
         val serialized = file.readText()
         val table = Json.decodeFromString(TimeTable.serializer(), serialized)
         return if (table.name.equals(timeTable.name, true) ||
-            table.dateCreated == timeTable.dateCreated
+            table.date == timeTable.date
         ) 1 else 2
     }
 

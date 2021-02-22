@@ -4,13 +4,12 @@ import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Required
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.descriptors.SerialDescriptor
-import kotlinx.serialization.descriptors.buildClassSerialDescriptor
-import kotlinx.serialization.descriptors.element
+import kotlinx.serialization.descriptors.*
 import kotlinx.serialization.encoding.*
 import me.dzikimlecz.timetables.timetable.Cell
 import me.dzikimlecz.timetables.timetable.TimeTable
 import me.dzikimlecz.timetables.timetable.timeTableOf
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
@@ -18,7 +17,7 @@ import java.time.format.DateTimeFormatter
 @SerialName("TimeTable")
 private data class TimeTableSurrogate(
     val table: List<List<Cell>>,
-    @Serializable(with = DateSerializer::class) val date: LocalDateTime,
+    @Serializable(with = DateSerializer::class) val date: LocalDate,
     @Required val name: String = ""
 ) {
     init {
@@ -30,13 +29,10 @@ object TimeTableSerializer : KSerializer<TimeTable> {
     override val descriptor: SerialDescriptor = TimeTableSurrogate.serializer().descriptor
 
     override fun serialize(encoder: Encoder, value: TimeTable) {
-        val name = value.name.ifBlank {
-            value.dateCreated.format(DateTimeFormatter.ISO_LOCAL_DATE_TIME).replace('T', '_')
-        }
+        val name = value.name.ifBlank { value.date.format(DateTimeFormatter.ISO_LOCAL_DATE) }
         encoder.encodeSerializableValue(
-            TimeTableSurrogate.serializer(), TimeTableSurrogate(value.list(), value.dateCreated,
-                name
-            )
+            TimeTableSurrogate.serializer(),
+            TimeTableSurrogate(value.list(), value.date, name)
         )
     }
 
@@ -48,29 +44,15 @@ object TimeTableSerializer : KSerializer<TimeTable> {
     }
 }
 
-class DateSerializer : KSerializer<LocalDateTime>{
-    override val descriptor: SerialDescriptor = buildClassSerialDescriptor("date") {
-        element<String>("date")
-        element<String>("time")
-    }
+class DateSerializer : KSerializer<LocalDate>{
+    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("day", PrimitiveKind.STRING)
 
-    override fun deserialize(decoder: Decoder): LocalDateTime =
+    override fun deserialize(decoder: Decoder): LocalDate =
         decoder.decodeStructure(descriptor) {
-            var date = ""
-            var time = ""
-            while (true) when (val index = decodeElementIndex(descriptor)) {
-                0 -> date = decodeStringElement(descriptor, 0)
-                1 -> time = decodeStringElement(descriptor, 1)
-                CompositeDecoder.DECODE_DONE -> break
-                else -> error("Unexpected index: $index")
-            }
-            LocalDateTime.parse("${date}T${time}")
+            val date = decodeStringElement(descriptor, 0)
+            LocalDate.parse(date)
         }
 
-    override fun serialize(encoder: Encoder, value: LocalDateTime) =
-        encoder.encodeStructure(descriptor) {
-            encodeStringElement(descriptor, 1, value.format(DateTimeFormatter.ISO_LOCAL_DATE))
-            encodeStringElement(descriptor, 0, value.format(DateTimeFormatter.ISO_LOCAL_TIME))
-        }
-
+    override fun serialize(encoder: Encoder, value: LocalDate) =
+        encoder.encodeString(value.format(DateTimeFormatter.ISO_LOCAL_DATE))
 }
