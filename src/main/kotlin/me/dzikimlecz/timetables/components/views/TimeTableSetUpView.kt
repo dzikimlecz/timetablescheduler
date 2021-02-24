@@ -6,7 +6,7 @@ import javafx.scene.control.TextField
 import javafx.scene.control.TextFormatter
 import javafx.scene.text.Font
 import tornadofx.*
-import java.time.LocalDateTime
+import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 class TimeTableSetUpView : View("Nowy Plan") {
@@ -15,7 +15,6 @@ class TimeTableSetUpView : View("Nowy Plan") {
     private var rowsField: TextField by singleAssign()
     private var columnsField: TextField by singleAssign()
     private var datePicker: DatePicker by singleAssign()
-//    val dimensions : Pair<AtomicInteger, AtomicInteger> by param()
     val tableProperties: MutableMap<String, String> by param()
 
 
@@ -38,14 +37,16 @@ class TimeTableSetUpView : View("Nowy Plan") {
             }
             nameField = textfield {
                 font = bigFont
-                promptText = LocalDateTime.now().format(DateTimeFormatter.ISO_LOCAL_DATE)
+                promptText = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)
             }
         }
         row {
             label("Data:") {
                 font = bigFont
             }
-            datePicker = datepicker()
+            datePicker = datepicker() {
+                value = LocalDate.now()
+            }
         }
         row {
             label("L. rzędów:") {
@@ -73,12 +74,11 @@ class TimeTableSetUpView : View("Nowy Plan") {
                 action {
                     tableProperties["name"] = nameField.text.ifBlank { nameField.promptText }
                     tableProperties["rows"] = rowsField.text.ifBlank { rowsField.promptText }
-                    tableProperties["columns"] = columnsField.text.ifBlank { rowsField.promptText }
-                    tableProperties["date"] = datePicker.editor.text.ifBlank { rowsField.promptText }
+                    tableProperties["columns"] = columnsField.text.ifBlank { columnsField.promptText }
+                    tableProperties["date"] = datePicker.value.format(DateTimeFormatter.ISO_LOCAL_DATE)
                     close()
-                    listOf(nameField, rowsField, columnsField, datePicker.editor).forEach {
-                        it.clear()
-                    }
+                    listOf(nameField, rowsField, columnsField).forEach { it.clear() }
+                    datePicker.value = LocalDate.now()
                 }
             }
         }
