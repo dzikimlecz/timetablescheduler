@@ -1,5 +1,6 @@
 package me.dzikimlecz.timetables.components.views
 
+import javafx.geometry.Insets
 import javafx.geometry.Pos
 import javafx.scene.control.DatePicker
 import javafx.scene.control.TextField
@@ -17,72 +18,56 @@ class TimeTableSetUpView : View("Nowy Plan") {
     private var datePicker: DatePicker by singleAssign()
     val tableProperties: MutableMap<String, String> by param()
 
-
-    override val root = gridpane {
-        hgap = 1E1
-        vgap = 1E1
-        alignment = Pos.CENTER
-        paddingHorizontal = 7E1
-        paddingVertical = 5E1
-
+    override val root = form {
+        paddingAll = 20
         val bigFont = Font.font(14.0)
-        row {
-            label("Dane Planu:") {
-                font = bigFont
+        fieldset("Dane Planu") {
+            field("Nazwa") {
+                label.font = bigFont
+                nameField = textfield {
+                    font = bigFont
+                    promptText = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)
+                }
+            }
+            field("Data") {
+                label.font = bigFont
+                datePicker = datepicker() {
+                    value = LocalDate.now()
+                }
             }
         }
-        row {
-            label("Nazwa:") {
-                font = bigFont
+        fieldset("Początkowe wymiary") {
+            field("L. rzędów") {
+                label.font = bigFont
+                rowsField = textfield {
+                    font = bigFont
+                    promptText = "1"
+                    filterContent()
+                }
             }
-            nameField = textfield {
-                font = bigFont
-                promptText = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)
-            }
-        }
-        row {
-            label("Data:") {
-                font = bigFont
-            }
-            datePicker = datepicker() {
-                value = LocalDate.now()
-            }
-        }
-        row {
-            label("L. rzędów:") {
-                font = bigFont
-            }
-            rowsField = textfield {
-                font = bigFont
-                promptText = "1"
-                filterContent()
-            }
-        }
-        row {
-            label("L. kolumn:") {
-                font = bigFont
-            }
-            columnsField = textfield {
-                font = bigFont
-                promptText = "1"
-                filterContent()
-            }
-        }
-        row {
-            button("Ok") {
-                font = bigFont
-                action {
-                    tableProperties["name"] = nameField.text.ifBlank { nameField.promptText }
-                    tableProperties["rows"] = rowsField.text.ifBlank { rowsField.promptText }
-                    tableProperties["columns"] = columnsField.text.ifBlank { columnsField.promptText }
-                    tableProperties["date"] = datePicker.value.format(DateTimeFormatter.ISO_LOCAL_DATE)
-                    close()
-                    listOf(nameField, rowsField, columnsField).forEach { it.clear() }
-                    datePicker.value = LocalDate.now()
+
+            field("L. kolumn") {
+                label.font = bigFont
+                columnsField = textfield {
+                    font = bigFont
+                    promptText = "1"
+                    filterContent()
                 }
             }
         }
 
+        button("Ok") {
+            font = bigFont
+            action {
+                tableProperties["name"] = nameField.text.ifBlank { nameField.promptText }
+                tableProperties["rows"] = rowsField.text.ifBlank { rowsField.promptText }
+                tableProperties["columns"] = columnsField.text.ifBlank { columnsField.promptText }
+                tableProperties["date"] = datePicker.value.format(DateTimeFormatter.ISO_LOCAL_DATE)
+                close()
+                listOf(nameField, rowsField, columnsField).forEach { it.clear() }
+                datePicker.value = LocalDate.now()
+            }
+        }
     }
 
     private fun TextField.filterContent() {
