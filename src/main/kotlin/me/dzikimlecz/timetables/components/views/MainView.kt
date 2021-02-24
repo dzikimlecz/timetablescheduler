@@ -6,14 +6,15 @@ import javafx.scene.layout.Background
 import javafx.scene.layout.BackgroundFill
 import javafx.scene.paint.Color
 import javafx.stage.StageStyle
+import me.dzikimlecz.timetables.components.fragments.TimeTableEditor
 import me.dzikimlecz.timetables.managers.Manager
+import me.dzikimlecz.timetables.timetable.TimeTable
 import tornadofx.*
-import java.time.LocalDate
 import me.dzikimlecz.timetables.components.views.TimeTableSetUpView as SetUpView
 
 
 class MainView : View("Układacz planów 3tysionce !!!") {
-    private val manager : Manager by inject()
+    private val manager : Manager by lazy { Manager() }
 
     override val root = borderpane {
         left {
@@ -24,11 +25,7 @@ class MainView : View("Układacz planów 3tysionce !!!") {
                 val buttonWidth = 1.8E2
                 val buttonHeight = 5E1
                 button("Nowy Plan") {
-                    action {
-                        val map = mutableMapOf<String, String>()
-                        find<SetUpView>(mapOf(SetUpView::tableProperties to map))
-                            .openModal(StageStyle.UTILITY, resizable = false, block = true)
-                    }
+                    action { setUpTable() }
                 }
                 button("Otwórz Plan")
                 button("Zapisz Plan")
@@ -42,6 +39,19 @@ class MainView : View("Układacz planów 3tysionce !!!") {
                 }
             }
         }
+    }
+
+    private fun setUpTable() {
+        val map = mutableMapOf<String, String>()
+        find<SetUpView>(mapOf(SetUpView::tableProperties to map))
+            .openModal(StageStyle.UTILITY, resizable = false, block = true)
+        try { displayTable(manager.newTable(map)) } catch (ignore : Exception) {}
+    }
+
+    private fun displayTable(table: TimeTable) {
+        val editor = find<TimeTableEditor>(mapOf(TimeTableEditor::timeTable to table))
+        root.center = editor.root
+        title = table.name
     }
 
     override fun onBeforeShow() {
