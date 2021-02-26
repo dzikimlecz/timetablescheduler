@@ -7,10 +7,9 @@ import me.dzikimlecz.timetables.timetable.json.CellSerializer
 
 @Serializable(with = CellSerializer::class)
 class Cell(isDivided : Boolean = false) {
-    private val contents = arrayOf(
-        SimpleStringProperty(this, ""),
-        SimpleStringProperty(this, "")
-    )
+    private val contents = Array(2) {
+        SimpleStringProperty(this, "", "")
+    }
 
     val isDivided = SimpleBooleanProperty(isDivided)
 
