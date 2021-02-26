@@ -52,11 +52,6 @@ class TimeTable(
     init {
         this.columns = columns
         this.rows = rows
-        for (i in 0 until rows) {
-            val row = FXCollections.observableArrayList<Cell>()
-            for (j in 0 until columns) row.add(Cell())
-            table.add(row)
-        }
     }
 
     operator fun get(i : Int) : ObservableList<Cell> {
