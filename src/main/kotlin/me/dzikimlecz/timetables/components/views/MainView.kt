@@ -28,7 +28,11 @@ class MainView : View("Układacz planów 3tysionce !!!") {
                     action { setUpTable() }
                 }
                 button("Otwórz Plan")
-                button("Zapisz Plan")
+                button("Zapisz Plan") {
+                    action {
+                        manager.exportPlan()
+                    }
+                }
                 button("Dodaj Plan do Bazy Godzin")
                 button("Otwórz Bazę Godzin")
                 children.forEach {
