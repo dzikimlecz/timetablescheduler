@@ -5,8 +5,11 @@ import me.dzikimlecz.timetables.timetable.TimeTable
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
+import java.nio.file.Files
+import java.nio.file.Paths
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
+import kotlin.streams.toList
 
 class FilesManager(
     val defaultSavePath: String = "${System.getenv("APPDATA")}\\TimeTableScheduler"
@@ -61,6 +64,13 @@ class FilesManager(
         ) 1 else 2
     }
 
+    fun getProperFile(table: TimeTable, path: String = defaultSavePath) =
+        File(path,
+            table.name.ifBlank {
+                table.date.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT))
+                .replace(Regex("[:.]"), "-")
+        } + ".json")
+
 
     fun readTable(name: String, path: String = defaultSavePath) : TimeTable {
         val file = File(path, "$name.json")
@@ -72,5 +82,12 @@ class FilesManager(
             throw IOException("Zawartość pliku została naruszona. Odczyt niemożliwy", e)
         }
     }
+
+    fun jsonFiles(path : String = defaultSavePath)  = Files.walk(Paths.get(path))
+        .filter { Files.isRegularFile(it) && Files.isReadable(it) }.map { it.toFile() }
+        .filter { it.toString().endsWith(".json") }.toList()
+
+    fun savedTables(path : String = defaultSavePath) = jsonFiles(path)
+        .mapNotNull { try { readTable(it.name, path) } catch (e: Exception) { null } }
 
 }
