@@ -16,9 +16,9 @@ import java.time.format.DateTimeFormatter
 @Serializable
 @SerialName("TimeTable")
 private data class TimeTableSurrogate(
-    val table: List<List<Cell>>,
     @Serializable(with = DateSerializer::class) val date: LocalDate,
-    @Required val name: String = ""
+    @Required val name: String = "",
+    val table: List<List<Cell>>,
 ) {
     init {
         require(table.stream().allMatch {it.size == table[0].size}) {"This list is not a table!"}
@@ -32,7 +32,7 @@ object TimeTableSerializer : KSerializer<TimeTable> {
         val name = value.name.ifBlank { value.date.format(DateTimeFormatter.ISO_LOCAL_DATE) }
         encoder.encodeSerializableValue(
             TimeTableSurrogate.serializer(),
-            TimeTableSurrogate(value.list(), value.date, name)
+            TimeTableSurrogate(value.date, name, value.list())
         )
     }
 
@@ -47,11 +47,7 @@ object TimeTableSerializer : KSerializer<TimeTable> {
 class DateSerializer : KSerializer<LocalDate>{
     override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("day", PrimitiveKind.STRING)
 
-    override fun deserialize(decoder: Decoder): LocalDate =
-        decoder.decodeStructure(descriptor) {
-            val date = decodeStringElement(descriptor, 0)
-            LocalDate.parse(date)
-        }
+    override fun deserialize(decoder: Decoder): LocalDate = LocalDate.parse(decoder.decodeString())
 
     override fun serialize(encoder: Encoder, value: LocalDate) =
         encoder.encodeString(value.format(DateTimeFormatter.ISO_LOCAL_DATE))
