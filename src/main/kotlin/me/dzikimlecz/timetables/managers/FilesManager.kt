@@ -9,7 +9,7 @@ import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 
 class FilesManager(
-    val defaultSavePath: String = "${System.getProperty("APPDATA")}\\TimeTableScheduler"
+    val defaultSavePath: String = "${System.getenv("APPDATA")}\\TimeTableScheduler"
 ) {
     init {
         val file = File(defaultSavePath)
