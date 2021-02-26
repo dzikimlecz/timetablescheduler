@@ -20,8 +20,9 @@ class FilesManager(
     }
 
 
-    fun saveTable(timeTable: TimeTable, path: String = defaultSavePath, enforce: Boolean = false) {
-        val filename = timeTable.name.ifBlank {
+    fun saveTable(timeTable: TimeTable, path: String = defaultSavePath, enforce: Boolean = false,
+    name: String? = null) {
+        val filename = name ?: timeTable.name.ifBlank {
             timeTable.date.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT))
             .replace(Regex("[:.]"), "-")
         } + ".json"
