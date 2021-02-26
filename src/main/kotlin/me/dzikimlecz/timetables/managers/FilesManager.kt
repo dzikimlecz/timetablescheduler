@@ -17,10 +17,10 @@ class FilesManager(
     }
 
 
-    fun saveTable(timeTable: TimeTable, path: String = defaultSavePath) {
+    fun saveTable(timeTable: TimeTable, path: String = defaultSavePath, enforce: Boolean = false) {
         val filename = timeTable.name.ifBlank {
             timeTable.date.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT))
-            .replace(Regex("[-:.]"), "_")
+            .replace(Regex("[:.]"), "-")
         } + ".json"
         val file = File(path, filename)
         val resultStatus = if (file.exists()) checkIdentity(file, timeTable)
@@ -29,8 +29,8 @@ class FilesManager(
             0 -> return
             1 -> serialize(timeTable, file)
             -1 -> throw IOException("Brak dostępu do pliku")
-            2 -> throw FileAlreadyExistsException(file,
-                reason = "Ten plik może zawierać już inny plan!")
+            2 -> if (enforce) serialize(timeTable, file) else throw FileAlreadyExistsException(file,
+                null, "Ten plik może zawierać już inny plan!")
             3 -> throw IOException("Błąd zapisu")
             else -> throw IOException()
         }
