@@ -6,16 +6,13 @@ import tornadofx.*
 
 class ExportView : View("Zapisz jako") {
     val exportProperties : MutableMap<String, String> by param()
+
     private var nameSet : Fieldset by singleAssign()
     private val nameField = field("Nazwa Pliku")
-    private val nameTextField : TextField by lazy { textfield {
-
-    }}
+    private val nameTextField = textfield()
     private var pathSet : Fieldset by singleAssign()
     private val pathField = field("Lokalizacja")
-    private val pathTextField : TextField by lazy { textfield {
-
-    }}
+    private val pathTextField = textfield()
 
     init {
         nameField += nameTextField
@@ -41,11 +38,16 @@ class ExportView : View("Zapisz jako") {
         }
         buttonbar {
             button("Ok").setOnAction {
-                if (nameSet.children.stream().anyMatch { it is CheckBox && !it.isSelected } ||
-                    pathField.children.stream().anyMatch { it is CheckBox && !it.isSelected }) {
-                    fillProperties(nameTextField.text.ifBlank { null }, pathTextField.text
-                        .ifBlank { null })
-                } else fillProperties()
+                val useCustomName =
+                    nameSet.children.stream().anyMatch { it is CheckBox && !it.isSelected }
+                val useCustomPath =
+                    pathField.children.stream().anyMatch { it is CheckBox && !it.isSelected }
+                val customPath = pathTextField.text.ifBlank { null }
+                val customName = nameTextField.text.ifBlank { null }
+                if (useCustomName && useCustomPath) fillProperties(customName, customPath)
+                else if (useCustomName) fillProperties(customName)
+                else if (useCustomPath) fillProperties(path = customPath)
+                else fillProperties()
                 close()
             }
         }
