@@ -31,7 +31,7 @@ class Manager {
         return lastTable
     }
 
-    fun exportPlan() {
+    fun exportTable() {
         if (filesManager.getProperFile(lastTable).exists())
             try {
                 filesManager.saveTable(lastTable)
@@ -49,7 +49,7 @@ class Manager {
 
     }
 
-    fun importPlan() {
+    fun importTable() {
         find<ImportView>(params = mapOf(ImportView::filesManager to filesManager))
             .openModal(block = true)
     }
