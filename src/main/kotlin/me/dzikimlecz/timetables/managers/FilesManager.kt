@@ -1,7 +1,10 @@
 package me.dzikimlecz.timetables.managers
 
+import javafx.collections.FXCollections
+import javafx.collections.ObservableList
 import kotlinx.serialization.json.Json
 import me.dzikimlecz.timetables.timetable.TimeTable
+import tornadofx.sortByDescending
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
@@ -14,9 +17,18 @@ import kotlin.streams.toList
 class FilesManager(
     val defaultSavePath: String = System.getProperty("defaultSavePath")
 ) {
+    private val files: ObservableList<File> = FXCollections.observableArrayList()
+
+    val jsonFiles: ObservableList<File>
+        get() {
+            refreshJsonFiles()
+            return files
+        }
+
     init {
         val file = File(defaultSavePath)
         if (!file.exists()) file.mkdirs()
+        refreshJsonFiles()
     }
 
 
@@ -84,11 +96,15 @@ class FilesManager(
         }
     }
 
-    fun jsonFiles(path : String = defaultSavePath)  = Files.walk(Paths.get(path))
-        .filter { Files.isRegularFile(it) && Files.isReadable(it) }.map { it.toFile() }
-        .filter { it.toString().endsWith(".json") }.toList()
+    fun refreshJsonFiles(path : String = defaultSavePath) {
+        files.addAll(
+            Files.walk(Paths.get(path)).filter { Files.isRegularFile(it) && Files.isReadable(it) }
+                .map { it.toFile() }
+        .filter { it.toString().endsWith(".json") }.filter { files.stream().noneMatch {
+                    file -> file.name == it.name } }.toList())
+        files.sortByDescending { it.lastModified() }
+    }
 
-    fun savedTables(path : String = defaultSavePath) = jsonFiles(path)
-        .mapNotNull { try { readTable(it.name, path) } catch (e: Exception) { null } }
+
 
 }
