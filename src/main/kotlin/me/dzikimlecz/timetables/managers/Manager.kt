@@ -1,6 +1,10 @@
 package me.dzikimlecz.timetables.managers
 
+import javafx.stage.StageStyle
 import me.dzikimlecz.timetables.components.views.ExportView
+import me.dzikimlecz.timetables.components.views.ImportView
+import me.dzikimlecz.timetables.components.views.MainView
+import me.dzikimlecz.timetables.components.views.TimeTableSetUpView
 import me.dzikimlecz.timetables.timetable.TimeTable
 import tornadofx.find
 import java.time.LocalDate
@@ -43,6 +47,18 @@ class Manager {
             .openModal(block = true)
         filesManager.saveTable(lastTable, enforce = true)
 
+    }
+
+    fun importPlan() {
+        find<ImportView>(params = mapOf(ImportView::filesManager to filesManager))
+            .openModal(block = true)
+    }
+
+    fun setUpTable() {
+        val map = mutableMapOf<String, String>()
+        find<TimeTableSetUpView>(params = mapOf(TimeTableSetUpView::tableProperties to map))
+            .openModal(StageStyle.UTILITY, resizable = false, block = true)
+        try { find<MainView>().displayTable(newTable(map)) } catch (ignore : Exception) {}
     }
 
     private val badProperty = { name : String, missing: Boolean ->

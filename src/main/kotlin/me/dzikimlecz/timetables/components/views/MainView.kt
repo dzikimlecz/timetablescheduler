@@ -21,20 +21,14 @@ class MainView : View("Układacz planów 3tysionce !!!") {
             vbox {
                 spacing = 3E1
                 background = Background(BackgroundFill(Color.LIGHTGREY, null, null))
-                padding = Insets(1.5E1, 0.0, 0.0, 0.0)
+                paddingTop = 15
                 val buttonWidth = 1.8E2
                 val buttonHeight = 5E1
-                button("Nowy Plan") {
-                    action { setUpTable() }
-                }
-                button("Otwórz Plan")
-                button("Zapisz Plan") {
-                    action {
-                        manager.exportPlan()
-                    }
-                }
-                button("Dodaj Plan do Bazy Godzin")
-                button("Otwórz Bazę Godzin")
+                button("Nowy Plan").setOnAction { manager.setUpTable() }
+                button("Otwórz Plan").setOnAction { manager.importPlan() }
+                button("Zapisz Plan").setOnAction { manager.exportPlan() }
+                button("Dodaj Plan do Bazy Godzin").setOnAction {  }
+                button("Otwórz Bazę Godzin").setOnAction {  }
                 children.forEach {
                     if (it is Button) {
                         it.prefWidth = buttonWidth
@@ -45,14 +39,7 @@ class MainView : View("Układacz planów 3tysionce !!!") {
         }
     }
 
-    private fun setUpTable() {
-        val map = mutableMapOf<String, String>()
-        find<SetUpView>(mapOf(SetUpView::tableProperties to map))
-            .openModal(StageStyle.UTILITY, resizable = false, block = true)
-        try { displayTable(manager.newTable(map)) } catch (ignore : Exception) {}
-    }
-
-    private fun displayTable(table: TimeTable) {
+    fun displayTable(table: TimeTable) {
         val editor = find<TimeTableEditor>(mapOf(TimeTableEditor::timeTable to table))
         root.center = editor.root
         title = table.name
