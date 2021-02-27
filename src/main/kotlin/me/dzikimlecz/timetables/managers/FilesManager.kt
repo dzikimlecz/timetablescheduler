@@ -12,7 +12,7 @@ import java.time.format.FormatStyle
 import kotlin.streams.toList
 
 class FilesManager(
-    val defaultSavePath: String = "${System.getenv("APPDATA")}\\TimeTableScheduler"
+    val defaultSavePath: String = System.getProperty("defaultSavePath")
 ) {
     init {
         val file = File(defaultSavePath)

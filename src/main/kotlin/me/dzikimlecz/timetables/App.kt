@@ -5,7 +5,10 @@ import me.dzikimlecz.timetables.components.views.TimeTableSetUpView
 import tornadofx.launch
 import tornadofx.App as Application
 
-fun main() = launch<App>()
+fun main() {
+    System.setProperty("defaultSavePath", "${System.getenv("APPDATA")}\\TimeTableScheduler")
+    launch<App>()
+}
 
 class App : Application(MainView::class)
 
