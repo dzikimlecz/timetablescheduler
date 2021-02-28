@@ -48,9 +48,16 @@ class Manager {
     private fun describedExport() {
         val properties = mutableMapOf<String, String>()
         find<ExportView>(params = mapOf(ExportView::exportProperties to properties))
-            .openModal(block = true)
-        filesManager.saveTable(lastTable, enforce = true)
-
+            .openModal(block = true, resizable = false)
+        val customName = properties["name"] ?: "\u0000"
+        val customPath = properties["path"] ?: "\u0000"
+        if (customName != "\u0000" && customPath != "\u0000")
+            filesManager.saveTable(lastTable, customPath, true, customName)
+        else if (customPath != "\u0000")
+            filesManager.saveTable(lastTable, customPath, true)
+        else if (customName != "\u0000")
+            filesManager.saveTable(lastTable, enforce = true, name = customName)
+        else filesManager.saveTable(lastTable, enforce = true)
     }
 
     fun importTable() {
