@@ -23,7 +23,6 @@ class MainView : View("Układacz planów 3tysionce !!!") {
                 val buttonHeight = 5E1
                 button("Nowy Plan").setOnAction { manager.setUpTable() }
                 button("Otwórz Plan").setOnAction { manager.importTable() }
-                button("Zapisz Plan").setOnAction { manager.exportTable() }
                 button("Dodaj Plan do Bazy Godzin").setOnAction {  }
                 button("Otwórz Bazę Godzin").setOnAction {  }
                 children.forEach {
