@@ -8,13 +8,16 @@ import javafx.util.Callback
 import tornadofx.*
 
 class ImportView : View("Otwórz") {
-    private lateinit var file: File
+    private var file: File? = null
     val chosenFile
         get() = file
     private var pathSet: Fieldset by singleAssign()
     val filesManager: FilesManager by param()
     private var filesList: ListView<File> by singleAssign()
-    private val pathField = field { textfield() }
+    private var useCustomPath: CheckBox by singleAssign()
+    private val customPath = textfield()
+    private val pathField = field()
+        init {pathField += customPath}
 
     override fun onBeforeShow() = filesManager.refreshJsonFiles()
 
@@ -31,7 +34,7 @@ class ImportView : View("Otwórz") {
             }
         }
         pathSet = fieldset("Otwórz inny plan") {
-            checkbox( "Inna lokalizacja") {
+            useCustomPath = checkbox( "Inna lokalizacja") {
                 action {
                     togglePathSelector(isSelected)
                 }
@@ -40,9 +43,9 @@ class ImportView : View("Otwórz") {
 
         buttonbar {
             button("Ok").setOnAction {
-                file = if (pathSet.children.stream().anyMatch { it is CheckBox && it.isSelected })
-                    File((pathField.children.filtered { it is TextField }[0] as TextField).text)
-                else filesList.selectedItem!!
+                file = if (useCustomPath.isSelected)
+                    try { File(customPath.text) } catch(e: Exception) { null }
+                else filesList.selectedItem
                 close()
             }
         }
