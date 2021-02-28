@@ -1,11 +1,14 @@
 package me.dzikimlecz.timetables.managers
 
+import javafx.scene.control.Alert
 import javafx.stage.StageStyle
 import me.dzikimlecz.timetables.components.views.ExportView
 import me.dzikimlecz.timetables.components.views.ImportView
 import me.dzikimlecz.timetables.components.views.MainView
 import me.dzikimlecz.timetables.components.views.TimeTableSetUpView
 import me.dzikimlecz.timetables.timetable.TimeTable
+import tornadofx.View
+import tornadofx.alert
 import tornadofx.find
 import java.time.LocalDate
 
@@ -16,7 +19,7 @@ class Manager {
     val activeTable : TimeTable
         get() = lastTable
 
-    fun newTable(properties: Map<String, String>): TimeTable {
+    private fun newTable(properties: Map<String, String>): TimeTable {
         val columns = (properties["columns"] ?: badProperty("columns", true))
             .toIntOrNull() ?: badProperty("columns", false)
         val rows = (properties["rows"] ?: badProperty("rows", true))
@@ -41,6 +44,7 @@ class Manager {
         else describedExport()
     }
 
+
     private fun describedExport() {
         val properties = mutableMapOf<String, String>()
         find<ExportView>(params = mapOf(ExportView::exportProperties to properties))
@@ -50,8 +54,20 @@ class Manager {
     }
 
     fun importTable() {
-        find<ImportView>(params = mapOf(ImportView::filesManager to filesManager))
-            .openModal(block = true)
+        val importView = find<ImportView>(params = mapOf(ImportView::filesManager to filesManager))
+        importView.openModal(block = true, resizable = false)
+        if (importView.chosenFile == null)  {
+            alert(Alert.AlertType.ERROR, "Nie wybrano pliku")
+            return
+        }
+        val table = try {
+             filesManager.readTable(importView.chosenFile!!)
+        } catch(e: Exception) {
+            alert(Alert.AlertType.ERROR,"Błąd odczytu", e.message)
+            return
+        }
+        lastTable = table
+        find<MainView>().displayTable(table)
     }
 
     fun setUpTable() {

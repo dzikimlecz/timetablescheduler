@@ -34,10 +34,9 @@ class FilesManager(
 
     fun saveTable(timeTable: TimeTable, path: String = defaultSavePath, enforce: Boolean = false,
     name: String? = null) {
-        val filename = name ?: timeTable.name.ifBlank {
+        val filename = (name ?: timeTable.name.ifBlank {
             timeTable.date.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT))
-            .replace(Regex("[:.]"), "-")
-        } + ".json"
+        }).replace(Regex("[?!;\"'{}:.]"), "-") + ".json"
         val file = File(path, filename)
         val resultStatus = if (file.exists()) checkIdentity(file, timeTable)
         else serialize(timeTable, file)
@@ -85,15 +84,19 @@ class FilesManager(
         } + ".json")
 
 
-    fun readTable(name: String, path: String = defaultSavePath) : TimeTable {
-        val file = File(path, "$name.json")
+    fun readTable(file: File) : TimeTable {
         if (!file.exists()) throw FileNotFoundException("Plik \"$file\" nie istnieje.")
-        if (!file.canRead()) throw IOException("Odczyt pliku zablokowany przez system")
+        val text = file.readText()
         return try {
-            Json.decodeFromString(TimeTable.serializer(), file.readText())
+            Json.decodeFromString(TimeTable.serializer(), text)
         } catch (e: Exception) {
             throw IOException("Zawartość pliku została naruszona. Odczyt niemożliwy", e)
         }
+    }
+
+    fun readTable(name: String, path: String = defaultSavePath) : TimeTable {
+        val file = File(path, "$name.json")
+        return readTable(file)
     }
 
     fun refreshJsonFiles(path : String = defaultSavePath) {
