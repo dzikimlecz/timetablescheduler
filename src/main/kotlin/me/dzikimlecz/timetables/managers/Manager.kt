@@ -84,6 +84,14 @@ class Manager {
         try { find<MainView>().displayTable(newTable(map)) } catch (ignore : Exception) {}
     }
 
+    fun includeTableToDB() {
+        TODO("Not yet implemented")
+    }
+
+    fun openDB() {
+        TODO("Not yet implemented")
+    }
+
     private val badProperty = { name : String, missing: Boolean ->
         val cause = if (missing) "Missing" else "Wrongly formatted"
         throw IllegalArgumentException("$cause property: $name")
