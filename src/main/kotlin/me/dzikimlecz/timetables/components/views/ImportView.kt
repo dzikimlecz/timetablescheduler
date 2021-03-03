@@ -19,7 +19,10 @@ class ImportView : View("Otwórz") {
     private val pathField = field()
         init {pathField += customPath}
 
-    override fun onBeforeShow() = filesManager.refreshJsonFiles()
+    override fun onBeforeShow() {
+        filesManager.refreshJsonFiles()
+        useCustomPath.isSelected = false
+    }
 
     override val root = form {
         fieldset("Plany w domyślnej lokalizacji") {
