@@ -20,7 +20,7 @@ class TimeTableEditor : Fragment() {
     private val rowsProperty = SimpleIntegerProperty()
     private val columnsProperty = SimpleIntegerProperty()
 
-    var viewMode = ViewMode.EDIT
+    var viewMode = ViewMode.VIEW
         set(value) {
             field = value
             viewModeProperty.set(value)
