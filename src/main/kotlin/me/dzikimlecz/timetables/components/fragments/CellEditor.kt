@@ -5,9 +5,9 @@ import javafx.beans.property.SimpleStringProperty
 import javafx.scene.control.Label
 import javafx.scene.control.TextField
 import me.dzikimlecz.timetables.timetable.Cell
-import tornadofx.Fragment
-import tornadofx.borderpane
-import tornadofx.clear
+import tornadofx.*
+import java.util.logging.Level
+import java.util.logging.Logger
 
 class CellEditor : Fragment() {
     val cell : Cell by param()
@@ -16,32 +16,25 @@ class CellEditor : Fragment() {
 
     override val root = borderpane {
         minWidth = 30.0
-        maxWidth = 100.0
         minHeight = 15.0
-        maxHeight = 50.0
     }
 
     init {
         for ((i, e) in texts.withIndex())
             e.bindBidirectional(cell.getContentProperty(i))
-        divisionProperty.addListener { _ -> refreshView(TimeTableEditor.ViewMode.EDIT) }
         divisionProperty.bind(cell.isDivided)
+        divisionProperty.addListener { _ -> refreshView(TimeTableEditor.ViewMode.EDIT) }
     }
 
     fun refreshView(viewMode: TimeTableEditor.ViewMode) {
         val nodes = { i: Int ->
-            if (viewMode == TimeTableEditor.ViewMode.VIEW) {
-                val label = Label()
-                label.textProperty().bindBidirectional(texts[i])
-                label.minWidthProperty().bind(root.minWidthProperty())
-                label.minHeightProperty().bind(root.minHeightProperty())
-                label
-            } else {
-                val field = TextField()
-                field.textProperty().bindBidirectional(texts[i])
-                field.minWidthProperty().bind(root.minWidthProperty())
-                field.minHeightProperty().bind(root.minHeightProperty())
-                field
+            if (viewMode == TimeTableEditor.ViewMode.VIEW) label {
+                paddingAll = 10
+                textProperty().bindBidirectional(texts[i])
+                minWidthProperty().bind(root.minWidthProperty() + 5)
+                minHeightProperty().bind(root.minHeightProperty() + 25)
+            } else textarea {
+                textProperty().bindBidirectional(texts[i])
             }
         }
         with(root) {
