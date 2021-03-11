@@ -5,7 +5,7 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.geometry.Pos
 import javafx.scene.control.Button
 import javafx.scene.layout.GridPane
-import me.dzikimlecz.timetables.components.views.MainView
+import me.dzikimlecz.timetables.components.fragments.TimeTableEditor.ViewMode.*
 import me.dzikimlecz.timetables.timetable.Cell
 import me.dzikimlecz.timetables.timetable.TimeTable
 import tornadofx.*
@@ -117,11 +117,12 @@ class TimeTableEditor : Fragment() {
         EDIT, VIEW
     }
 
-    private fun Button.bindDimensions() {
-        prefWidthProperty().bind(primaryStage.widthProperty() / 10 )
-        maxWidth = 1E2
-        prefHeightProperty().bind(primaryStage.heightProperty() / 20)
-        maxHeight = 4E1
+    fun cleanCells() {
+        TODO("Not yet implemented")
+    }
+
+    fun divideCells() {
+        TODO("Not yet implemented")
     }
 }
 

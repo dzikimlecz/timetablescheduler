@@ -1,8 +1,7 @@
 package me.dzikimlecz.timetables.components.fragments
 
-import javafx.event.EventHandler
-import javafx.stage.StageStyle
-import me.dzikimlecz.timetables.components.fragments.TimeTableEditor.ViewMode.*
+import javafx.application.Platform
+import me.dzikimlecz.timetables.components.fragments.TimeTableEditor.ViewMode.VIEW
 import tornadofx.*
 
 class EditToolBar : TimeTableEditorToolBar() {
@@ -15,24 +14,72 @@ class EditToolBar : TimeTableEditorToolBar() {
             action { parentEditor.viewMode = VIEW }
         }
         separator()
-        button("Dodaj") {
-            onMouseEntered = EventHandler {
-                find<ModifierChoiceStage>()
+
+        stackpane {
+            val box = choicebox<String> {
+                isVisible = false
+                items.addAll("Dodaj", "Usuń", "Wyczyść", "Więcej")
+                setOnAction {
+
+                    Platform.runLater {
+                        selectionModel.clearSelection()
+                        hide()
+                        isVisible = false
+                    }
+                }
             }
-            onMouseExited = EventHandler {
-                find<ModifierChoiceStage>().close()
+            val label = button("Rzędy") {
+                action { box.isVisible = true; box.show() }
             }
+            box.prefWidthProperty().bind(label.widthProperty())
         }
-        button("Usuń") {
 
+        stackpane {
+            val box = choicebox<String> {
+                isVisible = false
+                items.addAll("Dodaj", "Usuń", "Wyczyść", "Więcej")
+                setOnAction {
+
+                    Platform.runLater {
+                        selectionModel.clearSelection()
+                        hide()
+                        isVisible = false
+                    }
+                }
+            }
+            val label = button("Kolumny") {
+                action { box.isVisible = true; box.show() }
+            }
+            box.prefWidthProperty().bind(label.widthProperty())
         }
-        button("Wyczyść") {
 
-        }
-        button("Podziel") {
-
+        stackpane {
+            val box = choicebox<String> {
+                isVisible = false
+                val cleanKey = "Wyczyść"
+                val divideKey = "Podziel"
+                items.addAll(cleanKey, divideKey)
+                setOnAction {
+                    when (selectionModel.selectedItem) {
+                        cleanKey -> parentEditor.cleanCells()
+                        divideKey -> parentEditor.divideCells()
+                        null -> {}
+                        else -> throw AssertionError()
+                    }
+                    Platform.runLater {
+                        selectionModel.clearSelection()
+                        hide()
+                        isVisible = false
+                    }
+                }
+            }
+            val label = button("Komórki") {
+                action { box.isVisible = true; box.show() }
+            }
+            box.prefWidthProperty().bind(label.widthProperty())
         }
         separator()
+
         button("Szczegóły planu") {
 
         }
