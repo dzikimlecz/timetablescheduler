@@ -18,7 +18,18 @@ class TimeTableEditor : Fragment() {
     private val columnsProperty = SimpleIntegerProperty()
     private var tablePane by singleAssign<GridPane>()
 
-    var viewMode = ViewMode.VIEW
+    private val viewToolBar: ViewToolBar
+        get() = find(params = mapOf(ViewToolBar::parentEditor to this))
+
+    private val editToolBar: EditToolBar
+        get() = find(params = mapOf(EditToolBar::parentEditor to this))
+
+    private val toolBars by lazy {
+        mapOf(VIEW to viewToolBar.root, EDIT to editToolBar.root)
+    }
+
+
+    var viewMode = VIEW
         set(value) {
             field = value
             viewModeProperty.set(value)
@@ -28,28 +39,7 @@ class TimeTableEditor : Fragment() {
         paddingTop = 100
         paddingBottom = 120
         paddingHorizontal = 50
-        top {
-            flowpane {
-                alignment = Pos.CENTER
-                hgap = 10.0
-                prefHeight = paddingBottom.toDouble() - paddingTop.toDouble()
-                button("Zapisz") {
-                    action {
-                        find<MainView>().manager.exportTable()
-                    }
-                    bindDimensions()
-                }
-                button("Edytuj") {
-                    bindDimensions()
-                }
-                button("Dodaj") {
-                    bindDimensions()
-                }
-                button("Usuń") {
-                    bindDimensions()
-                }
-            }
-        }
+        top = viewToolBar.root
         center {
             tablePane = gridpane {
                 maxWidthProperty().bind(primaryStage.widthProperty() - 180)
@@ -88,9 +78,10 @@ class TimeTableEditor : Fragment() {
     }
 
     private fun initListeners() {
-        viewModeProperty.addListener { _ -> editors.forEach {
-                list -> list.forEach { it.refreshView(viewMode) }
-        } }
+        viewModeProperty.addListener { _, _, newVal ->
+            editors.forEach { list -> list.forEach { it.refreshView(viewMode) } }
+            root.top = toolBars[newVal]
+        }
 
         rowsProperty.addListener { _, oldValue, newValue ->
             val delta = newValue.toInt() - oldValue.toInt()
