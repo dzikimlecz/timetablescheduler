@@ -10,7 +10,9 @@ import me.dzikimlecz.timetables.timetable.TimeTable
 import tornadofx.*
 
 
-class MainView : View("Układacz planów 3tysionce !!!") {
+private const val defaultTitle = "Układacz planów 3tysionce !!!"
+
+class MainView : View(defaultTitle) {
     val manager by lazy { Manager() }
 
     override val root = borderpane {
@@ -35,10 +37,15 @@ class MainView : View("Układacz planów 3tysionce !!!") {
         }
     }
 
-    fun displayTable(table: TimeTable) {
-        val editor = find<TimeTableEditor>(mapOf(TimeTableEditor::timeTable to table))
-        root.center = editor.root
-        title = table.name
+    fun displayTable(table: TimeTable?) {
+        root.center = if (table != null){
+            val editor = find<TimeTableEditor>(mapOf(TimeTableEditor::timeTable to table))
+            title = table.name
+            editor.root
+        } else {
+            title = defaultTitle
+            null
+        }
     }
 
     override fun onBeforeShow() {
