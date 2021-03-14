@@ -73,6 +73,7 @@ class TimeTableEditor : Fragment() {
         viewModeProperty.addListener { _, _, newVal ->
             editors.forEach { list -> list.forEach { it.refreshView(viewMode) } }
             root.top = toolBars[newVal]
+            removeOverlayFromCells()
         }
 
         timeTable.rowsProperty.addListener { _, oldValue, newValue ->
@@ -148,12 +149,8 @@ class TimeTableEditor : Fragment() {
         return buttons
     }
 
-    private fun removeOverlayFromCells() {
-        val editorPanes = tablePane.children.parallelStream()
-            .filter { it is StackPane }.map {it as StackPane }.collect(Collectors.toList())
-        for (it in editorPanes)
-            it.children.removeAll(it.childrenUnmodifiable.filterIsInstance<Button>())
-    }
+    private fun removeOverlayFromCells() = tablePane.childrenUnmodifiable.stream()
+        .map {it as? StackPane }.forEach { pane -> pane?.children?.removeIf { it is Button } }
 }
 
 private fun GridPane.remove(x: Int, y: Int) {
