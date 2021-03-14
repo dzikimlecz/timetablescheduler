@@ -28,10 +28,13 @@ class TimeTable(
     private val table = FXCollections.observableArrayList<ObservableList<Cell>>()
 
     init {
-        columnsProperty.addListener {_, old, new ->
+        columnsProperty.addListener {observable, old, new ->
             val newValue = new.toInt()
             val oldValue = old.toInt()
-            if (newValue <= 0) throw IllegalArgumentException("Illegal Table Size")
+            if (newValue <= 0) {
+                (observable as SimpleIntegerProperty).set(oldValue)
+                throw IllegalArgumentException("Illegal Table Size: $newValue columns")
+            }
             val diff = newValue - oldValue
             if (diff > 0)
                 for (row in table)
@@ -40,10 +43,13 @@ class TimeTable(
                 for (row in table)
                     for (i in 1..diff) row.removeLast()
         }
-        rowsProperty.addListener { _, old, new ->
+        rowsProperty.addListener { observable, old, new ->
             val newValue = new.toInt()
             val oldValue = old.toInt()
-            if (newValue <= 0) throw IllegalArgumentException("Illegal Table Size")
+            if (newValue <= 0) {
+                (observable as SimpleIntegerProperty).set(oldValue)
+                throw IllegalArgumentException("Illegal Table Size: $newValue rows")
+            }
             val diff = newValue - oldValue
             rowsProperty.set(newValue)
             if (diff > 0) {
