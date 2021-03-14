@@ -38,8 +38,9 @@ object TimeTableSerializer : KSerializer<TimeTable> {
 
     override fun deserialize(decoder: Decoder): TimeTable {
         val surrogate = decoder.decodeSerializableValue(TimeTableSurrogate.serializer())
-        val timeTable = timeTableOf(surrogate.table, surrogate.date)
+        val timeTable = timeTableOf(surrogate.table)
         timeTable.name = surrogate.name
+        timeTable.date = surrogate.date
         return timeTable
     }
 }

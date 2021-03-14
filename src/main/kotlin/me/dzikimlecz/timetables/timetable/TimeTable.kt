@@ -69,10 +69,10 @@ class TimeTable(
     fun list(): List<List<Cell>> = table.toList()
 }
 
-fun timeTableOf(table: List<List<Cell>>, date: LocalDate = LocalDate.now()) : TimeTable {
+fun timeTableOf(table: List<List<Cell>>) : TimeTable {
     require(table.isNotEmpty() && table.stream().allMatch {it.size == table[0].size})
         {"This list is not a table!"}
-    val timeTable = TimeTable(table[0].size, table.size, date)
+    val timeTable = TimeTable(table[0].size, table.size)
     for ((y, row) in table.withIndex())
         for((x, cell) in row.withIndex())
             timeTable[y][x] = cell
