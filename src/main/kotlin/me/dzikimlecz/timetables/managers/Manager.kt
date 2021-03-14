@@ -47,8 +47,9 @@ class Manager {
 
     private fun describedExport() {
         val properties = mutableMapOf<String, String>()
-        find<ExportView>(params = mapOf(ExportView::exportProperties to properties))
-            .openModal(block = true, resizable = false)
+        find<MainView>().openInternalWindow<ExportView>(
+            params = mapOf(ExportView::exportProperties to properties)
+        )
         val customName = properties["name"] ?: "\u0000"
         val customPath = properties["path"] ?: "\u0000"
         if (customName != "\u0000" && customPath != "\u0000")
