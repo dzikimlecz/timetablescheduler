@@ -19,7 +19,7 @@ object CellSerializer : KSerializer<Cell> {
 
     override fun serialize(encoder: Encoder, value: Cell) {
         val content = mutableListOf(value[0])
-        if (value.isDivided.get()) content.add(value[1])
+        if (value.isDivided) content.add(value[1])
         encoder.encodeSerializableValue(CellSurrogate.serializer(), CellSurrogate(content))
     }
 

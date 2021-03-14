@@ -110,16 +110,19 @@ class TimeTableEditor : Fragment() {
         EDIT, VIEW
     }
 
-    fun cleanCells() {
-        TODO("Not yet implemented")
+    fun cleanCells() = handleCellsOverlayingAction {
+        set(0, ""); set(1, "")
+        isDivided = false
     }
 
-    fun divideCells() {
+    fun divideCells() = handleCellsOverlayingAction { isDivided = !isDivided }
+
+    private fun handleCellsOverlayingAction(action: Cell.() -> Unit) {
         val buttons = overlayCells()
         for (button in buttons.keys) {
             val cell = buttons[button]!!
             button.setOnAction {
-                cell.isDivided.set(true)
+                cell.action()
                 button.removeFromParent()
             }
         }

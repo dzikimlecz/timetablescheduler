@@ -25,7 +25,7 @@ class CellEditor : Fragment() {
     init {
         for ((i, e) in texts.withIndex())
             e.bindBidirectional(cell.getContentProperty(i))
-        divisionProperty.bind(cell.isDivided)
+        divisionProperty.bind(cell.isDividedProperty)
         divisionProperty.addListener { _ -> refreshView(ViewMode.EDIT) }
     }
 
