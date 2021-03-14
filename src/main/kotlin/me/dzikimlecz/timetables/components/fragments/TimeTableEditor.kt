@@ -111,8 +111,11 @@ class TimeTableEditor : Fragment() {
     }
 
     fun cleanCells() = handleCellsOverlayingAction {
-        set(0, ""); set(1, "")
-        isDivided = false
+        set(0, "")
+        if (isDivided) {
+            set(1, "")
+            isDivided = false
+        }
     }
 
     fun divideCells() = handleCellsOverlayingAction { isDivided = !isDivided }
