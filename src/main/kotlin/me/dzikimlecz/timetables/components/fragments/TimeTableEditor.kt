@@ -60,8 +60,9 @@ class TimeTableEditor : Fragment() {
         editors[y].add(editor)
         with(tablePane) {
             stackpane {
-                maxWidthProperty().bind(tablePane.maxWidthProperty() / timeTable.columns)
-                minWidthProperty().bind(maxWidthProperty())
+                maxWidthProperty().bind(tablePane.maxWidthProperty() / timeTable.columnsProperty)
+                maxHeightProperty().bind(tablePane.maxHeightProperty() / timeTable.rowsProperty)
+                prefWidthProperty().bind(maxWidthProperty())
                 this += editor.root
                 gridpaneConstraints { columnRowIndex(x, y) }
             }
@@ -163,8 +164,6 @@ class TimeTableEditor : Fragment() {
             .map {it as? StackPane }.forEach { pane -> pane?.children?.removeIf { it is Button } }
         okButton.removeFromParent()
     }
-
-
 }
 
 private fun GridPane.remove(x: Int, y: Int) {
