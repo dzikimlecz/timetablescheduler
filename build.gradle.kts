@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.4.30"
+    kotlin("jvm") version "1.4.31"
     kotlin("plugin.serialization") version "1.4.10"
     application
     id("org.openjfx.javafxplugin") version "0.0.9"
@@ -21,8 +21,8 @@ dependencies {
     implementation("no.tornado:tornadofx:1.7.20")
 }
 javafx {
-    version = "15.0.1"
-    modules("javafx.controls", "javafx.fxml")
+    version = "16"
+    modules("javafx.controls")
 }
 
 tasks.test {
