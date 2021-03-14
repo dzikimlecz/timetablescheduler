@@ -7,7 +7,8 @@ import kotlinx.serialization.Required
 import kotlinx.serialization.Serializable
 import me.dzikimlecz.timetables.timetable.json.TimeTableSerializer
 import java.time.LocalDate
-import java.time.LocalDateTime
+import tornadofx.getValue
+import tornadofx.setValue
 
 @Serializable(with = TimeTableSerializer::class)
 class TimeTable(
@@ -16,12 +17,22 @@ class TimeTable(
     @Required var date: LocalDate = LocalDate.now(),
     @Required var name: String = ""
 ) : Iterable<ObservableList<Cell>> {
-    var columns = 0
-        set(value) {
-            if (value <= 0) throw IllegalArgumentException("Illegal Table Size")
-            val diff = value - field
-            field = value
-            columnsProperty.set(value)
+
+
+    val columnsProperty = SimpleIntegerProperty(0)
+    var columns by columnsProperty
+
+    val rowsProperty = SimpleIntegerProperty(0)
+    var rows by rowsProperty
+
+    private val table = FXCollections.observableArrayList<ObservableList<Cell>>()
+
+    init {
+        columnsProperty.addListener {_, old, new ->
+            val newValue = new.toInt()
+            val oldValue = old.toInt()
+            if (newValue <= 0) throw IllegalArgumentException("Illegal Table Size")
+            val diff = newValue - oldValue
             if (diff > 0)
                 for (row in table)
                     for (i in 1..diff) row.add(Cell())
@@ -29,12 +40,12 @@ class TimeTable(
                 for (row in table)
                     for (i in 1..diff) row.removeLast()
         }
-    var rows = 0
-        set(value) {
-            if (value <= 0) throw IllegalArgumentException("Illegal Table Size")
-            val diff = value - field
-            field = value
-            rowsProperty.set(value)
+        rowsProperty.addListener { _, old, new ->
+            val newValue = new.toInt()
+            val oldValue = old.toInt()
+            if (newValue <= 0) throw IllegalArgumentException("Illegal Table Size")
+            val diff = newValue - oldValue
+            rowsProperty.set(newValue)
             if (diff > 0) {
                 for (i in 0 until diff) {
                     val newRow = FXCollections.observableArrayList<Cell>()
@@ -44,12 +55,6 @@ class TimeTable(
             } else if (diff < 0)
                 for (i in 1..diff) table.removeLast()
         }
-    val columnsProperty = SimpleIntegerProperty(columns)
-    val rowsProperty = SimpleIntegerProperty(rows)
-
-    private val table = FXCollections.observableArrayList<ObservableList<Cell>>()
-
-    init {
         this.columns = columns
         this.rows = rows
     }
