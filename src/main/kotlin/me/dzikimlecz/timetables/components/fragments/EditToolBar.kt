@@ -3,6 +3,7 @@ package me.dzikimlecz.timetables.components.fragments
 import javafx.application.Platform
 import me.dzikimlecz.timetables.components.fragments.TimeTableEditor.ViewMode.VIEW
 import tornadofx.*
+import java.util.concurrent.atomic.AtomicBoolean
 
 class EditToolBar : TimeTableEditorToolBar() {
 
@@ -60,17 +61,13 @@ class EditToolBar : TimeTableEditorToolBar() {
                 val divideKey = "Podziel"
                 items.addAll(cleanKey, divideKey)
                 setOnAction {
-                    when (selectionModel.selectedItem) {
+                    when (value) {
                         cleanKey -> parentEditor.cleanCells()
                         divideKey -> parentEditor.divideCells()
                         null -> {}
                         else -> throw AssertionError()
                     }
-                    Platform.runLater {
-                        selectionModel.clearSelection()
-                        hide()
-                        isVisible = false
-                    }
+                    Platform.runLater { isVisible = false; value = null }
                 }
             }
             val label = button("Komórki") {
