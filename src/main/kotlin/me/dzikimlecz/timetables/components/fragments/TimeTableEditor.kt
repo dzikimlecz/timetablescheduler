@@ -128,7 +128,9 @@ class TimeTableEditor : Fragment() {
         }
     }
 
+    private val okButton by lazy { button("Ok") }
     private fun overlayCells() : Map<Button, Cell> {
+        removeOverlayFromCells()
         val editorPanes = tablePane.children.parallelStream()
             .filter { it is StackPane }.map {it as StackPane }.collect(Collectors.toList())
         val buttons = mutableMapOf<Button, Cell>()
@@ -136,24 +138,30 @@ class TimeTableEditor : Fragment() {
             val location = GridPane.getRowIndex(pane) to GridPane.getColumnIndex(pane)
             val cell = editors[location.first][location.second].cell
             with(pane) {
-                if (!cell.isDivided.get()) this += button(cell[0]) {
-                    setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE)
-                    buttons += this to cell
+                this += button {
+                    text = cell[0]
+                    setMaxSize(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY)
+                    buttons[this] = cell
                 }
             }
         }
-        val button = button("Ok") {
+        with(okButton) {
             action {
                 removeOverlayFromCells()
                 this.removeFromParent()
             }
         }
-        editToolBar.root.items.add(button)
+        editToolBar.root.items.add(okButton)
         return buttons
     }
 
-    private fun removeOverlayFromCells() = tablePane.childrenUnmodifiable.stream()
-        .map {it as? StackPane }.forEach { pane -> pane?.children?.removeIf { it is Button } }
+    private fun removeOverlayFromCells() {
+        tablePane.childrenUnmodifiable.stream()
+            .map {it as? StackPane }.forEach { pane -> pane?.children?.removeIf { it is Button } }
+        okButton.removeFromParent()
+    }
+
+
 }
 
 private fun GridPane.remove(x: Int, y: Int) {
