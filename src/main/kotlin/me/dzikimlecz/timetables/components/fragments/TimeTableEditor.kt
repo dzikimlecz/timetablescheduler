@@ -13,6 +13,7 @@ import me.dzikimlecz.timetables.timetable.Cell
 import me.dzikimlecz.timetables.timetable.TimeTable
 import tornadofx.*
 import java.util.stream.Collectors
+import kotlin.math.max
 
 class TimeTableEditor : Fragment() {
     val timeTable: TimeTable by param()
@@ -38,6 +39,7 @@ class TimeTableEditor : Fragment() {
         center {
             tablePane = gridpane {
                 maxWidthProperty().bind(primaryStage.widthProperty() - 230)
+                maxHeightProperty().bind(primaryStage.heightProperty() - 230)
                 paddingTop = 10
                 alignment = Pos.TOP_CENTER
                 isGridLinesVisible = true
