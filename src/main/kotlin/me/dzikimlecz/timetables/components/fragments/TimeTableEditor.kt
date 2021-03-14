@@ -1,8 +1,10 @@
 package me.dzikimlecz.timetables.components.fragments
 
 import javafx.beans.property.SimpleObjectProperty
+import javafx.geometry.Insets
 import javafx.geometry.Pos
 import javafx.scene.control.Button
+import javafx.scene.layout.BorderPane
 import javafx.scene.layout.GridPane
 import javafx.scene.layout.StackPane
 import me.dzikimlecz.timetables.components.fragments.TimeTableEditor.ViewMode.EDIT
@@ -32,9 +34,6 @@ class TimeTableEditor : Fragment() {
     var viewMode: ViewMode by viewModeProperty
 
     override val root = borderpane {
-        paddingTop = 100
-        paddingBottom = 120
-        paddingHorizontal = 50
         top = viewToolBar.root
         center {
             tablePane = gridpane {
@@ -43,6 +42,7 @@ class TimeTableEditor : Fragment() {
                 alignment = Pos.TOP_CENTER
                 isGridLinesVisible = true
             }
+            BorderPane.setMargin(tablePane, Insets(90.0, 25.0, 120.0, 25.0))
         }
     }
 
