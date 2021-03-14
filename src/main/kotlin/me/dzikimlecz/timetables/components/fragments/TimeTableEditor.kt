@@ -122,7 +122,45 @@ class TimeTableEditor : Fragment() {
     }
 
     fun divideCells() {
-        TODO("Not yet implemented")
+        val buttons = overlayCells()
+        for (button in buttons.keys) {
+            val cell = buttons[button]!!
+            button.setOnAction {
+                cell.isDivided.set(true)
+                button.removeFromParent()
+            }
+        }
+    }
+
+    private fun overlayCells() : Map<Button, Cell> {
+        val editorPanes = tablePane.children.parallelStream()
+            .filter { it is StackPane }.map {it as StackPane }.collect(Collectors.toList())
+        val buttons = mutableMapOf<Button, Cell>()
+        for (pane in editorPanes) {
+            val location = GridPane.getRowIndex(pane) to GridPane.getColumnIndex(pane)
+            val cell = editors[location.first][location.second].cell
+            with(pane) {
+                if (!cell.isDivided.get()) this += button(cell[0]) {
+                    setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE)
+                    buttons += this to cell
+                }
+            }
+        }
+        val button = button("Ok") {
+            action {
+                removeOverlayFromCells()
+                this.removeFromParent()
+            }
+        }
+        editToolBar.root.items.add(button)
+        return buttons
+    }
+
+    private fun removeOverlayFromCells() {
+        val editorPanes = tablePane.children.parallelStream()
+            .filter { it is StackPane }.map {it as StackPane }.collect(Collectors.toList())
+        for (it in editorPanes)
+            it.children.removeAll(it.childrenUnmodifiable.filterIsInstance<Button>())
     }
 }
 
