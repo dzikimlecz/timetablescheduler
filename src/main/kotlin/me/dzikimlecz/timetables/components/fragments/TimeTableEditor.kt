@@ -1,39 +1,35 @@
 package me.dzikimlecz.timetables.components.fragments
 
-import javafx.beans.property.SimpleIntegerProperty
 import javafx.beans.property.SimpleObjectProperty
 import javafx.geometry.Pos
 import javafx.scene.control.Button
 import javafx.scene.layout.GridPane
-import me.dzikimlecz.timetables.components.fragments.TimeTableEditor.ViewMode.*
+import javafx.scene.layout.StackPane
+import me.dzikimlecz.timetables.components.fragments.TimeTableEditor.ViewMode.EDIT
+import me.dzikimlecz.timetables.components.fragments.TimeTableEditor.ViewMode.VIEW
 import me.dzikimlecz.timetables.timetable.Cell
 import me.dzikimlecz.timetables.timetable.TimeTable
 import tornadofx.*
+import java.util.stream.Collectors
 
 class TimeTableEditor : Fragment() {
     val timeTable: TimeTable by param()
-    private val viewModeProperty = SimpleObjectProperty<ViewMode>()
+    private val viewModeProperty = SimpleObjectProperty(VIEW)
     private val editors = ArrayList<ArrayList<CellEditor>>()
-    private val rowsProperty = SimpleIntegerProperty()
-    private val columnsProperty = SimpleIntegerProperty()
+
     private var tablePane by singleAssign<GridPane>()
 
-    private val viewToolBar: ViewToolBar
-        get() = find(params = mapOf(ViewToolBar::parentEditor to this))
+    private val viewToolBar: ViewToolBar = find(params = mapOf(ViewToolBar::parentEditor to this))
 
-    private val editToolBar: EditToolBar
-        get() = find(params = mapOf(EditToolBar::parentEditor to this))
+    private val editToolBar: EditToolBar by lazy {
+        find(params = mapOf(EditToolBar::parentEditor to this))
+    }
 
     private val toolBars by lazy {
         mapOf(VIEW to viewToolBar.root, EDIT to editToolBar.root)
     }
 
-
-    var viewMode = VIEW
-        set(value) {
-            field = value
-            viewModeProperty.set(value)
-        }
+    var viewMode: ViewMode by viewModeProperty
 
     override val root = borderpane {
         paddingTop = 100
@@ -42,7 +38,7 @@ class TimeTableEditor : Fragment() {
         top = viewToolBar.root
         center {
             tablePane = gridpane {
-                maxWidthProperty().bind(primaryStage.widthProperty() - 180)
+                maxWidthProperty().bind(primaryStage.widthProperty() - 230)
                 paddingTop = 10
                 alignment = Pos.TOP_CENTER
                 isGridLinesVisible = true
@@ -51,8 +47,6 @@ class TimeTableEditor : Fragment() {
     }
 
     init {
-        rowsProperty.bind(timeTable.rowsProperty)
-        columnsProperty.bind(timeTable.columnsProperty)
         for (y in 0 until timeTable.rows) {
             editors.add(ArrayList())
             for (x in 0 until timeTable.columns)
@@ -63,18 +57,16 @@ class TimeTableEditor : Fragment() {
 
     private fun addCell(x: Int, y: Int, cell: Cell) {
         val editor = find<CellEditor>(mapOf(CellEditor::cell to cell))
-        editor.refreshView(viewMode)
         editors[y].add(editor)
         with(tablePane) {
             stackpane {
-                maxWidthProperty().bind(tablePane.maxWidthProperty().divide(columnsProperty))
-                add(editor.root)
-                gridpaneConstraints {
-                    columnRowIndex(x, y)
-                }
+                maxWidthProperty().bind(tablePane.maxWidthProperty() / timeTable.columns)
+                minWidthProperty().bind(maxWidthProperty())
+                this += editor.root
+                gridpaneConstraints { columnRowIndex(x, y) }
             }
         }
-        editor.root.maxWidthProperty().bind(tablePane.maxWidthProperty().divide(columnsProperty))
+        editor.refreshView(viewMode)
     }
 
     private fun initListeners() {
@@ -83,7 +75,7 @@ class TimeTableEditor : Fragment() {
             root.top = toolBars[newVal]
         }
 
-        rowsProperty.addListener { _, oldValue, newValue ->
+        timeTable.rowsProperty.addListener { _, oldValue, newValue ->
             val delta = newValue.toInt() - oldValue.toInt()
             if (delta < 0) for (i in delta until 0) {
                 val lastY = editors.size - 1
@@ -98,7 +90,7 @@ class TimeTableEditor : Fragment() {
                 }
             }
         }
-        columnsProperty.addListener { _, oldValue, newValue ->
+        timeTable.columnsProperty.addListener { _, oldValue, newValue ->
             val oldVal = oldValue.toInt()
             val newVal = newValue.toInt()
             val delta = newVal - oldVal
