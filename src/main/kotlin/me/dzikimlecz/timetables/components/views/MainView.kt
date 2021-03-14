@@ -21,16 +21,14 @@ class MainView : View(defaultTitle) {
                 spacing = 3E1
                 background = Background(BackgroundFill(Color.LIGHTGREY, null, null))
                 paddingTop = 15
-                val buttonWidth = 1.8E2
-                val buttonHeight = 5E1
                 button("Nowy Plan").setOnAction { manager.setUpTable() }
                 button("Otwórz Plan").setOnAction { manager.importTable() }
                 button("Dodaj Plan do Bazy Godzin").setOnAction { manager.includeTableToDB() }
                 button("Otwórz Bazę Godzin").setOnAction { manager.openDB() }
                 children.forEach {
                     if (it is Button) {
-                        it.prefWidth = buttonWidth
-                        it.prefHeight = buttonHeight
+                        it.prefWidth = 1.8E2
+                        it.prefHeight = 5E1
                     }
                 }
             }
