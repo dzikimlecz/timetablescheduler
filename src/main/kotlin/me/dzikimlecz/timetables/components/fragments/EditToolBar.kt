@@ -2,12 +2,10 @@ package me.dzikimlecz.timetables.components.fragments
 
 import javafx.application.Platform
 import me.dzikimlecz.timetables.components.fragments.TimeTableEditor.ViewMode.VIEW
+import me.dzikimlecz.timetables.components.views.DetailsView
 import tornadofx.*
-import java.util.concurrent.atomic.AtomicBoolean
 
 class EditToolBar : TimeTableEditorToolBar() {
-
-    private lateinit var valueToChange : ValueForChange
 
     override val root = toolbar {
 
@@ -77,12 +75,12 @@ class EditToolBar : TimeTableEditorToolBar() {
         }
         separator()
 
-        button("Szczegóły planu") {
-
-        }
+        button("Szczegóły planu").setOnAction { showDetails() }
     }
 
-    private enum class ValueForChange {
-        ROW, COLUMN, CELL
+    private fun showDetails() {
+        parentEditor.openInternalWindow<DetailsView>(
+            params = mapOf(DetailsView::table to parentEditor.timeTable)
+        )
     }
 }
