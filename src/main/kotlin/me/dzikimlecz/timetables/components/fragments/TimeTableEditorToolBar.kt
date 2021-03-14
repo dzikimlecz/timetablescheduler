@@ -12,8 +12,5 @@ import kotlin.reflect.KClass
 abstract class TimeTableEditorToolBar : Fragment() {
     val parentEditor by param<TimeTableEditor>()
 
-
-
-
     abstract override val root: ToolBar
 }
