@@ -13,7 +13,6 @@ import me.dzikimlecz.timetables.timetable.Cell
 import me.dzikimlecz.timetables.timetable.TimeTable
 import tornadofx.*
 import java.util.stream.Collectors
-import kotlin.math.max
 
 class TimeTableEditor : Fragment() {
     val timeTable: TimeTable by param()
@@ -84,6 +83,7 @@ class TimeTableEditor : Fragment() {
             if (delta < 0) for (i in delta until 0) {
                 val lastY = editors.size - 1
                 for (x in 0 until editors[lastY].size) tablePane.remove(x, lastY)
+                editors.last().forEach { it.cell.clean() }
                 editors.removeLast()
             }
             else for (i in 0 until delta) {
@@ -94,12 +94,14 @@ class TimeTableEditor : Fragment() {
                 }
             }
         }
+
         timeTable.columnsProperty.addListener { _, oldValue, newValue ->
             val oldVal = oldValue.toInt()
             val newVal = newValue.toInt()
             val delta = newVal - oldVal
             if (delta < 0) for ((i, row) in editors.withIndex())
                 for (j in delta until 0) {
+                    row.last().cell.clean()
                     row.removeLast()
                     tablePane.remove(oldVal + delta, i)
                 }
@@ -166,8 +168,11 @@ class TimeTableEditor : Fragment() {
         for (button in buttons.keys) {
             button.setOnAction {
                 val rowIndex = GridPane.getRowIndex(button.parent)
-                for (editor in editors[rowIndex])
+                for ((index, editor) in editors[rowIndex].withIndex()) {
                     editor.cell.clean()
+                    (tablePane.get(index, rowIndex) as? StackPane)?.children
+                        ?.removeIf { it is Button }
+                }
                 button.removeFromParent()
             }
         }
@@ -178,17 +183,21 @@ class TimeTableEditor : Fragment() {
         for (button in buttons.keys) {
             button.setOnAction {
                 val columnIndex = GridPane.getColumnIndex(button.parent)
-                for (row in 0 until editors.size)
+                for (row in 0 until editors.size) {
                     editors[row][columnIndex].cell.clean()
+                    (tablePane.get(columnIndex, row) as? StackPane)?.children
+                    ?.removeIf { it is Button }
+                }
                 button.removeFromParent()
             }
         }
     }
 }
 
-private fun GridPane.remove(x: Int, y: Int) {
-    val toRemove = children.filter {
-        GridPane.getColumnIndex(it) == x && GridPane.getRowIndex(it) == y
-    }
-    children.removeAll(toRemove)
-}
+private fun GridPane.get(x: Int, y: Int) =
+    try {
+        children.filter { GridPane.getColumnIndex(it) == x && GridPane.getRowIndex(it) == y }[0]
+    } catch(e: IndexOutOfBoundsException) { null }
+
+
+private fun GridPane.remove(x: Int, y: Int) = children.remove(get(x, y))
