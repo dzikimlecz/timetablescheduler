@@ -32,4 +32,12 @@ class Cell(isDivided : Boolean = false) {
     fun getContentProperty(subCell : Int) : SimpleStringProperty {
         return contents[subCell]
     }
+
+    fun clean() {
+        this[0] = ""
+        if (isDivided) {
+            this[1] = ""
+            isDivided = false
+        }
+    }
 }

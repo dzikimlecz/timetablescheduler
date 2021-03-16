@@ -17,14 +17,20 @@ class EditToolBar : TimeTableEditorToolBar() {
         stackpane {
             val box = choicebox<String> {
                 isVisible = false
-                items.addAll("Dodaj", "Usuń", "Wyczyść", "Więcej")
+                val addKey = "Dodaj"
+                val removeKey = "Usuń"
+                val cleanKey = "Wyczyść"
+                val detailsKey = "Więcej"
+                items.addAll(addKey, removeKey, cleanKey, detailsKey)
                 setOnAction {
-
-                    Platform.runLater {
-                        selectionModel.clearSelection()
-                        hide()
-                        isVisible = false
+                    when (value) {
+                        addKey -> parentEditor.timeTable.rows++
+                        removeKey -> parentEditor.timeTable.rows--
+                        cleanKey -> parentEditor.cleanRows()
+                        detailsKey -> showDetails()
                     }
+
+                    Platform.runLater { isVisible = false; value = null }
                 }
             }
             val label = button("Rzędy") {
@@ -36,14 +42,20 @@ class EditToolBar : TimeTableEditorToolBar() {
         stackpane {
             val box = choicebox<String> {
                 isVisible = false
-                items.addAll("Dodaj", "Usuń", "Wyczyść", "Więcej")
+                val addKey = "Dodaj"
+                val removeKey = "Usuń"
+                val cleanKey = "Wyczyść"
+                val detailsKey = "Więcej"
+                items.addAll(addKey, removeKey, cleanKey, detailsKey)
                 setOnAction {
-
-                    Platform.runLater {
-                        selectionModel.clearSelection()
-                        hide()
-                        isVisible = false
+                    when (value) {
+                        addKey -> parentEditor.timeTable.columns++
+                        removeKey -> parentEditor.timeTable.columns--
+                        cleanKey -> parentEditor.cleanColumns()
+                        detailsKey -> showDetails()
                     }
+
+                    Platform.runLater { isVisible = false; value = null }
                 }
             }
             val label = button("Kolumny") {
@@ -62,8 +74,6 @@ class EditToolBar : TimeTableEditorToolBar() {
                     when (value) {
                         cleanKey -> parentEditor.cleanCells()
                         divideKey -> parentEditor.divideCells()
-                        null -> {}
-                        else -> throw AssertionError()
                     }
                     Platform.runLater { isVisible = false; value = null }
                 }

@@ -101,7 +101,7 @@ class TimeTableEditor : Fragment() {
             if (delta < 0) for ((i, row) in editors.withIndex())
                 for (j in delta until 0) {
                     row.removeLast()
-                    tablePane.remove(oldVal - delta, i)
+                    tablePane.remove(oldVal + delta, i)
                 }
             else for (y in editors.indices)
                 for (x in oldVal until newVal)
@@ -113,41 +113,35 @@ class TimeTableEditor : Fragment() {
         EDIT, VIEW
     }
 
-    fun cleanCells() = handleCellsOverlayingAction {
-        set(0, "")
-        if (isDivided) {
-            set(1, "")
-            isDivided = false
-        }
-    }
+    fun cleanCells() = handleCellsOverlayingAction { clean() }
 
     fun divideCells() = handleCellsOverlayingAction { isDivided = !isDivided }
 
     private fun handleCellsOverlayingAction(action: Cell.() -> Unit) {
         val buttons = overlayCells()
         for (button in buttons.keys) {
-            val cell = buttons[button]!!
+            val editor = buttons[button]!!
             button.setOnAction {
-                cell.action()
+                editor.cell.action()
                 button.removeFromParent()
             }
         }
     }
 
     private val okButton by lazy { button("Ok") }
-    private fun overlayCells() : Map<Button, Cell> {
+    private fun overlayCells() : Map<Button, CellEditor> {
         removeOverlayFromCells()
         val editorPanes = tablePane.children.parallelStream()
             .filter { it is StackPane }.map {it as StackPane }.collect(Collectors.toList())
-        val buttons = mutableMapOf<Button, Cell>()
+        val buttons = mutableMapOf<Button, CellEditor>()
         for (pane in editorPanes) {
             val location = GridPane.getRowIndex(pane) to GridPane.getColumnIndex(pane)
-            val cell = editors[location.first][location.second].cell
+            val editor = editors[location.first][location.second]
             with(pane) {
                 this += button {
-                    text = cell[0]
+                    text = editor.cell[0]
                     setMaxSize(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY)
-                    buttons[this] = cell
+                    buttons[this] = editor
                 }
             }
         }
@@ -165,6 +159,30 @@ class TimeTableEditor : Fragment() {
         tablePane.childrenUnmodifiable.stream()
             .map {it as? StackPane }.forEach { pane -> pane?.children?.removeIf { it is Button } }
         okButton.removeFromParent()
+    }
+
+    fun cleanRows() {
+        val buttons = overlayCells()
+        for (button in buttons.keys) {
+            button.setOnAction {
+                val rowIndex = GridPane.getRowIndex(button.parent)
+                for (editor in editors[rowIndex])
+                    editor.cell.clean()
+                button.removeFromParent()
+            }
+        }
+    }
+
+    fun cleanColumns() {
+        val buttons = overlayCells()
+        for (button in buttons.keys) {
+            button.setOnAction {
+                val columnIndex = GridPane.getColumnIndex(button.parent)
+                for (row in 0 until editors.size)
+                    editors[row][columnIndex].cell.clean()
+                button.removeFromParent()
+            }
+        }
     }
 }
 
