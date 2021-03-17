@@ -2,7 +2,9 @@ package me.dzikimlecz.timetables.timetable
 
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleIntegerProperty
+import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
+import javafx.geometry.Orientation
 import kotlinx.serialization.Serializable
 import me.dzikimlecz.timetables.timetable.json.CellSerializer
 import tornadofx.getValue
@@ -10,12 +12,18 @@ import tornadofx.setValue
 
 @Serializable(with = CellSerializer::class)
 class Cell(isDivided : Boolean = false) {
-    private val contents = Array(2) {
-        SimpleStringProperty(this, "", "")
-    }
+    private val contents = Array(2) { SimpleStringProperty(this, "", "") }
 
     val isDividedProperty = SimpleBooleanProperty(isDivided)
     var isDivided by isDividedProperty
+
+    val divisionDirectionProperty = SimpleObjectProperty<Orientation?>(null)
+    var divisionDirection by divisionDirectionProperty
+    init {
+        isDividedProperty.addListener { _, _, newValue ->
+            divisionDirection = if (newValue) Orientation.VERTICAL else null
+        }
+    }
 
     operator fun set(subCell: Int = 0, content: String) {
         if ((!isDivided && subCell != 0) || subCell < 0 || subCell > 1)
