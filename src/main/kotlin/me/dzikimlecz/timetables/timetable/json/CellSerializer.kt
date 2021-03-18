@@ -30,7 +30,8 @@ object CellSerializer : KSerializer<Cell> {
         val surrogate = decoder.decodeSerializableValue(CellSurrogate.serializer())
         val cell = Cell(surrogate.content.size == 2)
         for ((i, element) in surrogate.content.withIndex()) cell[i] = element
-        cell.divisionDirection = surrogate.divisionOrientation
+        cell.divisionDirection =
+            surrogate.divisionOrientation ?: if (cell.isDivided) Orientation.HORIZONTAL else null
         return cell
     }
 }
