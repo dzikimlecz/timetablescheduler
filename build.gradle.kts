@@ -22,7 +22,7 @@ dependencies {
 }
 javafx {
     version = "16"
-    modules("javafx.controls")
+    modules("javafx.controls", "javafx.swing")
 }
 
 tasks.test {
