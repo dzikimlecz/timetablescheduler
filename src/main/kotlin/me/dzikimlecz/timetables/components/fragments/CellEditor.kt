@@ -27,17 +27,17 @@ class CellEditor : Fragment() {
     init {
         for ((i, e) in texts.withIndex())
             e.bindBidirectional(cell.getContentProperty(i))
-        cell.divisionDirectionProperty.addListener { _ -> refreshView(ViewMode.EDIT) }
+        cell.divisionDirectionProperty.addListener { _,_,_ -> refreshView(ViewMode.EDIT) }
     }
 
-    fun refreshView(viewMode: ViewMode) = refreshImpl {
+    fun refreshView(viewMode: ViewMode) = refreshImpl { i: Int ->
         if (viewMode == VIEW) label {
             paddingAll = 10
-            textProperty().bindBidirectional(texts[it])
+            textProperty().bindBidirectional(texts[i])
             minWidth = root.minWidth + 5
             minHeight = root.minHeight + 25
         } else textarea {
-            textProperty().bindBidirectional(texts[it])
+            textProperty().bindBidirectional(texts[i])
         }
     }
 
@@ -85,8 +85,8 @@ class CellEditor : Fragment() {
             firstControl.prefHeightProperty().bind(root.heightProperty())
             secondControl.prefHeightProperty().bind(root.heightProperty())
         } else {
-            firstControl.maxHeightProperty().bind(root.heightProperty() / 2.1)
-            secondControl.maxHeightProperty().bind(root.heightProperty() / 2.1)
+            firstControl.maxHeightProperty().bind(root.heightProperty() / 2)
+            secondControl.maxHeightProperty().bind(root.heightProperty() / 2)
             firstControl.prefWidthProperty().bind(root.widthProperty())
             secondControl.prefWidthProperty().bind(root.widthProperty())
         }
