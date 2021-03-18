@@ -46,6 +46,8 @@ class MainView : View(defaultTitle) {
         }
     }
 
+    fun closeTable() = displayTable(null)
+
     override fun onBeforeShow() {
         super.onBeforeShow()
         setWindowMinSize(800, 600)
