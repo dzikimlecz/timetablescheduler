@@ -1,19 +1,24 @@
 package me.dzikimlecz.timetables.components.fragments
 
 import javafx.beans.property.SimpleObjectProperty
+import javafx.embed.swing.SwingFXUtils
 import javafx.geometry.Insets
 import javafx.geometry.Orientation
 import javafx.geometry.Pos
+import javafx.scene.SnapshotParameters
 import javafx.scene.control.Button
-import javafx.scene.layout.BorderPane
-import javafx.scene.layout.GridPane
-import javafx.scene.layout.StackPane
+import javafx.scene.image.WritableImage
+import javafx.scene.layout.*
+import javafx.scene.paint.Color
+import javafx.scene.transform.Transform
 import me.dzikimlecz.timetables.components.fragments.TimeTableEditor.ViewMode.EDIT
 import me.dzikimlecz.timetables.components.fragments.TimeTableEditor.ViewMode.VIEW
 import me.dzikimlecz.timetables.timetable.Cell
 import me.dzikimlecz.timetables.timetable.TimeTable
 import tornadofx.*
+import java.io.File
 import java.util.stream.Collectors
+import javax.imageio.ImageIO
 
 class TimeTableEditor : Fragment() {
     val timeTable: TimeTable by param()
@@ -57,23 +62,6 @@ class TimeTableEditor : Fragment() {
         initListeners()
     }
 
-    private fun addCell(x: Int, y: Int, cell: Cell) {
-        val editor = find<CellEditor>(mapOf(CellEditor::cell to cell))
-        editors[y].add(editor)
-        with(tablePane) {
-            stackpane {
-                maxWidthProperty().bind(tablePane.maxWidthProperty() / timeTable.columnsProperty)
-                maxHeightProperty().bind(tablePane.maxHeightProperty() / timeTable.rowsProperty)
-                prefWidthProperty().bind(maxWidthProperty())
-                this += editor.root
-                editor.root.maxWidthProperty().bind(maxWidthProperty())
-                editor.root.maxHeightProperty().bind(maxHeightProperty())
-                gridpaneConstraints { columnRowIndex(x, y) }
-            }
-        }
-        editor.refreshView(viewMode)
-    }
-
     private fun initListeners() {
         viewModeProperty.addListener { _, _, newVal ->
             editors.forEach { list -> list.forEach { it.refreshView(viewMode) } }
@@ -114,6 +102,23 @@ class TimeTableEditor : Fragment() {
         }
     }
 
+    private fun addCell(x: Int, y: Int, cell: Cell) {
+        val editor = find<CellEditor>(mapOf(CellEditor::cell to cell))
+        editors[y].add(editor)
+        with(tablePane) {
+            stackpane {
+                maxWidthProperty().bind(tablePane.maxWidthProperty() / timeTable.columnsProperty)
+                maxHeightProperty().bind(tablePane.maxHeightProperty() / timeTable.rowsProperty)
+                prefWidthProperty().bind(maxWidthProperty())
+                this += editor.root
+                editor.root.maxWidthProperty().bind(maxWidthProperty())
+                editor.root.maxHeightProperty().bind(maxHeightProperty())
+                gridpaneConstraints { columnRowIndex(x, y) }
+            }
+        }
+        editor.refreshView(viewMode)
+    }
+
     enum class ViewMode {
         EDIT, VIEW
     }
@@ -122,6 +127,52 @@ class TimeTableEditor : Fragment() {
 
     fun divideCells(direction: Orientation) =
         handleCellsOverlayingAction { divisionDirection = direction }
+
+    fun cleanRows() {
+        val buttons = overlayCells()
+        for (button in buttons.keys) {
+            button.setOnAction {
+                val rowIndex = GridPane.getRowIndex(button.parent)
+                for ((index, editor) in editors[rowIndex].withIndex()) {
+                    editor.cell.clean()
+                    (tablePane.get(index, rowIndex) as? StackPane)?.children
+                        ?.removeIf { it is Button }
+                }
+                button.removeFromParent()
+            }
+        }
+    }
+
+    fun cleanColumns() {
+        val buttons = overlayCells()
+        for (button in buttons.keys) {
+            button.setOnAction {
+                val columnIndex = GridPane.getColumnIndex(button.parent)
+                for (row in 0 until editors.size) {
+                    editors[row][columnIndex].cell.clean()
+                    (tablePane.get(columnIndex, row) as? StackPane)?.children
+                        ?.removeIf { it is Button }
+                }
+                button.removeFromParent()
+            }
+        }
+    }
+
+    fun exportTable() {
+        primaryStage.isMaximized = true
+        val params = SnapshotParameters()
+        val scale = 2.0
+        val width = (tablePane.width * scale + 10).toInt()
+        val height = (tablePane.height * 2).toInt()
+        params.transform = Transform.scale(scale, scale)
+        val img = tablePane.snapshot(params, WritableImage(width, height))
+        Thread() {
+            val image = SwingFXUtils.fromFXImage(img, null)
+            val file = File("${System.getenv("USERPROFILE")}\\Desktop", "${timeTable.name}.png")
+            if (!file.exists()) file.createNewFile()
+            ImageIO.write(image, "png", file)
+        }.start()
+    }
 
     private fun handleCellsOverlayingAction(action: Cell.() -> Unit) {
         val buttons = overlayCells()
@@ -160,41 +211,10 @@ class TimeTableEditor : Fragment() {
         editToolBar.root.items.add(okButton)
         return buttons
     }
-
     private fun removeOverlayFromCells() {
         tablePane.childrenUnmodifiable.stream()
             .map {it as? StackPane }.forEach { pane -> pane?.children?.removeIf { it is Button } }
         okButton.removeFromParent()
-    }
-
-    fun cleanRows() {
-        val buttons = overlayCells()
-        for (button in buttons.keys) {
-            button.setOnAction {
-                val rowIndex = GridPane.getRowIndex(button.parent)
-                for ((index, editor) in editors[rowIndex].withIndex()) {
-                    editor.cell.clean()
-                    (tablePane.get(index, rowIndex) as? StackPane)?.children
-                        ?.removeIf { it is Button }
-                }
-                button.removeFromParent()
-            }
-        }
-    }
-
-    fun cleanColumns() {
-        val buttons = overlayCells()
-        for (button in buttons.keys) {
-            button.setOnAction {
-                val columnIndex = GridPane.getColumnIndex(button.parent)
-                for (row in 0 until editors.size) {
-                    editors[row][columnIndex].cell.clean()
-                    (tablePane.get(columnIndex, row) as? StackPane)?.children
-                        ?.removeIf { it is Button }
-                }
-                button.removeFromParent()
-            }
-        }
     }
 }
 

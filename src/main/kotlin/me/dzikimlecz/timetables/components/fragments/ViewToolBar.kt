@@ -14,6 +14,7 @@ class ViewToolBar : TimeTableEditorToolBar()  {
         }
         button("Eksportuj") {
             action {
+                parentEditor.exportTable()
             }
         }
         separator()
