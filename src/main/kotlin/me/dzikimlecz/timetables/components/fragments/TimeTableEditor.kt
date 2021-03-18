@@ -66,6 +66,8 @@ class TimeTableEditor : Fragment() {
                 maxHeightProperty().bind(tablePane.maxHeightProperty() / timeTable.rowsProperty)
                 prefWidthProperty().bind(maxWidthProperty())
                 this += editor.root
+                editor.root.maxWidthProperty().bind(maxWidthProperty())
+                editor.root.maxHeightProperty().bind(maxHeightProperty())
                 gridpaneConstraints { columnRowIndex(x, y) }
             }
         }
@@ -188,7 +190,7 @@ class TimeTableEditor : Fragment() {
                 for (row in 0 until editors.size) {
                     editors[row][columnIndex].cell.clean()
                     (tablePane.get(columnIndex, row) as? StackPane)?.children
-                    ?.removeIf { it is Button }
+                        ?.removeIf { it is Button }
                 }
                 button.removeFromParent()
             }
@@ -200,6 +202,5 @@ private fun GridPane.get(x: Int, y: Int) =
     try {
         children.filter { GridPane.getColumnIndex(it) == x && GridPane.getRowIndex(it) == y }[0]
     } catch(e: IndexOutOfBoundsException) { null }
-
 
 private fun GridPane.remove(x: Int, y: Int) = children.remove(get(x, y))
