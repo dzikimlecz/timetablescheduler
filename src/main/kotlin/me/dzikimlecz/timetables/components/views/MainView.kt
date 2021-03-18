@@ -48,6 +48,6 @@ class MainView : View(defaultTitle) {
 
     override fun onBeforeShow() {
         super.onBeforeShow()
-        setWindowMinSize(800, 500)
+        setWindowMinSize(800, 600)
     }
 }
