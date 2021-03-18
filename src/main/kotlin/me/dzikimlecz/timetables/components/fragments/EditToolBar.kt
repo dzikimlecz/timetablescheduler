@@ -1,6 +1,7 @@
 package me.dzikimlecz.timetables.components.fragments
 
 import javafx.application.Platform
+import javafx.geometry.Orientation
 import me.dzikimlecz.timetables.components.fragments.TimeTableEditor.ViewMode.VIEW
 import me.dzikimlecz.timetables.components.views.DetailsView
 import tornadofx.*
@@ -68,12 +69,14 @@ class EditToolBar : TimeTableEditorToolBar() {
             val box = choicebox<String> {
                 isVisible = false
                 val cleanKey = "Wyczyść"
-                val divideKey = "Podziel"
-                items.addAll(cleanKey, divideKey)
+                val horizontalDivideKey = "Podziel w pionie"
+                val verticalDivideKey = "Podziel w poziomie"
+                items.addAll(cleanKey, horizontalDivideKey, verticalDivideKey)
                 setOnAction {
                     when (value) {
                         cleanKey -> parentEditor.cleanCells()
-                        divideKey -> parentEditor.divideCells()
+                        horizontalDivideKey -> parentEditor.divideCells(Orientation.HORIZONTAL)
+                        verticalDivideKey -> parentEditor.divideCells(Orientation.VERTICAL)
                     }
                     Platform.runLater { isVisible = false; value = null }
                 }
