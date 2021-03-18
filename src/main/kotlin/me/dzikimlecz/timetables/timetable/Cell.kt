@@ -14,15 +14,14 @@ import tornadofx.setValue
 class Cell(isDivided : Boolean = false) {
     private val contents = Array(2) { SimpleStringProperty(this, "", "") }
 
-    val isDividedProperty = SimpleBooleanProperty(isDivided)
-    var isDivided by isDividedProperty
+    private val isDividedProperty = SimpleBooleanProperty(isDivided)
+    val isDivided by isDividedProperty
 
     val divisionDirectionProperty = SimpleObjectProperty<Orientation?>(null)
     var divisionDirection by divisionDirectionProperty
     init {
-        isDividedProperty.addListener { _, _, newValue ->
-            divisionDirection = if (newValue) Orientation.VERTICAL else null
-        }
+        divisionDirectionProperty.addListener { _, _,
+                                                newValue -> isDividedProperty.set(newValue!==null) }
     }
 
     operator fun set(subCell: Int = 0, content: String) {
@@ -42,10 +41,8 @@ class Cell(isDivided : Boolean = false) {
     }
 
     fun clean() {
-        this[0] = ""
-        if (isDivided) {
-            this[1] = ""
-            isDivided = false
-        }
+        contents[0].set("")
+        contents[1].set("")
+        divisionDirection = null
     }
 }

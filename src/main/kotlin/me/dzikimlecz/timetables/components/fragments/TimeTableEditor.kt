@@ -2,6 +2,7 @@ package me.dzikimlecz.timetables.components.fragments
 
 import javafx.beans.property.SimpleObjectProperty
 import javafx.geometry.Insets
+import javafx.geometry.Orientation
 import javafx.geometry.Pos
 import javafx.scene.control.Button
 import javafx.scene.layout.BorderPane
@@ -117,7 +118,8 @@ class TimeTableEditor : Fragment() {
 
     fun cleanCells() = handleCellsOverlayingAction { clean() }
 
-    fun divideCells() = handleCellsOverlayingAction { isDivided = !isDivided }
+    fun divideCells(direction: Orientation) =
+        handleCellsOverlayingAction { divisionDirection = direction }
 
     private fun handleCellsOverlayingAction(action: Cell.() -> Unit) {
         val buttons = overlayCells()
