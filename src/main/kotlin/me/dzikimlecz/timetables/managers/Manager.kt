@@ -34,15 +34,8 @@ class Manager {
         return lastTable
     }
 
-    fun exportTable() {
-        if (filesManager.getProperFile(lastTable).exists())
-            try {
-                filesManager.saveTable(lastTable)
-            } catch (e: FileAlreadyExistsException) {
-                describedExport()
-            }
-        else describedExport()
-    }
+    fun exportTable() = try { filesManager.saveTable(lastTable) }
+        catch (e: FileAlreadyExistsException) { describedExport() }
 
 
     fun describedExport() {
@@ -50,8 +43,8 @@ class Manager {
         find<ExportView>(params = mapOf(ExportView::exportProperties to properties)).openModal(
             UTILITY, block = true, resizable = false
         )
-        val customName = properties["name"]!!
-        val customPath = properties["path"]!!
+        val customName = properties["name"] ?: return
+        val customPath = properties["path"] ?: return
         if (customName != "\u0000" && customPath != "\u0000")
             filesManager.saveTable(lastTable, customPath, true, customName)
         else if (customPath != "\u0000")
