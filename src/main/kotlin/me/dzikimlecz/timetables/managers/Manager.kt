@@ -1,13 +1,12 @@
 package me.dzikimlecz.timetables.managers
 
 import javafx.scene.control.Alert
-import javafx.stage.StageStyle
+import javafx.stage.StageStyle.UTILITY
 import me.dzikimlecz.timetables.components.views.ExportView
 import me.dzikimlecz.timetables.components.views.ImportView
 import me.dzikimlecz.timetables.components.views.MainView
 import me.dzikimlecz.timetables.components.views.TimeTableSetUpView
 import me.dzikimlecz.timetables.timetable.TimeTable
-import tornadofx.View
 import tornadofx.alert
 import tornadofx.find
 import java.time.LocalDate
@@ -45,13 +44,13 @@ class Manager {
     }
 
 
-    private fun describedExport() {
+    fun describedExport() {
         val properties = mutableMapOf<String, String>()
-        find<MainView>().openInternalWindow<ExportView>(
-            params = mapOf(ExportView::exportProperties to properties)
+        find<ExportView>(params = mapOf(ExportView::exportProperties to properties)).openModal(
+            UTILITY, block = true, resizable = false
         )
-        val customName = properties["name"] ?: "\u0000"
-        val customPath = properties["path"] ?: "\u0000"
+        val customName = properties["name"]!!
+        val customPath = properties["path"]!!
         if (customName != "\u0000" && customPath != "\u0000")
             filesManager.saveTable(lastTable, customPath, true, customName)
         else if (customPath != "\u0000")
@@ -81,7 +80,7 @@ class Manager {
     fun setUpTable() {
         val map = mutableMapOf<String, String>()
         find<TimeTableSetUpView>(params = mapOf(TimeTableSetUpView::tableProperties to map))
-            .openModal(StageStyle.UTILITY, resizable = false, block = true)
+            .openModal(UTILITY, resizable = false, block = true)
         try { find<MainView>().displayTable(newTable(map)) } catch (ignore : Exception) {}
     }
 
