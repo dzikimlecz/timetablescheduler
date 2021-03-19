@@ -23,7 +23,6 @@ class MainView : View(defaultTitle) {
                 paddingTop = 15
                 button("Nowy Plan").setOnAction { manager.setUpTable() }
                 button("Otwórz Plan").setOnAction { manager.importTable() }
-                button("Dodaj Plan do Bazy Godzin").setOnAction { manager.includeTableToDB() }
                 button("Otwórz Bazę Godzin").setOnAction { manager.openDB() }
                 children.forEach {
                     if (it is Button) {
