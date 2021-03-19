@@ -12,6 +12,11 @@ class ViewToolBar : TimeTableEditorToolBar()  {
                 find<MainView>().manager.exportTable()
             }
         }
+        button("Zapisz jako") {
+            action {
+                find<MainView>().manager.describedExport()
+            }
+        }
         button("Eksportuj") {
             action {
                 parentEditor.exportTable()
@@ -21,5 +26,7 @@ class ViewToolBar : TimeTableEditorToolBar()  {
         button("Edytuj").setOnAction {
             parentEditor.viewMode = EDIT
         }
+        separator()
+        button("Zamknij").setOnAction { find<MainView>().closeTable() }
     }
 }
