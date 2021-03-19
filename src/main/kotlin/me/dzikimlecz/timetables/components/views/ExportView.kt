@@ -5,12 +5,12 @@ import javafx.scene.control.TextField
 import tornadofx.*
 
 class ExportView : View("Zapisz jako") {
-    val exportProperties : MutableMap<String, String> by param()
+    val exportProperties by param<MutableMap<String, String>>()
 
-    private var nameSet : Fieldset by singleAssign()
+    private var nameSet by singleAssign<Fieldset>()
     private val nameField = field("Nazwa Pliku")
     private val nameTextField = textfield()
-    private var pathSet : Fieldset by singleAssign()
+    private var pathSet by singleAssign<Fieldset>()
     private val pathField = field("Lokalizacja")
     private val pathTextField = textfield()
 
@@ -56,7 +56,6 @@ class ExportView : View("Zapisz jako") {
     private fun fillProperties(name: String? = null, path: String? = null) {
         exportProperties["name"] = name ?: "\u0000"
         exportProperties["path"] = path ?: "\u0000"
-
     }
 
     private fun setNameFieldDisplayed(active: Boolean) {
