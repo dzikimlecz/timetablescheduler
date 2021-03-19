@@ -5,11 +5,11 @@ import javafx.embed.swing.SwingFXUtils
 import javafx.geometry.Insets
 import javafx.geometry.Orientation
 import javafx.geometry.Pos
+import javafx.geometry.Rectangle2D
+import javafx.scene.Node
 import javafx.scene.SnapshotParameters
 import javafx.scene.control.Button
-import javafx.scene.image.WritableImage
 import javafx.scene.layout.*
-import javafx.scene.paint.Color
 import javafx.scene.transform.Transform
 import me.dzikimlecz.timetables.components.fragments.TimeTableEditor.ViewMode.EDIT
 import me.dzikimlecz.timetables.components.fragments.TimeTableEditor.ViewMode.VIEW
@@ -45,7 +45,7 @@ class TimeTableEditor : Fragment() {
             tablePane = gridpane {
                 maxWidthProperty().bind(primaryStage.widthProperty() - 230)
                 maxHeightProperty().bind(primaryStage.heightProperty() - 230)
-                paddingTop = 10
+                paddingTop = 20
                 alignment = Pos.TOP_CENTER
                 isGridLinesVisible = true
             }
@@ -159,19 +159,44 @@ class TimeTableEditor : Fragment() {
     }
 
     fun exportTable() {
-        primaryStage.isMaximized = true
         val params = SnapshotParameters()
         val scale = 2.0
-        val width = (tablePane.width * scale + 10).toInt()
-        val height = (tablePane.height * 2).toInt()
         params.transform = Transform.scale(scale, scale)
-        val img = tablePane.snapshot(params, WritableImage(width, height))
-        Thread() {
+        params.viewport = generateViewPort(scale)
+        val img = tablePane.snapshot(params, null)
+        Thread {
             val image = SwingFXUtils.fromFXImage(img, null)
             val file = File("${System.getenv("USERPROFILE")}\\Desktop", "${timeTable.name}.png")
             if (!file.exists()) file.createNewFile()
             ImageIO.write(image, "png", file)
         }.start()
+    }
+
+    private fun generateViewPort(scale: Double) : Rectangle2D {
+        with (tablePane) {
+            val margin = paddingTop.toDouble()
+            var x = 0
+            var y = 0
+            var width = .0
+            var node: Node
+            while (true) {
+                node = get(x++, y) ?: break
+                width += node.boundsInParent.width
+            }
+            x = 0
+            var height = .0
+            while (true) {
+                node = get(x, y++) ?: break
+                height += node.boundsInParent.height
+            }
+
+            return Rectangle2D(
+                boundsInParent.minX * scale - margin,
+                boundsInParent.minY * scale ,
+                width * scale + 3 * margin,
+                height * scale + 3 * margin
+            )
+        }
     }
 
     private fun handleCellsOverlayingAction(action: Cell.() -> Unit) {
