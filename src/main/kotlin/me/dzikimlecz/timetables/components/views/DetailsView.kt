@@ -3,7 +3,7 @@ package me.dzikimlecz.timetables.components.views
 import me.dzikimlecz.timetables.timetable.TimeTable
 import tornadofx.*
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE
 import kotlin.reflect.KProperty1
 
 class DetailsView : View("Szczegóły Planu") {
@@ -22,9 +22,10 @@ class DetailsView : View("Szczegóły Planu") {
             }
             field("Data") {
                 datepicker {
-                    editor.text = table.date.format(DateTimeFormatter.ISO_LOCAL_DATE)
-                    editor.textProperty().addListener { _, _, newValue ->
-                        tableProperties[TimeTable::date] = newValue
+                    value = LocalDate.now()
+                    valueProperty().addListener {_, _, newValue ->
+                        tableProperties[TimeTable::date] = newValue.format(ISO_LOCAL_DATE)
+
                     }
                 }
             }
