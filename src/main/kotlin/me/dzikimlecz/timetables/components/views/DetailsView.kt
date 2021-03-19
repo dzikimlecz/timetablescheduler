@@ -20,7 +20,7 @@ class DetailsView : View("Szczegóły Planu") {
                     }
                 }
             }
-            field("Data") {
+            field("Data Początku Planu") {
                 datepicker {
                     value = LocalDate.now()
                     valueProperty().addListener {_, _, newValue ->
