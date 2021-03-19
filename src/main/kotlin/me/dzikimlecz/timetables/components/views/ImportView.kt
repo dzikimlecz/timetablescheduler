@@ -2,6 +2,7 @@ package me.dzikimlecz.timetables.components.views
 
 
 import javafx.scene.control.*
+import javafx.stage.FileChooser
 import me.dzikimlecz.timetables.managers.FilesManager
 import java.io.File
 import javafx.util.Callback
@@ -17,7 +18,23 @@ class ImportView : View("Otwórz") {
     private var useCustomPath: CheckBox by singleAssign()
     private val customPath = textfield()
     private val pathField = field()
-        init {pathField += customPath}
+        init {
+            with(pathField) {
+                this += customPath
+                button("Wybierz") {
+                    action {
+                        val files = chooseFile(
+                            "Wybierz plik",
+                            arrayOf(FileChooser.ExtensionFilter("Plany","*.json")),
+                            File(System.getProperty("user.home")+"\\Documents"),
+                            owner = currentStage
+                        )
+                        if (files.isEmpty()) return@action
+                        customPath.text = files[0].absolutePath
+                    }
+                }
+            }
+        }
 
     override fun onBeforeShow() {
         filesManager.refreshJsonFiles()
