@@ -166,7 +166,7 @@ class TimeTableEditor : Fragment() {
         val img = tablePane.snapshot(params, null)
         Thread {
             val image = SwingFXUtils.fromFXImage(img, null)
-            val file = File("${System.getenv("USERPROFILE")}\\Desktop", "${timeTable.name}.png")
+            val file = File(System.getProperty("defaultExportPath"), "${timeTable.name}.png")
             if (!file.exists()) file.createNewFile()
             ImageIO.write(image, "png", file)
         }.start()

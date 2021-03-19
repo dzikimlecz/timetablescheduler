@@ -15,7 +15,7 @@ import java.time.format.FormatStyle
 import kotlin.streams.toList
 
 class FilesManager(
-    val defaultSavePath: String = System.getProperty("defaultSavePath")
+    private val defaultSavePath: String = System.getProperty("defaultSavePath")
 ) {
     private val files: ObservableList<File> = FXCollections.observableArrayList()
 
@@ -26,8 +26,6 @@ class FilesManager(
         }
 
     init {
-        val file = File(defaultSavePath)
-        if (!file.exists()) file.mkdirs()
         refreshJsonFiles()
     }
 
