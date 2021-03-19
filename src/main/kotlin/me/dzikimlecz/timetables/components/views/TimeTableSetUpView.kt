@@ -1,14 +1,14 @@
 package me.dzikimlecz.timetables.components.views
 
-import javafx.geometry.Insets
-import javafx.geometry.Pos
 import javafx.scene.control.DatePicker
 import javafx.scene.control.TextField
 import javafx.scene.control.TextFormatter
 import javafx.scene.text.Font
+import me.dzikimlecz.timetables.timetable.TimeTable
 import tornadofx.*
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import kotlin.reflect.KProperty1
 
 class TimeTableSetUpView : View("Nowy Plan") {
 
@@ -16,7 +16,7 @@ class TimeTableSetUpView : View("Nowy Plan") {
     private var rowsField: TextField by singleAssign()
     private var columnsField: TextField by singleAssign()
     private var datePicker: DatePicker by singleAssign()
-    val tableProperties: MutableMap<String, String> by param()
+    val tableProperties: MutableMap<KProperty1<TimeTable, Any>, String> by param()
 
     override val root = form {
         paddingAll = 20
@@ -59,10 +59,12 @@ class TimeTableSetUpView : View("Nowy Plan") {
         button("Ok") {
             font = bigFont
             action {
-                tableProperties["name"] = nameField.text.ifBlank { nameField.promptText }
-                tableProperties["rows"] = rowsField.text.ifBlank { rowsField.promptText }
-                tableProperties["columns"] = columnsField.text.ifBlank { columnsField.promptText }
-                tableProperties["date"] = datePicker.value.format(DateTimeFormatter.ISO_LOCAL_DATE)
+                tableProperties[TimeTable::name] = nameField.text.ifBlank { nameField.promptText }
+                tableProperties[TimeTable::rows] = rowsField.text.ifBlank { rowsField.promptText }
+                tableProperties[TimeTable::columns] = columnsField.text.ifBlank { columnsField
+                    .promptText }
+                tableProperties[TimeTable::date] = datePicker.value.format(DateTimeFormatter
+                    .ISO_LOCAL_DATE)
                 close()
                 listOf(nameField, rowsField, columnsField).forEach { it.clear() }
                 datePicker.value = LocalDate.now()

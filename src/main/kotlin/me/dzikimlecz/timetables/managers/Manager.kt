@@ -10,6 +10,7 @@ import me.dzikimlecz.timetables.timetable.TimeTable
 import tornadofx.alert
 import tornadofx.find
 import java.time.LocalDate
+import kotlin.reflect.KProperty1
 
 class Manager {
     private lateinit var lastTable : TimeTable
@@ -18,14 +19,14 @@ class Manager {
     val activeTable : TimeTable
         get() = lastTable
 
-    private fun newTable(properties: Map<String, String>): TimeTable {
-        val columns = (properties["columns"] ?: badProperty("columns", true))
+    private fun newTable(properties: Map<KProperty1<TimeTable, Any>, String>): TimeTable {
+        val columns = (properties[TimeTable::columns] ?: badProperty("columns", true))
             .toIntOrNull() ?: badProperty("columns", false)
-        val rows = (properties["rows"] ?: badProperty("rows", true))
+        val rows = (properties[TimeTable::rows] ?: badProperty("rows", true))
             .toIntOrNull() ?: badProperty("rows", false)
-        val name = properties["name"] ?: badProperty("name", true)
+        val name = properties[TimeTable::name] ?: badProperty("name", true)
         val date = try {
-            LocalDate.parse(properties["date"] ?: badProperty("date", true))
+            LocalDate.parse(properties[TimeTable::date] ?: badProperty("date", true))
         } catch (e: Exception) {
             badProperty("date", false)
         }
@@ -78,14 +79,10 @@ class Manager {
     }
 
     fun setUpTable() {
-        val map = mutableMapOf<String, String>()
+        val map = mutableMapOf<KProperty1<TimeTable, Any>, String>()
         find<TimeTableSetUpView>(params = mapOf(TimeTableSetUpView::tableProperties to map))
             .openModal(UTILITY, resizable = false, block = true)
         try { find<MainView>().displayTable(newTable(map)) } catch (ignore : Exception) {}
-    }
-
-    fun includeTableToDB() {
-        TODO("Not yet implemented")
     }
 
     fun openDB() {
