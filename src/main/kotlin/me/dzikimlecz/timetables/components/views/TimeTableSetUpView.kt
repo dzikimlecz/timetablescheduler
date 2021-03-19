@@ -29,7 +29,7 @@ class TimeTableSetUpView : View("Nowy Plan") {
                     promptText = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)
                 }
             }
-            field("Data") {
+            field("Data Początku Planu") {
                 label.font = bigFont
                 datePicker = datepicker() {
                     value = LocalDate.now()
