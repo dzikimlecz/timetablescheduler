@@ -3,6 +3,7 @@ package me.dzikimlecz.timetables.components.views
 import javafx.scene.control.CheckBox
 import javafx.scene.control.TextField
 import tornadofx.*
+import java.io.File
 
 class ExportView : View("Zapisz jako") {
     val exportProperties by param<MutableMap<String, String>>()
@@ -16,7 +17,19 @@ class ExportView : View("Zapisz jako") {
 
     init {
         nameField += nameTextField
-        pathField += pathTextField
+        with(pathField) {
+            this += pathTextField
+            button("Wybierz") {
+                action {
+                    val file = chooseDirectory(
+                        "Wybierz folder",
+                        File(System.getProperty("user.home") + "\\Documents"),
+                        currentWindow
+                    )
+                    pathField.text = file?.absolutePath ?: ""
+                }
+            }
+        }
     }
 
     override val root = form {
@@ -71,4 +84,6 @@ class ExportView : View("Zapisz jako") {
         } else pathField.removeFromParent()
         root.scene.window.sizeToScene()
     }
+
+
 }
