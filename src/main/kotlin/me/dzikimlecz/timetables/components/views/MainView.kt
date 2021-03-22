@@ -1,6 +1,8 @@
 package me.dzikimlecz.timetables.components.views
 
 import javafx.scene.control.Button
+import javafx.scene.control.Tab
+import javafx.scene.control.TabPane
 import javafx.scene.layout.Background
 import javafx.scene.layout.BackgroundFill
 import javafx.scene.paint.Color
@@ -32,23 +34,27 @@ class MainView : View(defaultTitle) {
                 }
             }
         }
-    }
-
-    fun displayTable(table: TimeTable?) {
-        root.center = if (table != null){
-            val editor = find<TimeTableEditor>(mapOf(TimeTableEditor::timeTable to table))
-            title = table.name
-            editor.root
-        } else {
-            title = defaultTitle
-            null
+        center {
+            tabpane {
+                selectionModel.selectedItemProperty().addListener { _, _, newValue ->
+                    title = newValue?.text ?: defaultTitle
+                }
+            }
         }
     }
 
-    fun closeTable() = displayTable(null)
+    fun displayTable(table: TimeTable) = with(root.center as TabPane) {
+        val tab = Tab()
+        val editor = find<TimeTableEditor>(mapOf(TimeTableEditor::timeTable to table))
+        tab.content = editor.root
+        tab.text = "${table.name} : ${table.date}"
+        tabs += tab
+        selectionModel.select(tab)
+    }
 
     override fun onBeforeShow() {
         super.onBeforeShow()
-        setWindowMinSize(800, 600)
+        setWindowMinSize(800, 400)
+        primaryStage.isMaximized = true
     }
 }
