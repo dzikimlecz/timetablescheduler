@@ -9,10 +9,12 @@ import javafx.geometry.Rectangle2D
 import javafx.scene.Node
 import javafx.scene.SnapshotParameters
 import javafx.scene.control.Button
+import javafx.scene.control.Tab
 import javafx.scene.layout.*
 import javafx.scene.transform.Transform
 import me.dzikimlecz.timetables.components.fragments.TimeTableEditor.ViewMode.EDIT
 import me.dzikimlecz.timetables.components.fragments.TimeTableEditor.ViewMode.VIEW
+import me.dzikimlecz.timetables.components.views.MainView
 import me.dzikimlecz.timetables.timetable.Cell
 import me.dzikimlecz.timetables.timetable.TimeTable
 import tornadofx.*
@@ -21,7 +23,8 @@ import java.util.stream.Collectors
 import javax.imageio.ImageIO
 
 class TimeTableEditor : Fragment() {
-    val timeTable: TimeTable by param()
+    val timeTable by param<TimeTable>()
+    val tab by param<Tab>()
     private val viewModeProperty = SimpleObjectProperty(VIEW)
     private val editors = ArrayList<ArrayList<CellEditor>>()
 
@@ -59,6 +62,8 @@ class TimeTableEditor : Fragment() {
             for (x in 0 until timeTable.columns)
                 addCell(x, y, timeTable[y][x])
         }
+        tab.content = root
+        tab.text = "${timeTable.name} : ${timeTable.date}"
         initListeners()
     }
 
@@ -240,6 +245,11 @@ class TimeTableEditor : Fragment() {
         tablePane.childrenUnmodifiable.stream()
             .map {it as? StackPane }.forEach { pane -> pane?.children?.removeIf { it is Button } }
         okButton.removeFromParent()
+    }
+
+    fun closePane() {
+        tab.removeFromParent()
+        root.removeFromParent()
     }
 }
 

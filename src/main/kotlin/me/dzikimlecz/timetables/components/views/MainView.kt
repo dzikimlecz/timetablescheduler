@@ -45,9 +45,7 @@ class MainView : View(defaultTitle) {
 
     fun displayTable(table: TimeTable) = with(root.center as TabPane) {
         val tab = Tab()
-        val editor = find<TimeTableEditor>(mapOf(TimeTableEditor::timeTable to table))
-        tab.content = editor.root
-        tab.text = "${table.name} : ${table.date}"
+        find<TimeTableEditor>(mapOf(TimeTableEditor::timeTable to table, TimeTableEditor::tab to tab))
         tabs += tab
         selectionModel.select(tab)
     }

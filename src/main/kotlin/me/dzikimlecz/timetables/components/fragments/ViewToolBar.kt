@@ -27,6 +27,6 @@ class ViewToolBar : TimeTableEditorToolBar()  {
             parentEditor.viewMode = EDIT
         }
         separator()
-        button("Zamknij").setOnAction { find<MainView>().closeTable() }
+        button("Zamknij").setOnAction { parentEditor.closePane() }
     }
 }
