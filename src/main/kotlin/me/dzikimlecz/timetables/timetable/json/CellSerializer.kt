@@ -11,7 +11,7 @@ import me.dzikimlecz.timetables.timetable.Cell
 
 @Serializable
 @SerialName("Cell")
-private data class CellSurrogate(val content: List<String>,
+private class CellSurrogate(val content: List<String>,
                                  val divisionOrientation: Orientation?= null) {
     init { require(content.size in 1..2) }
 }
