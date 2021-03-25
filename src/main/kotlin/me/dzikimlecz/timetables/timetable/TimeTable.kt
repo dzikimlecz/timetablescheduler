@@ -6,9 +6,9 @@ import javafx.collections.ObservableList
 import kotlinx.serialization.Required
 import kotlinx.serialization.Serializable
 import me.dzikimlecz.timetables.timetable.json.TimeTableSerializer
-import java.time.LocalDate
 import tornadofx.getValue
 import tornadofx.setValue
+import java.time.LocalDate
 
 @Serializable(with = TimeTableSerializer::class)
 class TimeTable(
@@ -21,12 +21,6 @@ class TimeTable(
 
     val columnsProperty = SimpleIntegerProperty(0)
     var columns by columnsProperty
-
-    val rowsProperty = SimpleIntegerProperty(0)
-    var rows by rowsProperty
-
-    private val table = FXCollections.observableArrayList<ObservableList<Cell>>()
-
     init {
         columnsProperty.addListener {observable, old, new ->
             val newValue = new.toInt()
@@ -43,6 +37,20 @@ class TimeTable(
                 for (row in table)
                     for (i in 1..diff) row.removeLast()
         }
+    }
+
+    val columnsTimeSpan: ObservableList<TimeSpan> = FXCollections.observableArrayList()
+    init {
+        columnsProperty.addListener { _, _, newVal ->
+            val newValue = newVal.toInt()
+            while(columnsTimeSpan.size > newValue) columnsTimeSpan.removeLast()
+            while(columnsTimeSpan.size < newValue) columnsTimeSpan += null
+        }
+    }
+
+    val rowsProperty = SimpleIntegerProperty(0)
+    var rows by rowsProperty
+    init {
         rowsProperty.addListener { observable, old, new ->
             val newValue = new.toInt()
             val oldValue = old.toInt()
@@ -61,6 +69,11 @@ class TimeTable(
             } else if (diff < 0)
                 for (i in 1..diff) table.removeLast()
         }
+    }
+
+    private val table = FXCollections.observableArrayList<ObservableList<Cell>>()
+
+    init {
         this.columns = columns
         this.rows = rows
     }
