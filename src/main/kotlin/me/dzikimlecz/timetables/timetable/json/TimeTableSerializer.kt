@@ -21,7 +21,7 @@ private data class TimeTableSurrogate(
     val table: List<List<Cell>>,
 ) {
     init {
-        require(table.stream().allMatch {it.size == table[0].size}) {"This list is not a table!"}
+        require(table.stream().allMatch { it.size == table[0].size }) {"This list is not a table!"}
     }
 }
 
@@ -43,13 +43,4 @@ object TimeTableSerializer : KSerializer<TimeTable> {
         timeTable.date = surrogate.date
         return timeTable
     }
-}
-
-class DateSerializer : KSerializer<LocalDate>{
-    override val descriptor: SerialDescriptor = PrimitiveSerialDescriptor("day", PrimitiveKind.STRING)
-
-    override fun deserialize(decoder: Decoder): LocalDate = LocalDate.parse(decoder.decodeString())
-
-    override fun serialize(encoder: Encoder, value: LocalDate) =
-        encoder.encodeString(value.format(DateTimeFormatter.ISO_LOCAL_DATE))
 }
