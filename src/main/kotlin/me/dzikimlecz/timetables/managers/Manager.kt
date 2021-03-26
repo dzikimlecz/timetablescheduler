@@ -1,6 +1,8 @@
 package me.dzikimlecz.timetables.managers
 
+import javafx.embed.swing.SwingFXUtils
 import javafx.scene.control.Alert
+import javafx.scene.image.Image
 import javafx.stage.StageStyle.UTILITY
 import me.dzikimlecz.timetables.components.views.ExportView
 import me.dzikimlecz.timetables.components.views.ImportView
@@ -9,7 +11,9 @@ import me.dzikimlecz.timetables.components.views.TimeTableSetUpView
 import me.dzikimlecz.timetables.timetable.TimeTable
 import tornadofx.alert
 import tornadofx.find
+import java.io.File
 import java.time.LocalDate
+import javax.imageio.ImageIO
 import kotlin.reflect.KProperty1
 
 class Manager {
@@ -87,5 +91,11 @@ class Manager {
         throw IllegalArgumentException("$cause property: $name")
     }
 
+    fun exportTableImage(img: Image, name: String) = Thread {
+        val image = SwingFXUtils.fromFXImage(img, null)
+        val file = File(System.getProperty("defaultExportPath"), "$name.png")
+        if (!file.exists()) file.createNewFile()
+        ImageIO.write(image, "png", file)
+    }.start()
 
 }

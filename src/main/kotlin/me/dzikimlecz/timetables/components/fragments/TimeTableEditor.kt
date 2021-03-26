@@ -1,12 +1,10 @@
 package me.dzikimlecz.timetables.components.fragments
 
 import javafx.beans.property.SimpleObjectProperty
-import javafx.embed.swing.SwingFXUtils
 import javafx.geometry.Insets
 import javafx.geometry.Orientation
 import javafx.geometry.Pos
 import javafx.geometry.Rectangle2D
-import javafx.scene.Node
 import javafx.scene.SnapshotParameters
 import javafx.scene.control.Button
 import javafx.scene.control.Tab
@@ -18,9 +16,9 @@ import me.dzikimlecz.timetables.components.views.MainView
 import me.dzikimlecz.timetables.timetable.Cell
 import me.dzikimlecz.timetables.timetable.TimeTable
 import tornadofx.*
-import java.io.File
 import java.util.stream.Collectors
-import javax.imageio.ImageIO
+
+private const val exportScale = 2.0
 
 class TimeTableEditor : Fragment() {
     val timeTable by param<TimeTable>()
@@ -179,43 +177,28 @@ class TimeTableEditor : Fragment() {
 
     fun exportTable() {
         val params = SnapshotParameters()
-        val scale = 2.0
-        params.transform = Transform.scale(scale, scale)
-        params.viewport = generateViewPort(scale)
+        params.transform = Transform.scale(exportScale, exportScale)
+        params.viewport = generateViewPort()
         val img = tablePane.snapshot(params, null)
-        Thread {
-            val image = SwingFXUtils.fromFXImage(img, null)
-            val file = File(System.getProperty("defaultExportPath"), "${timeTable.name}.png")
-            if (!file.exists()) file.createNewFile()
-            ImageIO.write(image, "png", file)
-        }.start()
+        find<MainView>().manager.exportTableImage(img, timeTable.name)
     }
 
-    private fun generateViewPort(scale: Double) : Rectangle2D {
-        with (tablePane) {
-            val margin = paddingTop.toDouble()
-            var x = 0
-            var y = 0
-            var width = .0
-            var node: Node
-            while (true) {
-                node = get(x++, y) ?: break
-                width += node.boundsInParent.width
-            }
-            x = 0
-            var height = .0
-            while (true) {
-                node = get(x, y++) ?: break
-                height += node.boundsInParent.height
-            }
-
-            return Rectangle2D(
-                boundsInParent.minX * scale - margin,
-                boundsInParent.minY * scale ,
-                width * scale + 3 * margin,
-                height * scale + 3 * margin
-            )
-        }
+    private fun generateViewPort() = with(tablePane) {
+        val margin = paddingTop.toDouble()
+        var x = 0
+        var width = .0
+        while (true)
+            width += get(x++, 0)?.boundsInParent?.width ?: break
+        var y = 0
+        var height = .0
+        while (true)
+            height += get(0, y++)?.boundsInParent?.width ?: break
+        Rectangle2D(
+            boundsInParent.minX * exportScale - margin,
+            boundsInParent.minY * exportScale,
+            width * exportScale + 3 * margin,
+            height * exportScale + 3 * margin
+        )
     }
 
     private fun handleCellsOverlayingAction(action: Cell.() -> Unit) {
