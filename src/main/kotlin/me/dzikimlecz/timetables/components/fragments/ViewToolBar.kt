@@ -11,7 +11,7 @@ class ViewToolBar : TimeTableEditorToolBar()  {
     override val root = toolbar {
         button("Zapisz") {
             action {
-                find<MainView>().manager.exportTable()
+                find<MainView>().manager.saveTable()
             }
         }
         button("Zapisz jako") {

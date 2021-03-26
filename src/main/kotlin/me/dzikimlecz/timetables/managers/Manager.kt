@@ -34,7 +34,7 @@ class Manager {
         return lastTable
     }
 
-    fun exportTable() = try { filesManager.saveTable(lastTable) }
+    fun saveTable() = try { filesManager.saveTable(lastTable) }
         catch (e: FileAlreadyExistsException) { describedExport() }
 
 

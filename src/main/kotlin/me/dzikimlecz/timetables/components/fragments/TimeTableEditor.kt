@@ -46,6 +46,16 @@ class TimeTableEditor : Fragment() {
         top = viewToolBar.root
         center {
             tablePane = gridpane {
+                row {
+                    for (i in 0 until timeTable.rows) label {
+                        text = timeTable.columnsTimeSpan[i]?.toString() ?: "-/-"
+                        alignment = Pos.CENTER
+                        maxWidthProperty().bind(
+                            this@gridpane.maxWidthProperty() / timeTable.columnsProperty
+                        )
+                        maxHeight = 20.0
+                    }
+                }
                 maxWidthProperty().bind(primaryStage.widthProperty() - 230)
                 maxHeightProperty().bind(primaryStage.heightProperty() - 230)
                 paddingTop = 20
@@ -112,13 +122,17 @@ class TimeTableEditor : Fragment() {
         editors[y].add(editor)
         with(tablePane) {
             stackpane {
-                maxWidthProperty().bind(tablePane.maxWidthProperty() / timeTable.columnsProperty)
-                maxHeightProperty().bind(tablePane.maxHeightProperty() / timeTable.rowsProperty)
+                maxWidthProperty().bind(
+                    tablePane.maxWidthProperty() / timeTable.columnsProperty
+                )
+                maxHeightProperty().bind(
+                    (tablePane.maxHeightProperty() - 20) / timeTable.rowsProperty
+                )
                 prefWidthProperty().bind(maxWidthProperty())
                 this += editor.root
                 editor.root.maxWidthProperty().bind(maxWidthProperty())
                 editor.root.maxHeightProperty().bind(maxHeightProperty())
-                gridpaneConstraints { columnRowIndex(x, y) }
+                gridpaneConstraints { columnRowIndex(x, y + 1) }
             }
         }
         editor.refreshView(viewMode)
