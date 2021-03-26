@@ -86,6 +86,32 @@ class TimeTable(
     override fun iterator() : Iterator<ObservableList<Cell>> = table.iterator()
 
     fun list(): List<List<Cell>> = table.toList()
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (other !is TimeTable) return false
+
+        if (date != other.date) return false
+        if (name != other.name) return false
+        if (columns != other.columns) return false
+        if (columnsTimeSpan != other.columnsTimeSpan) return false
+        if (rows != other.rows) return false
+        if (table != other.table) return false
+
+        return true
+    }
+
+    override fun hashCode(): Int {
+        var result = date.hashCode()
+        result = 31 * result + name.hashCode()
+        result = 31 * result + columnsTimeSpan.hashCode()
+        result = 31 * result + (table?.hashCode() ?: 0)
+        return result
+    }
+
+    fun softEquals(other: Any?) =
+        this === other || (other is TimeTable && other.name == name && other.date == date)
+
 }
 
 fun timeTableOf(table: List<List<Cell>>) : TimeTable {
