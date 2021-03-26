@@ -1,9 +1,11 @@
 package me.dzikimlecz.timetables.components.fragments
 
-import javafx.scene.Parent
-import me.dzikimlecz.timetables.components.fragments.TimeTableEditor.ViewMode.*
+import me.dzikimlecz.timetables.components.fragments.TimeTableEditor.ViewMode.EDIT
 import me.dzikimlecz.timetables.components.views.MainView
-import tornadofx.*
+import tornadofx.action
+import tornadofx.button
+import tornadofx.separator
+import tornadofx.toolbar
 
 class ViewToolBar : TimeTableEditorToolBar()  {
     override val root = toolbar {

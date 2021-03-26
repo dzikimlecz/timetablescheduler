@@ -11,7 +11,6 @@ import me.dzikimlecz.timetables.managers.Manager
 import me.dzikimlecz.timetables.timetable.TimeTable
 import tornadofx.*
 
-
 private const val defaultTitle = "Układacz planów 3tysionce !!!"
 
 class MainView : View(defaultTitle) {
