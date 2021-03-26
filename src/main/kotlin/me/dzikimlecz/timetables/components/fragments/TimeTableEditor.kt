@@ -10,8 +10,8 @@ import javafx.scene.control.Button
 import javafx.scene.control.Tab
 import javafx.scene.layout.*
 import javafx.scene.transform.Transform
-import me.dzikimlecz.timetables.components.fragments.TimeTableEditor.ViewMode.EDIT
-import me.dzikimlecz.timetables.components.fragments.TimeTableEditor.ViewMode.VIEW
+import me.dzikimlecz.timetables.components.fragments.TimeTableEditor.Companion.ViewMode.EDIT
+import me.dzikimlecz.timetables.components.fragments.TimeTableEditor.Companion.ViewMode.VIEW
 import me.dzikimlecz.timetables.components.views.MainView
 import me.dzikimlecz.timetables.timetable.Cell
 import me.dzikimlecz.timetables.timetable.TimeTable
@@ -82,36 +82,49 @@ class TimeTableEditor : Fragment() {
             removeOverlayFromCells()
         }
 
-        timeTable.rowsProperty.addListener { _, oldValue, newValue ->
-            val delta = newValue.toInt() - oldValue.toInt()
-            if (delta < 0) for (i in delta until 0) {
-                val lastY = editors.size - 1
-                for (x in 0 until editors[lastY].size) tablePane.remove(x, lastY)
-                editors.last().forEach { it.cell.clean() }
-                editors.removeLast()
-            }
-            else for (i in 0 until delta) {
+        timeTable.rowsProperty.addListener { _, _, newVal ->
+            val newValue = newVal.toInt()
+            for (i in editors.size until newValue) {
                 editors.add(ArrayList())
                 for (x in 0 until timeTable.columns) {
                     val y = editors.size - 1
                     addCell(x, y, timeTable[y][x])
                 }
             }
+            while (editors.size > newValue) {
+                tablePane.removeRow(tablePane.get(editors.last().size - 1, editors.size)!!)
+                editors.last().forEach { it.cell.clean() }
+                editors.removeLast()
+            }
         }
 
-        timeTable.columnsProperty.addListener { _, oldValue, newValue ->
-            val oldVal = oldValue.toInt()
-            val newVal = newValue.toInt()
-            val delta = newVal - oldVal
-            if (delta < 0) for ((i, row) in editors.withIndex())
-                for (j in delta until 0) {
+        timeTable.columnsProperty.addListener { _, _, newVal ->
+            val newValue = newVal.toInt()
+            while (editors.last().size < newValue) {
+                for (y in 0 until editors.size)
+                    addCell(editors.last().size, y, timeTable[y][editors.last().size])
+                with(tablePane) {
+                    label {
+                        val columnIndex = editors.first().size - 1
+                        text = timeTable.columnsTimeSpan[columnIndex]?.toString() ?:
+                        "-/-"
+                        alignment = Pos.CENTER
+                        maxWidthProperty().bind(
+                            tablePane.maxWidthProperty() / timeTable.columnsProperty
+                        )
+                        maxHeight = 20.0
+                        gridpaneConstraints { columnRowIndex(columnIndex, 0) }
+                    }
+                }
+            }
+            while (editors.last().size > newValue) {
+                tablePane.remove(editors.last().size - 1, 0)
+                for ((y, row) in editors.withIndex()) {
+                    tablePane.remove(editors.last().size - 1, y + 1)
                     row.last().cell.clean()
                     row.removeLast()
-                    tablePane.remove(oldVal + delta, i)
                 }
-            else for (y in editors.indices)
-                for (x in oldVal until newVal)
-                    addCell(x, y, timeTable[y][x])
+            }
         }
     }
 
@@ -148,7 +161,7 @@ class TimeTableEditor : Fragment() {
                 val rowIndex = GridPane.getRowIndex(button.parent)
                 for ((index, editor) in editors[rowIndex].withIndex()) {
                     editor.cell.clean()
-                    (tablePane.get(index, rowIndex) as? StackPane)?.children
+                    (tablePane.get(index, rowIndex + 1) as? StackPane)?.children
                         ?.removeIf { it is Button }
                 }
                 button.removeFromParent()
@@ -163,7 +176,7 @@ class TimeTableEditor : Fragment() {
                 val columnIndex = GridPane.getColumnIndex(button.parent)
                 for (row in 0 until editors.size) {
                     editors[row][columnIndex].cell.clean()
-                    (tablePane.get(columnIndex, row) as? StackPane)?.children
+                    (tablePane.get(columnIndex, row + 1) as? StackPane)?.children
                         ?.removeIf { it is Button }
                 }
                 button.removeFromParent()
@@ -215,7 +228,7 @@ class TimeTableEditor : Fragment() {
             .filter { it is StackPane }.map {it as StackPane }.collect(Collectors.toList())
         val buttons = mutableMapOf<Button, CellEditor>()
         for (pane in editorPanes) {
-            val location = GridPane.getRowIndex(pane) to GridPane.getColumnIndex(pane)
+            val location = GridPane.getRowIndex(pane) - 1 to GridPane.getColumnIndex(pane)
             val editor = editors[location.first][location.second]
             with(pane) {
                 this += button {
