@@ -2,7 +2,11 @@ package me.dzikimlecz.timetables.components.fragments
 
 import javafx.application.Platform
 import javafx.geometry.Orientation
-import me.dzikimlecz.timetables.components.fragments.TimeTableEditor.ViewMode.VIEW
+import javafx.scene.control.ChoiceBox
+import me.dzikimlecz.timetables.components.fragments.EditToolBar.Companion.Applicable.*
+import me.dzikimlecz.timetables.components.fragments.EditToolBar.Companion.ChangedValue.*
+import me.dzikimlecz.timetables.components.fragments.EditToolBar.Companion.ChangedValue.Companion.toChangedValue
+import me.dzikimlecz.timetables.components.fragments.TimeTableEditor.Companion.ViewMode.VIEW
 import me.dzikimlecz.timetables.components.views.DetailsView
 import tornadofx.*
 
@@ -10,82 +14,39 @@ class EditToolBar : TimeTableEditorToolBar() {
 
     override val root = toolbar {
 
-        button("Zatwierdź") {
-            action { parentEditor.viewMode = VIEW }
-        }
+        button("Zatwierdź").setOnAction { parentEditor.viewMode = VIEW }
+
         separator()
 
-        stackpane {
-            val box = choicebox<String> {
-                isVisible = false
-                val addKey = "Dodaj"
-                val removeKey = "Usuń"
-                val cleanKey = "Wyczyść"
-                val detailsKey = "Więcej"
-                items.addAll(addKey, removeKey, cleanKey, detailsKey)
-                setOnAction {
-                    when (value) {
-                        addKey -> parentEditor.timeTable.rows++
-                        removeKey -> parentEditor.timeTable.rows--
-                        cleanKey -> parentEditor.cleanRows()
-                        detailsKey -> showDetails()
-                    }
-
-                    Platform.runLater { isVisible = false; value = null }
-                }
+        this += pane(ROW) {
+            when (value.toChangedValue()) {
+                ADD -> parentEditor.timeTable.rows++
+                REMOVE -> parentEditor.timeTable.rows--
+                CLEAN -> parentEditor.cleanRows()
+                DETAILS -> showDetails()
+                else -> {}
             }
-            val label = button("Rzędy") {
-                action { box.isVisible = true; box.show() }
-            }
-            box.prefWidthProperty().bind(label.widthProperty())
         }
 
-        stackpane {
-            val box = choicebox<String> {
-                isVisible = false
-                val addKey = "Dodaj"
-                val removeKey = "Usuń"
-                val cleanKey = "Wyczyść"
-                val detailsKey = "Więcej"
-                items.addAll(addKey, removeKey, cleanKey, detailsKey)
-                setOnAction {
-                    when (value) {
-                        addKey -> parentEditor.timeTable.columns++
-                        removeKey -> parentEditor.timeTable.columns--
-                        cleanKey -> parentEditor.cleanColumns()
-                        detailsKey -> showDetails()
-                    }
-
-                    Platform.runLater { isVisible = false; value = null }
-                }
+        this += pane(COLUMN) {
+            when (value.toChangedValue()) {
+                ADD -> parentEditor.timeTable.columns++
+                REMOVE -> parentEditor.timeTable.columns--
+                CLEAN -> parentEditor.cleanColumns()
+                DETAILS -> showDetails()
+                else -> {}
             }
-            val label = button("Kolumny") {
-                action { box.isVisible = true; box.show() }
-            }
-            box.prefWidthProperty().bind(label.widthProperty())
         }
 
-        stackpane {
-            val box = choicebox<String> {
-                isVisible = false
-                val cleanKey = "Wyczyść"
-                val horizontalDivideKey = "Podziel w pionie"
-                val verticalDivideKey = "Podziel w poziomie"
-                items.addAll(cleanKey, horizontalDivideKey, verticalDivideKey)
-                setOnAction {
-                    when (value) {
-                        cleanKey -> parentEditor.cleanCells()
-                        horizontalDivideKey -> parentEditor.divideCells(Orientation.HORIZONTAL)
-                        verticalDivideKey -> parentEditor.divideCells(Orientation.VERTICAL)
-                    }
-                    Platform.runLater { isVisible = false; value = null }
-                }
+        this += pane(CELL) {
+            when (value.toChangedValue()) {
+                CLEAN -> parentEditor.cleanCells()
+                HORIZONTAL_DIVIDE -> parentEditor.divideCells(Orientation.HORIZONTAL)
+                VERTICAL_DIVIDE -> parentEditor.divideCells(Orientation.VERTICAL)
+                else -> {}
             }
-            val label = button("Komórki") {
-                action { box.isVisible = true; box.show() }
-            }
-            box.prefWidthProperty().bind(label.widthProperty())
         }
+
         separator()
 
         button("Szczegóły planu").setOnAction { showDetails() }
@@ -95,5 +56,50 @@ class EditToolBar : TimeTableEditorToolBar() {
         parentEditor.openInternalWindow<DetailsView>(
             params = mapOf(DetailsView::table to parentEditor.timeTable)
         )
+    }
+
+    private fun pane(applicable: Applicable, eventHandler: ChoiceBox<String>.() -> Unit) = stackpane {
+        val box = choicebox<String> {
+            isVisible = false
+            val values = ChangedValue.values().filter { it.applicable.contains(applicable) }
+            items.addAll(values.map { it.translation })
+
+            setOnAction {
+                Platform.runLater { eventHandler(); isVisible = false; value = null }
+            }
+        }
+
+        val label = button(applicable.translation) {
+            action { box.isVisible = true; box.show() }
+        }
+        box.prefWidthProperty().bind(label.widthProperty())
+    }
+
+
+    companion object {
+        private enum class ChangedValue(
+            val translation: String,
+            vararg val applicable: Applicable,
+        ) {
+            ADD("Dodaj", ROW, COLUMN),
+            REMOVE("Usuń", ROW, COLUMN),
+            CLEAN("Wyczyść", CELL, ROW, COLUMN),
+            DETAILS("Więcej", CELL, ROW, COLUMN),
+            TIME_SPANS("Czas trwania zajęć", COLUMN),
+            HORIZONTAL_DIVIDE("Podziel w pionie", CELL),
+            VERTICAL_DIVIDE("Podziel w poziomie", CELL);
+
+            companion object {
+                fun String?.toChangedValue() = try {
+                    values().filter { it.translation == this }[0]
+                } catch (e: Exception) { null }
+            }
+        }
+
+        private enum class Applicable(val translation: String) {
+            CELL("Komórki"),
+            ROW("Rzędy"),
+            COLUMN("Kolumny"),
+        }
     }
 }
