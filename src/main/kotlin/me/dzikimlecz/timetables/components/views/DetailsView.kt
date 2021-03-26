@@ -25,8 +25,8 @@ class DetailsView : View("Szczegóły Planu") {
                     value = LocalDate.now()
                     valueProperty().addListener {_, _, newValue ->
                         tableProperties[TimeTable::date] = newValue.format(ISO_LOCAL_DATE)
-
                     }
+                    editor.isEditable = false
                 }
             }
             field("Kolumny") {
@@ -35,6 +35,7 @@ class DetailsView : View("Szczegóły Planu") {
                     textProperty().addListener { _, _, newValue ->
                         tableProperties[TimeTable::columns] = newValue
                     }
+                    filterContent()
                 }
             }
             field("Rzędy") {
@@ -43,6 +44,7 @@ class DetailsView : View("Szczegóły Planu") {
                     textProperty().addListener { _, _, newValue ->
                         tableProperties[TimeTable::rows] = newValue
                     }
+                    filterContent()
                 }
             }
             buttonbar {
