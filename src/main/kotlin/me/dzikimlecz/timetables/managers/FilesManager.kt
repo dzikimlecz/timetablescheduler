@@ -36,7 +36,8 @@ class FilesManager(
         enforce: Boolean = false,
         name: String? = null,
     ) {
-        val file = if (name !== null) File(path, name) else getProperFile(timeTable, path)
+        val file =
+            if (name !== null) File(path, name) else getProperFile(this, timeTable, path)
         val resultStatus = if (file.exists()) checkIdentity(file, timeTable)
         else serialize(timeTable, file)
         when (resultStatus) {
@@ -65,23 +66,6 @@ class FilesManager(
         }
     }
 
-    private fun checkIdentity(file: File, timeTable: TimeTable) : Int {
-        require(file.exists())
-        if (!file.canRead()) return if (file.canWrite()) 2 else -1
-        val serialized = file.readText()
-        val table = Json.decodeFromString(TimeTable.serializer(), serialized)
-        return if (table.name.equals(timeTable.name, true) ||
-            table.date == timeTable.date
-        ) 1 else 2
-    }
-
-    fun getProperFile(table: TimeTable, path: String = defaultSavePath) =
-        File(path,
-            table.name +
-                table.date.format(DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT))
-                .replace(Regex("[:.]"), "-")
-         + ".json")
-
 
     fun readTable(file: File) : TimeTable {
         if (!file.exists()) throw FileNotFoundException("Plik \"$file\" nie istnieje.")
@@ -98,15 +82,34 @@ class FilesManager(
         return readTable(file)
     }
 
-    fun refreshJsonFiles(path : String = defaultSavePath) {
+    fun refreshJsonFiles() {
         files.addAll(
-            Files.walk(Paths.get(path)).filter { Files.isRegularFile(it) && Files.isReadable(it) }
+            Files.walk(Paths.get(defaultSavePath)).filter { Files.isRegularFile(it) && Files.isReadable(it) }
                 .map { it.toFile() }
         .filter { it.toString().endsWith(".json") }.filter { files.stream().noneMatch {
                     file -> file.name == it.name } }.toList())
         files.sortByDescending { it.lastModified() }
     }
 
+    companion object {
+        private fun checkIdentity(file: File, timeTable: TimeTable) : Int {
+            require(file.exists())
+            if (!file.canRead()) return if (file.canWrite()) 2 else -1
+            val serialized = file.readText()
+            val table = Json.decodeFromString(TimeTable.serializer(), serialized)
+            return if (table.softEquals(timeTable)) 1 else 2
+        }
+
+        private fun getProperFile(
+            filesManager: FilesManager,
+            table: TimeTable,
+            path: String = filesManager.defaultSavePath
+        ) = File(path,
+            table.name + "_" + table.date
+                .format(DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT))
+                .replace(Regex("[:.]"), "-") + ".json"
+        )
+    }
 
 
 }

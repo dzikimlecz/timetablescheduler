@@ -72,11 +72,10 @@ class TimeTableSetUpView : View("Nowy Plan") {
         }
     }
 
-    private fun TextField.filterContent() {
-        textFormatter = TextFormatter<String> {
-            if (it.text.matches(Regex("\\D")) || this.text.length >= 2)
-                it.text = ""
-            it
-        }
-    }
 }
+
+fun TextField.filterContent() = TextFormatter<String> {
+        if (it.text.matches(Regex("\\D")) || this.text.length >= 2)
+            it.text = ""
+        it
+    }.also { textFormatter = it }

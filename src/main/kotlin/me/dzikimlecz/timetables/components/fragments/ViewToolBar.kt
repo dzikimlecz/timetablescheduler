@@ -1,6 +1,6 @@
 package me.dzikimlecz.timetables.components.fragments
 
-import me.dzikimlecz.timetables.components.fragments.TimeTableEditor.ViewMode.EDIT
+import me.dzikimlecz.timetables.components.fragments.TimeTableEditor.Companion.ViewMode.EDIT
 import me.dzikimlecz.timetables.components.views.MainView
 import tornadofx.action
 import tornadofx.button

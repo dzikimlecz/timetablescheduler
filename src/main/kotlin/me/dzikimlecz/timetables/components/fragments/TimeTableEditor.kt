@@ -136,10 +136,6 @@ class TimeTableEditor : Fragment() {
         editor.refreshView(viewMode)
     }
 
-    enum class ViewMode {
-        EDIT, VIEW
-    }
-
     fun cleanCells() = handleCellsOverlayingAction { clean() }
 
     fun divideCells(direction: Orientation) =
@@ -247,6 +243,12 @@ class TimeTableEditor : Fragment() {
     fun closePane() {
         tab.removeFromParent()
         root.removeFromParent()
+    }
+
+    companion object {
+        enum class ViewMode {
+            EDIT, VIEW
+        }
     }
 }
 

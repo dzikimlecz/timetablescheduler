@@ -1,19 +1,17 @@
 package me.dzikimlecz.timetables.components.fragments
 
 import javafx.beans.property.ObjectProperty
-import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.geometry.Orientation
 import javafx.scene.Node
 import javafx.scene.control.Control
 import javafx.scene.control.Label
 import javafx.scene.paint.Color
-import me.dzikimlecz.timetables.components.fragments.TimeTableEditor.ViewMode
-import me.dzikimlecz.timetables.components.fragments.TimeTableEditor.ViewMode.VIEW
+import me.dzikimlecz.timetables.components.fragments.TimeTableEditor.Companion.ViewMode
+import me.dzikimlecz.timetables.components.fragments.TimeTableEditor.Companion.ViewMode.VIEW
 import me.dzikimlecz.timetables.timetable.Cell
 import tornadofx.*
 import tornadofx.Dimension.LinearUnits.px
-import java.lang.Double.max
 
 class CellEditor : Fragment() {
     val cell: Cell by param()
