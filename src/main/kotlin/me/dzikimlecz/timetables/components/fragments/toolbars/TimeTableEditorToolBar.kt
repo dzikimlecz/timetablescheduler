@@ -1,6 +1,7 @@
-package me.dzikimlecz.timetables.components.fragments
+package me.dzikimlecz.timetables.components.fragments.toolbars
 
 import javafx.scene.control.ToolBar
+import me.dzikimlecz.timetables.components.fragments.TimeTableEditor
 import tornadofx.Fragment
 
 abstract class TimeTableEditorToolBar : Fragment() {

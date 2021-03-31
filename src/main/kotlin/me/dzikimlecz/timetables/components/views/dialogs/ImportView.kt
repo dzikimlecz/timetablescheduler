@@ -1,12 +1,12 @@
-package me.dzikimlecz.timetables.components.views
+package me.dzikimlecz.timetables.components.views.dialogs
 
 
 import javafx.scene.control.*
 import javafx.stage.FileChooser
-import me.dzikimlecz.timetables.managers.FilesManager
-import java.io.File
 import javafx.util.Callback
+import me.dzikimlecz.timetables.managers.FilesManager
 import tornadofx.*
+import java.io.File
 
 class ImportView : View("Otwórz") {
     private var file: File? = null

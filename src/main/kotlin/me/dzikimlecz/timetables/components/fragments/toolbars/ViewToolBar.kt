@@ -1,4 +1,4 @@
-package me.dzikimlecz.timetables.components.fragments
+package me.dzikimlecz.timetables.components.fragments.toolbars
 
 import me.dzikimlecz.timetables.components.fragments.TimeTableEditor.Companion.ViewMode.EDIT
 import me.dzikimlecz.timetables.components.views.MainView

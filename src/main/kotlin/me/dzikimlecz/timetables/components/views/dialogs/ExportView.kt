@@ -1,7 +1,6 @@
-package me.dzikimlecz.timetables.components.views
+package me.dzikimlecz.timetables.components.views.dialogs
 
 import javafx.scene.control.CheckBox
-import javafx.scene.control.TextField
 import tornadofx.*
 import java.io.File
 

@@ -1,4 +1,4 @@
-package me.dzikimlecz.timetables.components.fragments
+package me.dzikimlecz.timetables.components.fragments.toolbars
 
 import javafx.application.Platform
 import javafx.geometry.Orientation

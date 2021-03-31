@@ -1,4 +1,4 @@
-package me.dzikimlecz.timetables.components.views
+package me.dzikimlecz.timetables.components.views.dialogs
 
 import me.dzikimlecz.timetables.timetable.TimeTable
 import tornadofx.*
