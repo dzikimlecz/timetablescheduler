@@ -4,10 +4,10 @@ import javafx.embed.swing.SwingFXUtils
 import javafx.scene.control.Alert
 import javafx.scene.image.Image
 import javafx.stage.StageStyle.UTILITY
-import me.dzikimlecz.timetables.components.views.ExportView
-import me.dzikimlecz.timetables.components.views.ImportView
 import me.dzikimlecz.timetables.components.views.MainView
-import me.dzikimlecz.timetables.components.views.TimeTableSetUpView
+import me.dzikimlecz.timetables.components.views.dialogs.ExportView
+import me.dzikimlecz.timetables.components.views.dialogs.ImportView
+import me.dzikimlecz.timetables.components.views.dialogs.TimeTableSetUpView
 import me.dzikimlecz.timetables.timetable.TimeTable
 import tornadofx.alert
 import tornadofx.find
@@ -79,14 +79,17 @@ class Manager {
         val map = mutableMapOf<KProperty1<TimeTable, Any>, String>()
         find<TimeTableSetUpView>(params = mapOf(TimeTableSetUpView::tableProperties to map))
             .openModal(UTILITY, resizable = false, block = true)
-        try { find<MainView>().displayTable(newTable(map)) } catch (ignore : Exception) {}
+        try { find<MainView>().displayTable(newTable(map)) } catch (e: Exception) {
+            alert(Alert.AlertType.ERROR,"Błąd", e.message)
+            e.printStackTrace()
+        }
     }
 
     fun openDB() {
         TODO("Not yet implemented")
     }
 
-    private val badProperty = { name : String, missing: Boolean ->
+    private fun badProperty(name: String, missing: Boolean): Nothing {
         val cause = if (missing) "Missing" else "Wrongly formatted"
         throw IllegalArgumentException("$cause property: $name")
     }
