@@ -39,12 +39,12 @@ class TimeTable(
         }
     }
 
-    val columnsTimeSpan: ObservableList<TimeSpan> = FXCollections.observableArrayList()
+    val columnsTimeSpan: ObservableList<Array<TimeSpan?>> = FXCollections.observableArrayList()
     init {
         columnsProperty.addListener { _, _, newVal ->
             val newValue = newVal.toInt()
             while(columnsTimeSpan.size > newValue) columnsTimeSpan.removeLast()
-            while(columnsTimeSpan.size < newValue) columnsTimeSpan += null
+            while(columnsTimeSpan.size < newValue) columnsTimeSpan.add(arrayOf(null, null))
         }
     }
 
@@ -85,7 +85,8 @@ class TimeTable(
 
     override fun iterator() : Iterator<ObservableList<Cell>> = table.iterator()
 
-    fun list(): List<List<Cell>> = table.toList()
+    val list: List<List<Cell>>
+        get() = table.toList()
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
