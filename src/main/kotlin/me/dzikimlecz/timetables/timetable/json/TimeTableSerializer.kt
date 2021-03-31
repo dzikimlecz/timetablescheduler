@@ -20,7 +20,7 @@ private class TimeTableSurrogate(
     @Serializable(with = DateSerializer::class) val date: LocalDate,
     @Required val name: String = "",
     val table: List<List<Cell>>,
-    val timeSpans : List<TimeSpan>?= null
+    val timeSpans : List<Array<TimeSpan?>>?= null
 ) {
     init {
         require(table.stream().allMatch { it.size == table[0].size }) {"This list is not a table!"}
@@ -34,7 +34,7 @@ object TimeTableSerializer : KSerializer<TimeTable> {
         val name = value.name.ifBlank { value.date.format(DateTimeFormatter.ISO_DATE) }
         encoder.encodeSerializableValue(
             TimeTableSurrogate.serializer(),
-            TimeTableSurrogate(value.date, name, value.list(), value.columnsTimeSpan)
+            TimeTableSurrogate(value.date, name, value.list, value.columnsTimeSpan)
         )
     }
 
