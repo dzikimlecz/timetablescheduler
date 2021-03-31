@@ -1,8 +1,7 @@
-package me.dzikimlecz.timetables.components.views
+package me.dzikimlecz.timetables.components.views.dialogs
 
 import javafx.scene.control.DatePicker
 import javafx.scene.control.TextField
-import javafx.scene.control.TextFormatter
 import javafx.scene.text.Font
 import me.dzikimlecz.timetables.timetable.TimeTable
 import tornadofx.*
@@ -31,7 +30,7 @@ class TimeTableSetUpView : View("Nowy Plan") {
             }
             field("Data Początku Planu") {
                 label.font = bigFont
-                datePicker = datepicker() {
+                datePicker = datepicker {
                     value = LocalDate.now()
                 }
             }
@@ -61,21 +60,22 @@ class TimeTableSetUpView : View("Nowy Plan") {
             action {
                 tableProperties[TimeTable::name] = nameField.text.ifBlank { nameField.promptText }
                 tableProperties[TimeTable::rows] = rowsField.text.ifBlank { rowsField.promptText }
-                tableProperties[TimeTable::columns] = columnsField.text.ifBlank { columnsField
-                    .promptText }
-                tableProperties[TimeTable::date] = datePicker.value.format(DateTimeFormatter
-                    .ISO_LOCAL_DATE)
+                tableProperties[TimeTable::columns] = columnsField.text.ifBlank {
+                    columnsField.promptText
+                }
+                tableProperties[TimeTable::date] =
+                    datePicker.value.format(DateTimeFormatter.ISO_LOCAL_DATE)
                 close()
-                listOf(nameField, rowsField, columnsField).forEach { it.clear() }
-                datePicker.value = LocalDate.now()
             }
         }
     }
 
+    override fun onBeforeShow() = try {
+        listOf(nameField, rowsField, columnsField).forEach { it.clear() }
+        datePicker.value = LocalDate.now()
+    } catch(_: Exception) {}
 }
 
-fun TextField.filterContent() = TextFormatter<String> {
-        if (it.text.matches(Regex("\\D")) || this.text.length >= 2)
-            it.text = ""
-        it
-    }.also { textFormatter = it }
+fun TextField.filterContent() = filterInput {
+    it.controlNewText.isInt() && it.text.length + text.length <= 2
+}
