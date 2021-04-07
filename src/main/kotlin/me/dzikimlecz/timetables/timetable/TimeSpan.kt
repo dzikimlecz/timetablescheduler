@@ -22,7 +22,7 @@ class TimeSpan private constructor(@Serializable(with = TimeSerializer::class) v
         private val separator = Regex("[:;,.-]")
         val pattern = Regex("\\d{1,2}[:;,.-]\\d{2}")
 
-        @JvmStatic private val spans = mutableSetOf<TimeSpan>()
+        private val spans = mutableSetOf<TimeSpan>()
 
         @JvmStatic fun of(start: LocalTime, end: LocalTime): TimeSpan = try {
             spans.first { it.start == start && it.end == end }
