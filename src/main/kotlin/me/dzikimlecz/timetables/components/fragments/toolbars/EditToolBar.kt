@@ -3,11 +3,11 @@ package me.dzikimlecz.timetables.components.fragments.toolbars
 import javafx.application.Platform
 import javafx.geometry.Orientation
 import javafx.scene.control.ChoiceBox
-import me.dzikimlecz.timetables.components.fragments.EditToolBar.Companion.Applicable.*
-import me.dzikimlecz.timetables.components.fragments.EditToolBar.Companion.ChangedValue.*
-import me.dzikimlecz.timetables.components.fragments.EditToolBar.Companion.ChangedValue.Companion.toChangedValue
 import me.dzikimlecz.timetables.components.fragments.TimeTableEditor.Companion.ViewMode.VIEW
-import me.dzikimlecz.timetables.components.views.DetailsView
+import me.dzikimlecz.timetables.components.fragments.toolbars.EditToolBar.Companion.Applicable.*
+import me.dzikimlecz.timetables.components.fragments.toolbars.EditToolBar.Companion.ChangedValue.*
+import me.dzikimlecz.timetables.components.fragments.toolbars.EditToolBar.Companion.ChangedValue.Companion.toChangedValue
+import me.dzikimlecz.timetables.components.views.dialogs.DetailsView
 import tornadofx.*
 
 class EditToolBar : TimeTableEditorToolBar() {
@@ -34,6 +34,7 @@ class EditToolBar : TimeTableEditorToolBar() {
                 REMOVE -> parentEditor.timeTable.columns--
                 CLEAN -> parentEditor.cleanColumns()
                 DETAILS -> showDetails()
+                TIME_SPANS -> parentEditor.adjustTimeSpans()
                 else -> {}
             }
         }
@@ -52,11 +53,10 @@ class EditToolBar : TimeTableEditorToolBar() {
         button("Szczegóły planu").setOnAction { showDetails() }
     }
 
-    private fun showDetails() {
-        parentEditor.openInternalWindow<DetailsView>(
-            params = mapOf(DetailsView::table to parentEditor.timeTable)
-        )
-    }
+    private fun showDetails() = parentEditor.openInternalWindow<DetailsView>(
+        params = mapOf(DetailsView::table to parentEditor.timeTable)
+    )
+
 
     private fun pane(applicable: Applicable, eventHandler: ChoiceBox<String>.() -> Unit) = stackpane {
         val box = choicebox<String> {
