@@ -24,13 +24,12 @@ class TimeSpan private constructor(@Serializable(with = TimeSerializer::class) v
 
         @JvmStatic private val spans = mutableSetOf<TimeSpan>()
 
-        @JvmStatic fun of(start: LocalTime, end: LocalTime): TimeSpan {
-            val filtered = spans.filter { it.start == start }.filter { it.end == end }
-            if (filtered.isNotEmpty())
-                return filtered[0]
+        @JvmStatic fun of(start: LocalTime, end: LocalTime): TimeSpan = try {
+            spans.first { it.start == start && it.end == end }
+        } catch(e: NoSuchElementException) {
             val newTimeSpan = TimeSpan(start, end)
             spans += newTimeSpan
-            return newTimeSpan
+            newTimeSpan
         }
 
 
