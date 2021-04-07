@@ -32,6 +32,26 @@ class TimeSpan private constructor(@Serializable(with = TimeSerializer::class) v
             newTimeSpan
         }
 
+        @JvmStatic fun of(start: String, end: String): TimeSpan {
+            if (!pattern.matches(start))
+                throw IllegalArgumentException("\"$start\" doesn't match TimeSpan pattern")
+            if (!pattern.matches(end))
+                throw IllegalArgumentException("\"$end\" doesn't match TimeSpan pattern")
+
+            val startISO = StringBuilder(start)
+            val endISO = StringBuilder(end)
+
+            if (start.length == 4) startISO.insert(0, '0')
+            if (end.length == 4) endISO.insert(0, '0')
+
+            startISO[2] = ':'
+            endISO[2] = ':'
+
+            return try { of(LocalTime.parse(startISO), LocalTime.parse(endISO)) }
+            catch(e: Exception) {
+                throw IllegalArgumentException("TimeSpan could not be created", e)
+            }
+        }
 
         fun validate(st: String) = pattern.matches(st)
 
