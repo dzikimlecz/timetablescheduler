@@ -5,7 +5,6 @@ import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import kotlinx.serialization.Required
 import kotlinx.serialization.Serializable
-import me.dzikimlecz.timetables.timetable.json.TimeTableSerializer
 import tornadofx.getValue
 import tornadofx.setValue
 import java.time.LocalDate

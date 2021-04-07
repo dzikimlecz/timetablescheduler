@@ -1,7 +1,6 @@
 package me.dzikimlecz.timetables.timetable
 
 import kotlinx.serialization.Serializable
-import me.dzikimlecz.timetables.timetable.json.TimeSerializer
 import tornadofx.isInt
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter

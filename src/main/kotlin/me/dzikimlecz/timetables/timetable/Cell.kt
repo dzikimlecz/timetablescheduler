@@ -5,7 +5,6 @@ import javafx.beans.property.SimpleObjectProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.geometry.Orientation
 import kotlinx.serialization.Serializable
-import me.dzikimlecz.timetables.timetable.json.CellSerializer
 import tornadofx.getValue
 import tornadofx.setValue
 
