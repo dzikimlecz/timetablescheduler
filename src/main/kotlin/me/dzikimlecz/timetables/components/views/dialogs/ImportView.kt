@@ -1,9 +1,12 @@
 package me.dzikimlecz.timetables.components.views.dialogs
 
 
-import javafx.scene.control.*
+import javafx.scene.control.CheckBox
+import javafx.scene.control.ListCell
+import javafx.scene.control.ListView
 import javafx.stage.FileChooser
 import javafx.util.Callback
+import me.dzikimlecz.timetables.DefaultPaths
 import me.dzikimlecz.timetables.managers.FilesManager
 import tornadofx.*
 import java.io.File
@@ -26,7 +29,7 @@ class ImportView : View("Otwórz") {
                         val files = chooseFile(
                             "Wybierz plik",
                             arrayOf(FileChooser.ExtensionFilter("Plany","*.json")),
-                            File(System.getProperty("user.home")+"\\Documents"),
+                            File(DefaultPaths.EXPORT.value),
                             owner = currentStage
                         )
                         if (files.isEmpty()) return@action

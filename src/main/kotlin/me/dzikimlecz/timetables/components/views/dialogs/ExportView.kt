@@ -1,6 +1,7 @@
 package me.dzikimlecz.timetables.components.views.dialogs
 
 import javafx.scene.control.CheckBox
+import me.dzikimlecz.timetables.DefaultPaths
 import tornadofx.*
 import java.io.File
 
@@ -22,7 +23,7 @@ class ExportView : View("Zapisz jako") {
                 action {
                     val file = chooseDirectory(
                         "Wybierz folder",
-                        File(System.getProperty("user.home") + "\\Documents"),
+                        File(DefaultPaths.EXPORT.value),
                         currentWindow
                     )
                     pathField.text = file?.absolutePath ?: ""

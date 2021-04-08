@@ -5,14 +5,15 @@ import me.dzikimlecz.timetables.components.views.MainView
 import tornadofx.launch
 import java.io.File
 
+enum class DefaultPaths(val value: String) {
+    SAVE("${System.getenv("APPDATA")}\\TimeTableScheduler"),
+    EXPORT("${System.getProperty("user.home")}\\Documents\\TimeTableScheduler")
+}
+
 fun main() {
-    System.setProperty("defaultSavePath", "${System.getenv("APPDATA")}\\TimeTableScheduler")
-    var file = File(System.getProperty("defaultSavePath"))
-    if (!file.exists()) file.mkdirs()
-    System.setProperty("defaultExportPath",
-        "${System.getProperty("user.home")}\\Documents\\TimeTableScheduler")
-    file = File(System.getProperty("defaultExportPath"))
-    if (!file.exists()) file.mkdirs()
+    DefaultPaths.values().map { File(it.value) }.forEach {
+        if (!it.exists()) it.mkdirs()
+    }
     launch<App>()
 }
 

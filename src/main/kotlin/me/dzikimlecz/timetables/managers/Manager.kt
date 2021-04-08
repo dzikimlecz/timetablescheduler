@@ -4,6 +4,7 @@ import javafx.embed.swing.SwingFXUtils
 import javafx.scene.control.Alert
 import javafx.scene.image.Image
 import javafx.stage.StageStyle.UTILITY
+import me.dzikimlecz.timetables.DefaultPaths
 import me.dzikimlecz.timetables.components.views.MainView
 import me.dzikimlecz.timetables.components.views.dialogs.ExportView
 import me.dzikimlecz.timetables.components.views.dialogs.ImportView
@@ -96,7 +97,7 @@ class Manager {
 
     fun exportTableImage(img: Image, name: String) = Thread {
         val image = SwingFXUtils.fromFXImage(img, null)
-        val file = File(System.getProperty("defaultExportPath"), "$name.png")
+        val file = File(DefaultPaths.EXPORT.value, "$name.png")
         if (!file.exists()) file.createNewFile()
         ImageIO.write(image, "png", file)
     }.start()

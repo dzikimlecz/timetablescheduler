@@ -3,6 +3,7 @@ package me.dzikimlecz.timetables.managers
 import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import kotlinx.serialization.json.Json
+import me.dzikimlecz.timetables.DefaultPaths
 import me.dzikimlecz.timetables.timetable.TimeTable
 import tornadofx.sortByDescending
 import java.io.File
@@ -15,7 +16,7 @@ import java.time.format.FormatStyle
 import kotlin.streams.toList
 
 class FilesManager(
-    private val defaultSavePath: String = System.getProperty("defaultSavePath")
+    private val defaultSavePath: String = DefaultPaths.SAVE.value
 ) {
     private val files: ObservableList<File> = FXCollections.observableArrayList()
 
