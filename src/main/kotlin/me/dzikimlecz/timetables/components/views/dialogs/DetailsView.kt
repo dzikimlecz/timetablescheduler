@@ -35,7 +35,7 @@ class DetailsView : View("Szczegóły Planu") {
                     textProperty().addListener { _, _, newValue ->
                         tableProperties[TimeTable::columns] = newValue
                     }
-                    filterContent()
+                    filterNumbers()
                 }
             }
             field("Rzędy") {
@@ -44,7 +44,7 @@ class DetailsView : View("Szczegóły Planu") {
                     textProperty().addListener { _, _, newValue ->
                         tableProperties[TimeTable::rows] = newValue
                     }
-                    filterContent()
+                    filterNumbers()
                 }
             }
             buttonbar {

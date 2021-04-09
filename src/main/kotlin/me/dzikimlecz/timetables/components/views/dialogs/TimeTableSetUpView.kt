@@ -41,7 +41,7 @@ class TimeTableSetUpView : View("Nowy Plan") {
                 rowsField = textfield {
                     font = bigFont
                     promptText = "1"
-                    filterContent()
+                    filterNumbers()
                 }
             }
 
@@ -50,7 +50,7 @@ class TimeTableSetUpView : View("Nowy Plan") {
                 columnsField = textfield {
                     font = bigFont
                     promptText = "1"
-                    filterContent()
+                    filterNumbers()
                 }
             }
         }
@@ -76,6 +76,6 @@ class TimeTableSetUpView : View("Nowy Plan") {
     } catch(_: Exception) {}
 }
 
-fun TextField.filterContent() = filterInput {
+fun TextField.filterNumbers() = filterInput {
     it.controlNewText.isInt() && it.text.length + text.length <= 2
 }
