@@ -13,7 +13,7 @@ class TimeSpan private constructor(@Serializable(with = TimeSerializer::class) v
     init { require(start.isBefore(end)) { "Start can't be before or equal to end" } }
 
     override fun toString(): String {
-        val formatter = DateTimeFormatter.ofLocalizedDateTime(FormatStyle.SHORT)
+        val formatter = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT)
         return "${start.format(formatter)}-${end.format(formatter)}"
     }
 
