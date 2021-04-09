@@ -1,14 +1,18 @@
 package me.dzikimlecz.timetables.components.fragments
 
 import javafx.beans.property.SimpleObjectProperty
+import javafx.collections.ListChangeListener
 import javafx.geometry.Insets
 import javafx.geometry.Orientation
-import javafx.geometry.Pos
+import javafx.geometry.Pos.CENTER
+import javafx.geometry.Pos.TOP_CENTER
 import javafx.geometry.Rectangle2D
 import javafx.scene.SnapshotParameters
 import javafx.scene.control.Button
 import javafx.scene.control.Tab
-import javafx.scene.layout.*
+import javafx.scene.layout.BorderPane
+import javafx.scene.layout.GridPane
+import javafx.scene.layout.StackPane
 import javafx.scene.transform.Transform
 import me.dzikimlecz.timetables.components.fragments.TimeTableEditor.Companion.ViewMode.EDIT
 import me.dzikimlecz.timetables.components.fragments.TimeTableEditor.Companion.ViewMode.VIEW
@@ -17,6 +21,7 @@ import me.dzikimlecz.timetables.components.fragments.toolbars.ViewToolBar
 import me.dzikimlecz.timetables.components.views.MainView
 import me.dzikimlecz.timetables.components.views.dialogs.TimeSpanAdjustView
 import me.dzikimlecz.timetables.timetable.Cell
+import me.dzikimlecz.timetables.timetable.TimeSpan
 import me.dzikimlecz.timetables.timetable.TimeTable
 import tornadofx.*
 
@@ -49,7 +54,7 @@ class TimeTableEditor : Fragment() {
                 maxWidthProperty().bind(primaryStage.widthProperty() - 230)
                 maxHeightProperty().bind(primaryStage.heightProperty() - 230)
                 paddingTop = 20
-                alignment = Pos.TOP_CENTER
+                alignment = TOP_CENTER
                 isGridLinesVisible = true
             }
             for (i in 0 until timeTable.columns) addTimeSpans(i)
@@ -131,15 +136,19 @@ class TimeTableEditor : Fragment() {
         editor.refreshView(viewMode)
     }
 
-    private fun addTimeSpans(columnIndex: Int) = with(tablePane) {
-        borderpane {
-            val firstSpan = timeTable.columnsTimeSpan[columnIndex][0]
-            val secondSpan = timeTable.columnsTimeSpan[columnIndex][1]
-            (if (secondSpan == null) centerProperty() else leftProperty()).also {
-                it.set(
+    private fun addTimeSpans(columnIndex: Int): Unit = with(tablePane) {
+        if (columnIndex < 0) throw IndexOutOfBoundsException("Index $columnIndex out of bonds")
+        remove(columnIndex, 0)
+        stackpane {
+            borderpane {
+                val timeSpans = timeTable.columnsTimeSpan[columnIndex]
+                timeSpans.addListener { _: ListChangeListener.Change<out TimeSpan?>? -> addTimeSpans(columnIndex) }
+                val firstSpan = timeSpans[0]
+                val secondSpan = timeSpans[1]
+                (if (secondSpan == null) centerProperty() else leftProperty()).set(
                     label {
                         text = firstSpan?.toString() ?: "-/-"
-                        alignment = Pos.CENTER
+                        alignment = CENTER
                         maxWidthProperty().bind(
                             this@with.maxWidthProperty() /
                                     timeTable.columnsProperty /
@@ -148,15 +157,16 @@ class TimeTableEditor : Fragment() {
                         maxHeight = 20.0
                     }
                 )
-            }
-            if (secondSpan != null) right {
-                label {
-                    text = secondSpan.toString()
-                    alignment = Pos.CENTER
-                    maxWidthProperty().bind(
-                        this@with.maxWidthProperty() / timeTable.columnsProperty / 2
-                    )
-                    maxHeight = 20.0
+
+                if (secondSpan != null) right {
+                    label {
+                        text = secondSpan.toString()
+                        alignment = CENTER
+                        maxWidthProperty().bind(
+                            this@with.maxWidthProperty() / timeTable.columnsProperty / 2
+                        )
+                        maxHeight = 20.0
+                    }
                 }
             }
             gridpaneConstraints { columnRowIndex(columnIndex, 0) }
@@ -165,8 +175,7 @@ class TimeTableEditor : Fragment() {
 
     fun cleanCells() = handleCellsOverlayingAction { clean() }
 
-    fun divideCells(direction: Orientation) =
-        handleCellsOverlayingAction { divisionDirection = direction }
+    fun divideCells(direction: Orientation) = handleCellsOverlayingAction { divisionDirection = direction }
 
     fun cleanRows() {
         val buttons = overlayCells()
@@ -175,8 +184,7 @@ class TimeTableEditor : Fragment() {
                 val rowIndex = GridPane.getRowIndex(button.parent)
                 for ((index, editor) in editors[rowIndex].withIndex()) {
                     editor.cell.clean()
-                    (tablePane.get(index, rowIndex + 1) as? StackPane)?.children
-                        ?.removeIf { it is Button }
+                    (tablePane.get(index, rowIndex + 1) as? StackPane)?.children?.removeIf { it is Button }
                 }
                 button.removeFromParent()
             }
@@ -190,8 +198,7 @@ class TimeTableEditor : Fragment() {
                 val columnIndex = GridPane.getColumnIndex(button.parent)
                 for (row in 0 until editors.size) {
                     editors[row][columnIndex].cell.clean()
-                    (tablePane.get(columnIndex, row + 1) as? StackPane)?.children
-                        ?.removeIf { it is Button }
+                    (tablePane.get(columnIndex, row + 1) as? StackPane)?.children?.removeIf { it is Button }
                 }
                 button.removeFromParent()
             }
@@ -235,20 +242,28 @@ class TimeTableEditor : Fragment() {
         }
     }
 
+
     private val okButton by lazy { button("Ok") }
-    private fun overlayCells(predicate: (StackPane) -> Boolean = { true }): Map<Button, CellEditor> {
+
+    private fun overlayCells(): Map<Button, CellEditor> {
+        val map = overlayGrid { (GridPane.getRowIndex(it) ?: 0) != 0 }
+            .mapValues { (_, location) -> editors[location.first - 1][location.second] }
+        for ((button, editor) in map)
+            button.text = editor.cell[0]
+        return map
+    }
+
+    private fun overlayGrid(predicate: (StackPane) -> Boolean = { true } ): Map<Button, Pair<Int, Int>> {
         removeOverlayFromCells()
         val editorPanes = tablePane.children.filterIsInstance<StackPane>()
-        val buttons = mutableMapOf<Button, CellEditor>()
+        val buttons = mutableMapOf<Button, Pair<Int, Int>>()
         for (pane in editorPanes) {
             if (predicate(pane)) {
-                val location = GridPane.getRowIndex(pane) - 1 to GridPane.getColumnIndex(pane)
-                val editor = editors[location.first][location.second]
+                val location = GridPane.getRowIndex(pane) to GridPane.getColumnIndex(pane)
                 with(pane) {
                     this += button {
-                        text = editor.cell[0]
                         setMaxSize(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY)
-                        buttons[this] = editor
+                        buttons[this] = location
                     }
                 }
             }
@@ -262,6 +277,7 @@ class TimeTableEditor : Fragment() {
         editToolBar.root.items.add(okButton)
         return buttons
     }
+
     private fun removeOverlayFromCells() {
         tablePane.children.filterIsInstance<StackPane>().forEach { pane ->
             pane.children.removeIf { it is Button }
@@ -269,13 +285,14 @@ class TimeTableEditor : Fragment() {
         okButton.removeFromParent()
     }
 
+
     fun closePane() {
         tab.removeFromParent()
         root.removeFromParent()
     }
 
     fun adjustTimeSpans() = with(tablePane) {
-        val buttons = overlayCells { GridPane.getRowIndex(it) == 0 }
+        val buttons = overlayGrid { GridPane.getRowIndex(it) == 0 }
         for ((i, button) in buttons.keys.withIndex()) button.setOnAction {
             this@TimeTableEditor.openInternalWindow<TimeSpanAdjustView>(
                 movable = false,
@@ -284,6 +301,7 @@ class TimeTableEditor : Fragment() {
                     TimeSpanAdjustView::table to timeTable,
                 )
             )
+            button.removeFromParent()
         }
     }
 
