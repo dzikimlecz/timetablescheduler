@@ -55,6 +55,7 @@ class TimeSpan private constructor(@Serializable(with = TimeSerializer::class) v
         fun validate(st: String) = pattern.matches(st)
 
         fun validateAsBeginning(st: String) = when(st.length) {
+            0 -> true
             1 -> st.isInt()
             2 -> st.isInt() ||
                     (st[0].isDigit() && separator.containsMatchIn(st))
