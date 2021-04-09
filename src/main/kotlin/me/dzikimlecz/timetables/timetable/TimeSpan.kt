@@ -5,12 +5,19 @@ import tornadofx.isInt
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
+import java.time.temporal.ChronoUnit.MINUTES
 
 @Serializable
 class TimeSpan private constructor(@Serializable(with = TimeSerializer::class) val start: LocalTime,
                                    @Serializable(with = TimeSerializer::class) val end: LocalTime) {
 
-    init { require(start.isBefore(end)) { "Start can't be before or equal to end" } }
+    init { require(start.isBefore(end)) { "Start must be before an end" } }
+
+    val minutes: Long
+        get() = start.until(end, MINUTES)
+
+    val duration: LocalTime
+        get() = LocalTime.of(minutes.toInt() / 60, minutes.toInt() % 60)
 
     override fun toString(): String {
         val formatter = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT)
@@ -33,9 +40,9 @@ class TimeSpan private constructor(@Serializable(with = TimeSerializer::class) v
 
         @JvmStatic fun of(start: String, end: String): TimeSpan {
             if (!pattern.matches(start))
-                throw IllegalArgumentException("\"$start\" doesn't match TimeSpan pattern")
+                throw IllegalArgumentException("\"$start\" doesn't match Time pattern $pattern")
             if (!pattern.matches(end))
-                throw IllegalArgumentException("\"$end\" doesn't match TimeSpan pattern")
+                throw IllegalArgumentException("\"$end\" doesn't match Time pattern $pattern")
 
             val startISO = StringBuilder(start)
             val endISO = StringBuilder(end)
@@ -47,9 +54,7 @@ class TimeSpan private constructor(@Serializable(with = TimeSerializer::class) v
             endISO[2] = ':'
 
             return try { of(LocalTime.parse(startISO), LocalTime.parse(endISO)) }
-            catch(e: Exception) {
-                throw IllegalArgumentException("TimeSpan could not be created", e)
-            }
+            catch(e: Exception) { throw IllegalArgumentException("TimeSpan could not be created", e) }
         }
 
         fun validate(st: String) = pattern.matches(st)
@@ -57,11 +62,9 @@ class TimeSpan private constructor(@Serializable(with = TimeSerializer::class) v
         fun validateAsBeginning(st: String) = when(st.length) {
             0 -> true
             1 -> st.isInt()
-            2 -> st.isInt() ||
-                    (st[0].isDigit() && separator.containsMatchIn(st))
+            2 -> st.isInt() || (st[0].isDigit() && separator.containsMatchIn(st))
             3 -> separator.containsMatchIn(st) &&
-                    (st.substring(0..1).isInt() ||
-                            (st[0].isDigit() && st[2].isDigit()))
+                    (st.substring(0..1).isInt() || (st[0].isDigit() && st[2].isDigit()))
             4 -> separator.containsMatchIn(st) &&
                     ((st.substring(0..1).isInt() && st[3].isDigit()) ||
                             (st[0].isDigit() && st.substring(2..3).isInt()))
