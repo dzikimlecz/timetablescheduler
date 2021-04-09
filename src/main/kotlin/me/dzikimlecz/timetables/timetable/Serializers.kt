@@ -1,5 +1,6 @@
 package me.dzikimlecz.timetables.timetable
 
+import javafx.collections.FXCollections
 import javafx.geometry.Orientation
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.Required
@@ -10,9 +11,11 @@ import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
+import tornadofx.sizeProperty
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
+import javax.naming.OperationNotSupportedException
 
 object TimeTableSerializer : KSerializer<TimeTable> {
     override val descriptor: SerialDescriptor = TimeTableSurrogate.serializer().descriptor
@@ -21,7 +24,7 @@ object TimeTableSerializer : KSerializer<TimeTable> {
         val name = value.name.ifBlank { value.date.format(DateTimeFormatter.ISO_DATE) }
         encoder.encodeSerializableValue(
             TimeTableSurrogate.serializer(),
-            TimeTableSurrogate(value.date, name, value.list, value.columnsTimeSpan)
+            TimeTableSurrogate(value.date, name, value.list, value.columnsTimeSpan.map { it.toTypedArray() },)
         )
     }
 
@@ -30,9 +33,16 @@ object TimeTableSerializer : KSerializer<TimeTable> {
         val timeTable = timeTableOf(surrogate.table)
         timeTable.name = surrogate.name
         timeTable.date = surrogate.date
-        if (surrogate.timeSpans != null) {
+        val timeSpans = surrogate.timeSpans
+        if (timeSpans != null) {
             timeTable.columnsTimeSpan.clear()
-            timeTable.columnsTimeSpan.addAll(surrogate.timeSpans)
+            timeSpans.map {
+                FXCollections.observableArrayList(*it).apply {
+                    sizeProperty.addListener { _, _, _, ->
+                        throw OperationNotSupportedException("Lists of TimeSpans must have fixed size.")
+                    }
+                }
+            }.also { timeTable.columnsTimeSpan.addAll(it) }
         }
         return timeTable
     }

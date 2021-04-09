@@ -7,7 +7,9 @@ import kotlinx.serialization.Required
 import kotlinx.serialization.Serializable
 import tornadofx.getValue
 import tornadofx.setValue
+import tornadofx.sizeProperty
 import java.time.LocalDate
+import javax.naming.OperationNotSupportedException
 
 @Serializable(with = TimeTableSerializer::class)
 class TimeTable(
@@ -38,12 +40,18 @@ class TimeTable(
         }
     }
 
-    val columnsTimeSpan: ObservableList<Array<TimeSpan?>> = FXCollections.observableArrayList()
+    val columnsTimeSpan: ObservableList<ObservableList<TimeSpan?>> = FXCollections.observableArrayList()
     init {
         columnsProperty.addListener { _, _, newVal ->
             val newValue = newVal.toInt()
             while(columnsTimeSpan.size > newValue) columnsTimeSpan.removeLast()
-            while(columnsTimeSpan.size < newValue) columnsTimeSpan.add(arrayOf(null, null))
+            while(columnsTimeSpan.size < newValue) {
+                val element: ObservableList<TimeSpan?> = FXCollections.observableArrayList(null, null)
+                element.sizeProperty.addListener { _, _, _, ->
+                    throw OperationNotSupportedException("Lists of TimeSpans must have fixed size.")
+                }
+                columnsTimeSpan.add(element)
+            }
         }
     }
 
