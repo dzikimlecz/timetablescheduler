@@ -6,8 +6,10 @@ import javafx.geometry.Orientation
 import javafx.scene.Node
 import javafx.scene.control.Control
 import javafx.scene.control.Label
+import javafx.scene.control.TextArea
 import javafx.scene.paint.Color
 import me.dzikimlecz.timetables.components.fragments.TimeTableEditor.Companion.ViewMode
+import me.dzikimlecz.timetables.components.fragments.TimeTableEditor.Companion.ViewMode.EDIT
 import me.dzikimlecz.timetables.components.fragments.TimeTableEditor.Companion.ViewMode.VIEW
 import me.dzikimlecz.timetables.timetable.Cell
 import tornadofx.*
@@ -15,28 +17,42 @@ import tornadofx.Dimension.LinearUnits.px
 
 class CellEditor : Fragment() {
     val cell: Cell by param()
-    private val texts = Array(2) { SimpleStringProperty() }
+    private val texts: Array<SimpleStringProperty> = Array(2) { i -> cell.getContentProperty(i) }
 
     override val root = borderpane {
         minWidth = 30.0
         minHeight = 15.0
     }
 
+    private val labels: List<Label>
     init {
-        for ((i, e) in texts.withIndex())
-            e.bindBidirectional(cell.getContentProperty(i))
-        cell.divisionDirectionProperty.addListener { _,_,_ -> refreshView(ViewMode.EDIT) }
-    }
-
-    fun refreshView(viewMode: ViewMode) = refreshImpl { i: Int ->
-        if (viewMode == VIEW) label {
+        val list = mutableListOf<Label>()
+        for (i in 0..1) label {
             paddingAll = 10
             textProperty().bindBidirectional(texts[i])
             minWidth = root.minWidth + 5
             minHeight = root.minHeight + 25
-        } else textarea {
+        }.also(list::add)
+        labels = list
+    }
+
+    private val textAreas: List<TextArea> by lazy {
+        val list = mutableListOf<TextArea>()
+        for (i in 0..1) textarea {
             textProperty().bindBidirectional(texts[i])
-        }
+        }.also(list::add)
+        list
+    }
+
+
+
+    init {
+        cell.divisionDirectionProperty.addListener { _,_,_ -> refreshView(EDIT) }
+    }
+
+    fun refreshView(viewMode: ViewMode) = refreshImpl { i: Int ->
+        if (viewMode == VIEW) labels[i]
+        else textAreas[i]
     }
 
     private inline fun refreshImpl(nodes: (i: Int) -> Control) = with(root) {
