@@ -12,6 +12,7 @@ version = "1.0"
 
 repositories {
     jcenter()
+    maven { url = uri("https://jitpack.io") }
 }
 
 dependencies {
@@ -21,6 +22,8 @@ dependencies {
     implementation("no.tornado:tornadofx:1.7.20")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.7.0")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.7.0")
+    implementation(kotlin("stdlib-jdk8"))
+    implementation("com.github.jkcclemens:khttp:-SNAPSHOT")
 }
 javafx {
     version = "16"
@@ -38,4 +41,13 @@ application {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+val compileKotlin: KotlinCompile by tasks
+compileKotlin.kotlinOptions {
+    jvmTarget = "1.8"
+}
+val compileTestKotlin: KotlinCompile by tasks
+compileTestKotlin.kotlinOptions {
+    jvmTarget = "1.8"
 }
