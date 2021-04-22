@@ -123,9 +123,9 @@ class TimeTable(
 }
 
 fun timeTableOf(table: List<List<Cell>>) : TimeTable {
-    require(table.isNotEmpty() && table.stream().allMatch {it.size == table[0].size})
+    require(table.isEmpty() || table.stream().allMatch {it.size == table[0].size})
         {"This list is not a table!"}
-    val timeTable = TimeTable(table[0].size, table.size)
+    val timeTable = TimeTable(if (table.isNotEmpty()) table[0].size else 0, table.size)
     for ((y, row) in table.withIndex())
         for((x, cell) in row.withIndex())
             timeTable[y][x] = cell
