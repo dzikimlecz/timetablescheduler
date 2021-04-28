@@ -11,6 +11,8 @@ import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
+import me.dzikimlecz.lecturers.LecturerTransferredSurrogate
+import me.dzikimlecz.serializers.DateSerializer
 import tornadofx.sizeProperty
 import java.time.LocalDate
 import java.time.LocalTime
@@ -98,15 +100,4 @@ object TimeSerializer : KSerializer<LocalTime> {
 
     override fun serialize(encoder: Encoder, value: LocalTime) =
         encoder.encodeString(value.format(DateTimeFormatter.ISO_TIME))
-}
-
-
-object DateSerializer : KSerializer<LocalDate> {
-    override val descriptor: SerialDescriptor =
-        PrimitiveSerialDescriptor("day", PrimitiveKind.STRING)
-
-    override fun deserialize(decoder: Decoder): LocalDate = LocalDate.parse(decoder.decodeString())
-
-    override fun serialize(encoder: Encoder, value: LocalDate) =
-        encoder.encodeString(value.format(DateTimeFormatter.ISO_DATE))
 }
