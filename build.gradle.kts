@@ -12,7 +12,6 @@ version = "1.0"
 
 repositories {
     jcenter()
-    maven { url = uri("https://jitpack.io") }
 }
 
 dependencies {
@@ -23,7 +22,8 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.7.0")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.7.0")
     implementation(kotlin("stdlib-jdk8"))
-    implementation("com.github.jkcclemens:khttp:-SNAPSHOT")
+    implementation("khttp:khttp:1.0.0")
+    implementation(files("C:\\libs\\transferred-0.0.1-SNAPSHOT.jar"))
 }
 javafx {
     version = "16"
