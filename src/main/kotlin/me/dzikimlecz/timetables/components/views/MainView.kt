@@ -6,10 +6,12 @@ import javafx.scene.control.TabPane
 import javafx.scene.layout.Background
 import javafx.scene.layout.BackgroundFill
 import javafx.scene.paint.Color
+import me.dzikimlecz.lecturers.Lecturer
 import me.dzikimlecz.timetables.components.fragments.TimeTableEditor
 import me.dzikimlecz.timetables.managers.Manager
 import me.dzikimlecz.timetables.timetable.TimeTable
 import tornadofx.*
+import me.dzikimlecz.timetables.components.views.DataBaseControlPanelView as DataBasePanel
 
 private const val defaultTitle = "Układacz planów 3tysionce !!!"
 
@@ -53,5 +55,14 @@ class MainView : View(defaultTitle) {
         super.onBeforeShow()
         setWindowMinSize(800, 400)
         primaryStage.isMaximized = true
+    }
+
+    fun showDataBaseControlPane(lecturers: List<Lecturer>, tables: List<TimeTable>) {
+        find<DataBasePanel>(params = mapOf(
+            DataBasePanel::lecturers to lecturers,
+            DataBasePanel::tables to tables,
+        )).also {
+            root.center = it.root
+        }
     }
 }

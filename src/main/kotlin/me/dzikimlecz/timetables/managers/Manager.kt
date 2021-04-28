@@ -1,7 +1,9 @@
 package me.dzikimlecz.timetables.managers
 
+import javafx.application.Platform
 import javafx.embed.swing.SwingFXUtils
 import javafx.scene.control.Alert
+import javafx.scene.control.Alert.AlertType.ERROR
 import javafx.scene.image.Image
 import javafx.stage.StageStyle.UTILITY
 import me.dzikimlecz.timetables.DefaultPaths
@@ -20,6 +22,7 @@ import kotlin.reflect.KProperty1
 class Manager {
     private lateinit var lastTable : TimeTable
     private val filesManager by lazy { FilesManager() }
+    private val dataBaseConnectionManager by lazy { DataBaseConnectionManager() }
 
     val activeTable : TimeTable
         get() = lastTable
@@ -63,13 +66,13 @@ class Manager {
         val importView = find<ImportView>(params = mapOf(ImportView::filesManager to filesManager))
         importView.openModal(block = true, resizable = false)
         if (importView.chosenFile == null)  {
-            alert(Alert.AlertType.ERROR, "Nie wybrano pliku")
+            alert(ERROR, "Nie wybrano pliku")
             return
         }
         val table = try {
              filesManager.readTable(importView.chosenFile!!)
         } catch(e: Exception) {
-            alert(Alert.AlertType.ERROR,"Błąd odczytu", e.message)
+            alert(ERROR,"Błąd odczytu", e.message)
             return
         }
         lastTable = table
@@ -81,13 +84,29 @@ class Manager {
         find<TimeTableSetUpView>(params = mapOf(TimeTableSetUpView::tableProperties to map))
             .openModal(UTILITY, resizable = false, block = true)
         try { find<MainView>().displayTable(newTable(map)) } catch (e: Exception) {
-            alert(Alert.AlertType.ERROR,"Błąd", e.message)
+            alert(ERROR,"Błąd", e.message)
             e.printStackTrace()
         }
     }
 
     fun openDB() {
-        TODO("Not yet implemented")
+        fun alert(e: Throwable) =
+            Platform.runLater { alert(ERROR, "Błąd Połączenia!", e.message) }
+
+        try { dataBaseConnectionManager.tryToConnect() } catch (e: Exception) {
+            return alert(e)
+        }
+        val lecturers = try {
+            dataBaseConnectionManager.getLecturers()
+        } catch (e: IllegalStateException) {
+            return alert(e)
+        }
+        val tables = try {
+            dataBaseConnectionManager.getTimeTables()
+        } catch (e: IllegalStateException) {
+            return alert(e)
+        }
+        find<MainView>().showDataBaseControlPane(lecturers, tables)
     }
 
     private fun badProperty(name: String, missing: Boolean): Nothing {
