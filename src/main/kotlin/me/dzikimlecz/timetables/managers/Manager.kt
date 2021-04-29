@@ -2,7 +2,6 @@ package me.dzikimlecz.timetables.managers
 
 import javafx.application.Platform
 import javafx.embed.swing.SwingFXUtils
-import javafx.scene.control.Alert
 import javafx.scene.control.Alert.AlertType.ERROR
 import javafx.scene.image.Image
 import javafx.stage.StageStyle.UTILITY
@@ -22,7 +21,8 @@ import kotlin.reflect.KProperty1
 class Manager {
     private lateinit var lastTable : TimeTable
     private val filesManager by lazy { FilesManager() }
-    private val dataBaseConnectionManager by lazy { DataBaseConnectionManager() }
+    val dataBaseConnectionManager: DataBaseConnectionManager = KhttpDataBaseConnectionManager()
+    val db = dataBaseConnectionManager
 
     val activeTable : TimeTable
         get() = lastTable
