@@ -35,20 +35,20 @@ class MainView : View(defaultTitle) {
                 }
             }
         }
-        center {
-            tabpane {
-                selectionModel.selectedItemProperty().addListener { _, _, newValue ->
-                    title = newValue?.text ?: defaultTitle
-                }
-            }
-        }
     }
 
-    fun displayTable(table: TimeTable) = with(root.center as TabPane) {
-        val tab = Tab()
-        find<TimeTableEditor>(mapOf(TimeTableEditor::timeTable to table, TimeTableEditor::tab to tab))
-        tabs += tab
-        selectionModel.select(tab)
+    fun displayTable(table: TimeTable) = with(root) {
+        if (center !is TabPane) center = tabpane {
+            selectionModel.selectedItemProperty().addListener { _, _, newValue ->
+                title = newValue?.text ?: defaultTitle
+            }
+        }
+        with(center as TabPane) {
+            val tab = Tab()
+            find<TimeTableEditor>(mapOf(TimeTableEditor::timeTable to table, TimeTableEditor::tab to tab))
+            tabs += tab
+            selectionModel.select(tab)
+        }
     }
 
     override fun onBeforeShow() {
