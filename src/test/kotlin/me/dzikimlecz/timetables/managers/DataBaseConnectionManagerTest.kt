@@ -10,7 +10,8 @@ import org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS
 
 @TestInstance(PER_CLASS)
 internal class DataBaseConnectionManagerTest {
-    val manager = DataBaseConnectionManager()
+    val manager: DataBaseConnectionManager =
+        KhttpDataBaseConnectionManager()
 
     @BeforeAll
     fun waitForServerToStart() = Thread.sleep(7_000)
