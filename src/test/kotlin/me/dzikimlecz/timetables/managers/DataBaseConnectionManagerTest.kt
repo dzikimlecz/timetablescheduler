@@ -62,7 +62,7 @@ internal class DataBaseConnectionManagerTest {
         @Test
         fun `should post a new table`() {
             // when
-            val table = TimeTable(2, 2, name = "UwU")
+            val table = TimeTable(2, 2, name = "patcher")
             //then
             assertDoesNotThrow { manager.sendTable(table) }
         }
@@ -70,7 +70,7 @@ internal class DataBaseConnectionManagerTest {
         @Test
         fun `should patch existing table`() {
             // when
-            val table = TimeTable(2, 2, name = "test")
+            val table = TimeTable(2, 2, name = "patcher")
             //then
             assertDoesNotThrow { manager.sendTable(table) }
         }
@@ -96,7 +96,7 @@ internal class DataBaseConnectionManagerTest {
             // when
             assertNull(manager.lookForTable(name))
             // then
-            assertThrows<IllegalStateException> { manager.removeTable(name) }
+            assertThrows<ServerAccessException> { manager.removeTable(name) }
         }
     }
     
@@ -105,8 +105,10 @@ internal class DataBaseConnectionManagerTest {
     @TestInstance(PER_CLASS)
     inner class GetLecturers {
         @Test
-        fun `should get all lecturers from the server`() =
-            assertDoesNotThrow { manager.getLecturers() }
+        fun `should get all lecturers from the server`() {
+            val lecturers = manager.getLecturers()
+            assertTrue(lecturers.isNotEmpty())
+        }
 
         @Test
         fun `should get a specific lecturer from the server`() {
@@ -145,7 +147,7 @@ internal class DataBaseConnectionManagerTest {
         @Test
         fun `should patch a lecturer`() {
             // given
-            val lecturer = manager.getLecturers()[0]
+            val lecturer = manager.getLecturers()[0].derive("Koo", "FA26AAf")
             // then
             assertDoesNotThrow { manager.sendLecturer(lecturer) }
         }
@@ -172,7 +174,7 @@ internal class DataBaseConnectionManagerTest {
             manager.removeLecturer(code)
             assertNull(manager.lookForLecturer(code))
             // then
-            assertThrows<IllegalStateException> { manager.removeLecturer(code) }
+            assertThrows<ServerAccessException> { manager.removeLecturer(code) }
         }
     }
     
