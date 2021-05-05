@@ -4,9 +4,11 @@ import khttp.delete
 import khttp.get
 import khttp.patch
 import khttp.post
+import khttp.responses.Response
 import kotlinx.serialization.json.Json
 import me.dzikimlecz.lecturers.Lecturer
-import me.dzikimlecz.lecturers.LecturerTransferredSurrogate
+import me.dzikimlecz.timetables.managers.DataBaseConnectionManager.Companion.lecturerSerializer
+import me.dzikimlecz.timetables.managers.DataBaseConnectionManager.Companion.timetableSerializer
 import me.dzikimlecz.timetables.timetable.TimeTable
 
 class KhttpDataBaseConnectionManager: DataBaseConnectionManager {
@@ -53,13 +55,13 @@ class KhttpDataBaseConnectionManager: DataBaseConnectionManager {
     override fun getLecturers(): List<Lecturer> {
         val response = get("$address/lecturers")
         response.checkSuccess()
-        return response.jsonArray.map { Json.decodeFromString(lecturerSerializer, it.toString()).toLecturer() }
+        return response.jsonArray.map { Json.decodeFromString(lecturerSerializer, it.toString()) }
     }
 
     override fun lookForLecturer(name: String): Lecturer? {
         val response = get("$address/lecturers/$name")
         return if (response.isOk())
-            Json.decodeFromString(lecturerSerializer, response.jsonObject.toString()).toLecturer()
+            Json.decodeFromString(lecturerSerializer, response.jsonObject.toString())
         else null
     }
 
@@ -68,13 +70,13 @@ class KhttpDataBaseConnectionManager: DataBaseConnectionManager {
         val postResponse = post(
             "$address/lecturers",
             headers = mapOf("Content-Type" to "application/json"),
-            data = Json.encodeToString(lecturerSerializer, lecturer.toSurrogate())
+            data = Json.encodeToString(lecturerSerializer, lecturer)
         )
         if (!postResponse.isOk()) {
             val patchResponse = patch(
                 "$address/lecturers",
                 headers = mapOf("Content-Type" to "application/json"),
-                data = Json.encodeToString(lecturerSerializer, lecturer.toSurrogate())
+                data = Json.encodeToString(lecturerSerializer, lecturer)
             )
             check (patchResponse.isOk()) {
                 """Could not create new, nor update an existing table.
@@ -85,13 +87,12 @@ class KhttpDataBaseConnectionManager: DataBaseConnectionManager {
     }
 
     override fun removeLecturer(name: String) =
-        delete("$address/lecturers/$name")
-            .checkSuccess()
-
-
-    companion object {
-        private val timetableSerializer = TimeTable.serializer()
-        private val lecturerSerializer = LecturerTransferredSurrogate.serializer()
-    }
+        delete("$address/lecturers/$name").checkSuccess()
 
 }
+
+fun Response.checkSuccess() {
+    if (!isOk()) throw ServerAccessException("Connection problem", statusCode, text)
+}
+
+fun Response.isOk() = statusCode in 200..299
