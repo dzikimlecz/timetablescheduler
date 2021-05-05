@@ -1,7 +1,8 @@
 package me.dzikimlecz.timetables.timetable
 
 import javafx.beans.property.SimpleIntegerProperty
-import javafx.collections.FXCollections
+import javafx.beans.property.SimpleStringProperty
+import javafx.collections.FXCollections.observableArrayList
 import javafx.collections.ObservableList
 import kotlinx.serialization.Required
 import kotlinx.serialization.Serializable
@@ -40,18 +41,27 @@ class TimeTable(
         }
     }
 
-    val columnsTimeSpan: ObservableList<ObservableList<TimeSpan?>> = FXCollections.observableArrayList()
+    val columnsTimeSpan: ObservableList<ObservableList<TimeSpan?>> = observableArrayList()
     init {
         columnsProperty.addListener { _, _, newVal ->
             val newValue = newVal.toInt()
             while(columnsTimeSpan.size > newValue) columnsTimeSpan.removeLast()
             while(columnsTimeSpan.size < newValue) {
-                val element: ObservableList<TimeSpan?> = FXCollections.observableArrayList(null, null)
-                element.sizeProperty.addListener { _, _, _, ->
+                val element: ObservableList<TimeSpan?> = observableArrayList(null, null)
+                element.sizeProperty.addListener { _, _, _ ->
                     throw OperationNotSupportedException("Lists of TimeSpans must have fixed size.")
                 }
                 columnsTimeSpan.add(element)
             }
+        }
+    }
+
+    val titles: ObservableList<SimpleStringProperty> = observableArrayList()
+    init {
+        columnsProperty.addListener { _, _, newVal ->
+            val newValue = newVal.toInt()
+            while(titles.size > newValue) titles.removeLast()
+            while(titles.size < newValue) titles += SimpleStringProperty("")
         }
     }
 
@@ -69,7 +79,7 @@ class TimeTable(
             rowsProperty.set(newValue)
             if (diff > 0) {
                 for (i in 0 until diff) {
-                    val newRow = FXCollections.observableArrayList<Cell>()
+                    val newRow = observableArrayList<Cell>()
                     for (j in 0 until columns) newRow.add(Cell())
                     table.add(newRow)
                 }
@@ -78,7 +88,7 @@ class TimeTable(
         }
     }
 
-    private val table = FXCollections.observableArrayList<ObservableList<Cell>>()
+    private val table = observableArrayList<ObservableList<Cell>>()
 
     init {
         this.columns = columns
