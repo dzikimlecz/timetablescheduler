@@ -19,50 +19,52 @@ class MainView : View(defaultTitle) {
     val manager by lazy { Manager() }
 
     override val root = borderpane {
-        left {
-            vbox {
-                spacing = 3E1
-                background = Background(BackgroundFill(Color.LIGHTGREY, null, null))
-                paddingTop = 15
-                button("Nowy Plan").setOnAction { manager.setUpTable() }
-                button("Otwórz Plan").setOnAction { manager.importTable() }
-                button("Otwórz Bazę Godzin").setOnAction { manager.openDB() }
-                children.forEach {
-                    if (it is Button) {
-                        it.prefWidth = 1.8E2
-                        it.prefHeight = 5E1
-                    }
-                }
+        left = vbox {
+            spacing = 3E1
+            background = Background(BackgroundFill(Color.LIGHTGREY, null, null))
+            paddingTop = 15
+            button("Nowy Plan").setOnAction { manager.setUpTable() }
+            button("Otwórz Plan").setOnAction { manager.importTable() }
+            button("Otwórz Bazę Godzin").setOnAction { manager.openDB() }
+            children.filterIsInstance<Button>().forEach {
+                it.prefWidth = 1.8E2
+                it.prefHeight = 5E1
             }
         }
-    }
-
-    fun displayTable(table: TimeTable) = with(root) {
-        if (center !is TabPane) center = tabpane {
+        center = tabpane {
             selectionModel.selectedItemProperty().addListener { _, _, newValue ->
                 title = newValue?.text ?: defaultTitle
             }
         }
-        with(center as TabPane) {
-            val tab = Tab()
-            find<TimeTableEditor>(mapOf(TimeTableEditor::timeTable to table, TimeTableEditor::tab to tab))
-            tabs += tab
+
+    }
+
+    fun displayTable(table: TimeTable) = with(root.center as TabPane) {
+        val tab = Tab()
+        find<TimeTableEditor>(mapOf(TimeTableEditor::timeTable to table, TimeTableEditor::tab to tab))
+        tabs += tab
+        selectionModel.select(tab)
+    }
+
+    fun showDataBaseControlPane(lecturers: List<Lecturer>, tables: List<TimeTable>) =
+        with(root.center as TabPane) {
+            val controPanelId = "databaseControlPanel"
+            val tab = tabs.firstOrNull { it.id == controPanelId }
+                ?: Tab().apply {
+                    content = find<DataBasePanel>(params = mapOf(
+                        DataBasePanel::lecturers to lecturers,
+                        DataBasePanel::tables to tables,
+                    )).root
+                    id = controPanelId
+                    text = "Baza Planów"
+                    tabs += this
+                }
             selectionModel.select(tab)
         }
-    }
 
     override fun onBeforeShow() {
         super.onBeforeShow()
         setWindowMinSize(800, 400)
         primaryStage.isMaximized = true
-    }
-
-    fun showDataBaseControlPane(lecturers: List<Lecturer>, tables: List<TimeTable>) {
-        find<DataBasePanel>(params = mapOf(
-            DataBasePanel::lecturers to lecturers,
-            DataBasePanel::tables to tables,
-        )).also {
-            root.center = it.root
-        }
     }
 }
