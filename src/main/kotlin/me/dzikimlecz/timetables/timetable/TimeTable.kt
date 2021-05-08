@@ -23,45 +23,38 @@ class TimeTable(
 
     val columnsProperty = SimpleIntegerProperty(0)
     var columns by columnsProperty
-    init {
-        columnsProperty.addListener {observable, old, new ->
-            val newValue = new.toInt()
-            val oldValue = old.toInt()
-            if (newValue <= 0) {
-                (observable as SimpleIntegerProperty).set(oldValue)
-                throw IllegalArgumentException("Illegal Table Size: $newValue columns")
-            }
-            val diff = newValue - oldValue
-            if (diff > 0)
-                for (row in table)
-                    for (i in 1..diff) row.add(Cell())
-            else if (diff < 0)
-                for (row in table)
-                    for (i in 1..diff) row.removeLast()
-        }
-    }
 
     val columnsTimeSpan: ObservableList<ObservableList<TimeSpan?>> = observableArrayList()
+
+    val titles: ObservableList<SimpleStringProperty> = observableArrayList()
+
     init {
-        columnsProperty.addListener { _, _, newVal ->
-            val newValue = newVal.toInt()
+        columnsProperty.addListener { observable, old, new ->
+            val newValue = new.toInt()
+            val oldValue = old.toInt()
+            require (newValue >= 0) {
+                (observable as SimpleIntegerProperty).set(oldValue)
+                "Illegal Table Size: $newValue columns"
+            }
+
+            while(titles.size > newValue) titles.removeLast()
+            while(titles.size < newValue) titles += SimpleStringProperty("")
+
             while(columnsTimeSpan.size > newValue) columnsTimeSpan.removeLast()
             while(columnsTimeSpan.size < newValue) {
                 val element: ObservableList<TimeSpan?> = observableArrayList(null, null)
                 element.sizeProperty.addListener { _, _, _ ->
                     throw OperationNotSupportedException("Lists of TimeSpans must have fixed size.")
                 }
-                columnsTimeSpan.add(element)
+                columnsTimeSpan += element
             }
-        }
-    }
 
-    val titles: ObservableList<SimpleStringProperty> = observableArrayList()
-    init {
-        columnsProperty.addListener { _, _, newVal ->
-            val newValue = newVal.toInt()
-            while(titles.size > newValue) titles.removeLast()
-            while(titles.size < newValue) titles += SimpleStringProperty("")
+            val size = { table.firstOrNull()?.size ?: newValue }
+            while (size() < newValue)
+                table.forEach { it.add(Cell()) }
+            while (size() > newValue)
+                table.forEach { it.removeLast() }
+
         }
     }
 
@@ -71,28 +64,24 @@ class TimeTable(
         rowsProperty.addListener { observable, old, new ->
             val newValue = new.toInt()
             val oldValue = old.toInt()
-            if (newValue <= 0) {
+            require (newValue >= 0) {
                 (observable as SimpleIntegerProperty).set(oldValue)
-                throw IllegalArgumentException("Illegal Table Size: $newValue rows")
+                "Illegal Table Size: $newValue rows"
             }
-            val diff = newValue - oldValue
-            rowsProperty.set(newValue)
-            if (diff > 0) {
-                for (i in 0 until diff) {
-                    val newRow = observableArrayList<Cell>()
-                    for (j in 0 until columns) newRow.add(Cell())
-                    table.add(newRow)
-                }
-            } else if (diff < 0)
-                for (i in 1..diff) table.removeLast()
+            while (table.size < newValue) {
+                val newRow = observableArrayList<Cell>()
+                for (j in 0 until columns) newRow.add(Cell())
+                table.add(newRow)
+            }
+            while (table.size > newValue)  table.removeLast()
         }
     }
 
     private val table = observableArrayList<ObservableList<Cell>>()
 
     init {
-        this.columns = columns
         this.rows = rows
+        this.columns = columns
     }
 
     operator fun get(i : Int) : ObservableList<Cell> {
@@ -109,14 +98,13 @@ class TimeTable(
         if (this === other) return true
         if (other !is TimeTable) return false
 
-        if (date != other.date) return false
-        if (name != other.name) return false
-        if (columns != other.columns) return false
-        if (columnsTimeSpan != other.columnsTimeSpan) return false
-        if (rows != other.rows) return false
-        if (table != other.table) return false
+       return date == other.date
+               && name == other.name
+               && columns == other.columns
+               && columnsTimeSpan == other.columnsTimeSpan
+               && rows == other.rows
+               && table == other.table
 
-        return true
     }
 
     override fun hashCode(): Int {
