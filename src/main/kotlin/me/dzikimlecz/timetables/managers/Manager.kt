@@ -44,9 +44,11 @@ class Manager {
 
     fun saveTable() = try { filesManager.saveTable(lastTable) }
         catch (e: FileAlreadyExistsException) { describedExport() }
+        catch (e: Exception) { alert(ERROR,"Błąd Zapisu", e.message) }
 
 
     fun describedExport() {
+        // FIXME: 08.05.2021 Looks like shit
         val properties = mutableMapOf<String, String>()
         find<ExportView>(params = mapOf(ExportView::exportProperties to properties)).openModal(
             UTILITY, block = true, resizable = false

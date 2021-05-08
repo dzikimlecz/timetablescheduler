@@ -58,7 +58,7 @@ class FilesManager(
         } catch (e: Exception) {
             return 3
         }
-        if (!file.exists()) file.createNewFile()
+        file.createNewFile()
         return if (!file.canWrite()) -1 else try {
             file.writeText(serialized)
             0
