@@ -13,6 +13,8 @@ import javafx.scene.control.Tab
 import javafx.scene.layout.BorderPane
 import javafx.scene.layout.BorderPane.setMargin
 import javafx.scene.layout.GridPane
+import javafx.scene.layout.GridPane.getColumnIndex
+import javafx.scene.layout.GridPane.getRowIndex
 import javafx.scene.layout.StackPane
 import javafx.scene.transform.Transform
 import me.dzikimlecz.timetables.components.fragments.TimeTableEditor.Companion.ViewMode.EDIT
@@ -25,6 +27,7 @@ import me.dzikimlecz.timetables.timetable.Cell
 import me.dzikimlecz.timetables.timetable.TimeSpan
 import me.dzikimlecz.timetables.timetable.TimeTable
 import tornadofx.*
+import kotlin.Double.Companion.POSITIVE_INFINITY
 
 private const val exportScale = 2.0
 
@@ -36,7 +39,7 @@ class TimeTableEditor : Fragment() {
 
     private var tablePane by singleAssign<GridPane>()
 
-    private val viewToolBar: ViewToolBar = find(params = mapOf(ViewToolBar::parentEditor to this))
+    private val viewToolBar = find<ViewToolBar>(params = mapOf(ViewToolBar::parentEditor to this))
 
     private val editToolBar: EditToolBar by lazy {
         find(params = mapOf(EditToolBar::parentEditor to this))
@@ -49,29 +52,33 @@ class TimeTableEditor : Fragment() {
     var viewMode: ViewMode by viewModeProperty
 
     override val root = borderpane {
-        top = viewToolBar.root
-        center {
-            tablePane = gridpane {
-                maxWidthProperty().bind(primaryStage.widthProperty() - 230)
-                maxHeightProperty().bind(primaryStage.heightProperty() - 230)
-                paddingTop = 20
-                alignment = TOP_CENTER
-                isGridLinesVisible = true
-                for (x in 0 until timeTable.columns)
-                    stackpane { borderpane(); gridpaneConstraints { columnRowIndex(x /*+ 1*/, 0) } }
+            top = viewToolBar.root
+            center {
+                tablePane = gridpane {
+                    maxWidthProperty().bind(primaryStage.widthProperty() - 230)
+                    maxHeightProperty().bind(primaryStage.heightProperty() - 230)
+                    paddingTop = 20
+                    alignment = TOP_CENTER
+                    isGridLinesVisible = true
+                    for (x in 1..timeTable.columns)
+                        stackpane { borderpane(); gridpaneConstraints { columnRowIndex(x, 0) } }
+                    setMargin(this, Insets(90.0, 25.0, 120.0, 25.0))
+                }
             }
-            setMargin(tablePane, Insets(90.0, 25.0, 120.0, 25.0))
+            for (y in 0 until timeTable.rows) {
+                tablePane.rectangle(10,10,10,10) {
+                    fill = c("red")
+                    gridpaneConstraints { columnRowIndex(0, y) }
+                }
+                editors.add(ArrayList())
+                for (x in 0 until timeTable.columns)
+                    addCell(x, y, timeTable[y][x])
+            }
+            for (x in 0 until timeTable.columns) {
+                addTimeSpans(x)
+                addTitle(x)
+            }
         }
-        for (y in 0 until timeTable.rows) {
-            editors.add(ArrayList())
-            for (x in 0 until timeTable.columns)
-                addCell(x, y, timeTable[y][x])
-        }
-        for (x in 0 until timeTable.columns) {
-            addTimeSpans(x)
-            addTitle(x)
-        }
-    }
 
     init {
         tab.content = root
@@ -127,23 +134,23 @@ class TimeTableEditor : Fragment() {
         with(tablePane) {
             stackpane {
                 maxWidthProperty().bind(
-                    tablePane.maxWidthProperty() / (timeTable.columnsProperty + 1)
+                    this@with.maxWidthProperty() / (timeTable.columnsProperty + 1)
                 )
                 maxHeightProperty().bind(
-                    (tablePane.maxHeightProperty() - 20) / (timeTable.rowsProperty + 1)
+                    (this@with.maxHeightProperty() - 20) / (timeTable.rowsProperty + 1)
                 )
                 prefWidthProperty().bind(maxWidthProperty())
                 this += editor.root
                 editor.root.maxWidthProperty().bind(maxWidthProperty())
                 editor.root.maxHeightProperty().bind(maxHeightProperty())
-                gridpaneConstraints { columnRowIndex(x /*+ 1*/, y + 1) }
+                gridpaneConstraints { columnRowIndex(x + 1, y + 1) }
             }
         }
         editor.refreshView(viewMode)
     }
 
     private fun addTitle(x: Int) {
-        val columnIndex = x /*+ 1*/
+        val columnIndex = x + 1
         if (columnIndex < 0) throw IndexOutOfBoundsException(columnIndex)
         val stackPane = tablePane.get(columnIndex, 0) as StackPane
         with(stackPane) {
@@ -167,7 +174,7 @@ class TimeTableEditor : Fragment() {
     }
 
     private fun addTimeSpans(column: Int) {
-        val columnIndex = column /*+ 1*/
+        val columnIndex = column + 1
         if (columnIndex < 0) throw IndexOutOfBoundsException(columnIndex)
         val stackPane = tablePane.get(columnIndex, 0) as StackPane
         with(stackPane) {
@@ -178,7 +185,7 @@ class TimeTableEditor : Fragment() {
                 (tablePane.maxHeightProperty() - 20) / (timeTable.rowsProperty + 1)
             )
         }
-        val borderPane = stackPane.children.filterIsInstance<BorderPane>().first()
+        val borderPane = stackPane.children.first { it is BorderPane } as BorderPane
         with(borderPane) {
             val timeSpans = timeTable.columnsTimeSpan[column]
             timeSpans.addListener { _: Change<out TimeSpan?>? -> addTimeSpans(column) }
@@ -220,7 +227,7 @@ class TimeTableEditor : Fragment() {
         val buttons = overlayCells()
         for (button in buttons.keys) {
             button.setOnAction {
-                val rowIndex = GridPane.getRowIndex(button.parent)
+                val rowIndex = getRowIndex(button.parent)
                 for ((index, editor) in editors[rowIndex].withIndex()) {
                     editor.cell.clean()
                     (getCell(index, rowIndex) as? StackPane)?.children?.removeIf { it is Button }
@@ -234,7 +241,7 @@ class TimeTableEditor : Fragment() {
         val buttons = overlayCells()
         for (button in buttons.keys) {
             button.setOnAction {
-                val columnIndex = GridPane.getColumnIndex(button.parent)
+                val columnIndex = getColumnIndex(button.parent)
                 for (row in 0 until editors.size) {
                     editors[row][columnIndex].cell.clean()
                     (getCell(columnIndex, row) as? StackPane)?.children?.removeIf { it is Button }
@@ -284,40 +291,37 @@ class TimeTableEditor : Fragment() {
     private val okButton by lazy { button("Ok") }
 
     private fun overlayCells(): Map<Button, CellEditor> {
-        val map = overlayGrid { (GridPane.getRowIndex(it) ?: 0) != 0 }
-            .mapValues { (_, location) -> editors[location.first - 1][location.second] }
+        val map = overlayGrid { (getRowIndex(it) ?: -1) > 0 && (getColumnIndex(it) ?: -1) > 0 }
+            .mapValues { (_, location) ->
+                val (y, x) = location
+                editors[y - 1][x - 1]
+            }
         for ((button, editor) in map)
             button.text = editor.cell[0]
         return map
     }
 
     private fun overlayGrid(predicate: (StackPane) -> Boolean = { true } ): Map<Button, Pair<Int, Int>> {
+        // ensures that cells are overlaid exactly once
         removeOverlayFromCells()
-        val editorPanes = tablePane.children.filterIsInstance<StackPane>()
         val buttons = mutableMapOf<Button, Pair<Int, Int>>()
-        for (pane in editorPanes) {
-            if (predicate(pane)) {
-                val location = GridPane.getRowIndex(pane) to GridPane.getColumnIndex(pane)
-                with(pane) {
-                    this += button {
-                        setMaxSize(Double.POSITIVE_INFINITY, Double.POSITIVE_INFINITY)
-                        buttons[this] = location
-                    }
-                }
+        // overlays and add button with it coordinates to buttons map
+        tablePane.editorPanes().filter(predicate).forEach {
+            it += button {
+                setMaxSize(POSITIVE_INFINITY, POSITIVE_INFINITY)
+                buttons[this] = getRowIndex(it) to getColumnIndex(it)
             }
         }
-        with(okButton) {
-            action {
-                removeOverlayFromCells()
-                this.removeFromParent()
-            }
+        okButton.action {
+            removeOverlayFromCells()
+            okButton.removeFromParent()
         }
-        editToolBar.root.items.add(okButton)
+        editToolBar.root.items += okButton
         return buttons
     }
 
     private fun removeOverlayFromCells() {
-        tablePane.children.filterIsInstance<StackPane>().forEach { pane ->
+        tablePane.editorPanes().forEach { pane ->
             pane.children.removeIf { it is Button }
         }
         okButton.removeFromParent()
@@ -328,10 +332,10 @@ class TimeTableEditor : Fragment() {
         root.removeFromParent()
     }
 
-    fun adjustTimeSpans() = with(tablePane) {
-        val buttons = overlayGrid { GridPane.getRowIndex(it) == 0 }
+    fun adjustTimeSpans() {
+        val buttons = overlayGrid { getRowIndex(it) == 0 }
         for ((i, button) in buttons.keys.withIndex()) button.setOnAction {
-            this@TimeTableEditor.openInternalWindow<TimeSpanAdjustView>(
+            this.openInternalWindow<TimeSpanAdjustView>(
                 movable = false,
                 params = mapOf(
                     TimeSpanAdjustView::column to i,
@@ -343,7 +347,7 @@ class TimeTableEditor : Fragment() {
     }
 
     private fun getCell(x: Int, y: Int) =
-        tablePane.get(x/* + 1*/, y + 1)
+        tablePane.get(x + 1, y + 1)
 
     companion object {
         enum class ViewMode {
@@ -353,8 +357,11 @@ class TimeTableEditor : Fragment() {
 }
 
 private fun GridPane.get(x: Int, y: Int) =
-    try {
-        children.first { GridPane.getColumnIndex(it) == x && GridPane.getRowIndex(it) == y }
-    } catch(e: NoSuchElementException) { null }
+        children.firstOrNull { getColumnIndex(it) == x && getRowIndex(it) == y }
 
-private fun GridPane.remove(x: Int, y: Int) = children.remove(get(x, y))
+private fun GridPane.remove(x: Int, y: Int) =
+    children.remove(get(x, y))
+
+private fun GridPane.editorPanes() =
+    children.filterIsInstance<StackPane>()
+
