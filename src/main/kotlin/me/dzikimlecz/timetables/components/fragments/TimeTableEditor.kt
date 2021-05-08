@@ -27,6 +27,7 @@ import me.dzikimlecz.timetables.timetable.Cell
 import me.dzikimlecz.timetables.timetable.TimeSpan
 import me.dzikimlecz.timetables.timetable.TimeTable
 import tornadofx.*
+import java.time.format.DateTimeFormatter
 import kotlin.Double.Companion.POSITIVE_INFINITY
 
 private const val exportScale = 2.0
@@ -52,33 +53,35 @@ class TimeTableEditor : Fragment() {
     var viewMode: ViewMode by viewModeProperty
 
     override val root = borderpane {
-            top = viewToolBar.root
-            center {
-                tablePane = gridpane {
-                    maxWidthProperty().bind(primaryStage.widthProperty() - 230)
-                    maxHeightProperty().bind(primaryStage.heightProperty() - 230)
-                    paddingTop = 20
-                    alignment = TOP_CENTER
-                    isGridLinesVisible = true
-                    for (x in 1..timeTable.columns)
-                        stackpane { borderpane(); gridpaneConstraints { columnRowIndex(x, 0) } }
-                    setMargin(this, Insets(90.0, 25.0, 120.0, 25.0))
-                }
-            }
-            for (y in 0 until timeTable.rows) {
-                tablePane.rectangle(10,10,10,10) {
-                    fill = c("red")
-                    gridpaneConstraints { columnRowIndex(0, y) }
-                }
-                editors.add(ArrayList())
-                for (x in 0 until timeTable.columns)
-                    addCell(x, y, timeTable[y][x])
-            }
-            for (x in 0 until timeTable.columns) {
-                addTimeSpans(x)
-                addTitle(x)
+        top = viewToolBar.root
+        center {
+            tablePane = gridpane {
+                maxWidthProperty().bind(primaryStage.widthProperty() - 230)
+                maxHeightProperty().bind(primaryStage.heightProperty() - 230)
+                paddingTop = 20
+                alignment = TOP_CENTER
+                isGridLinesVisible = true
+                for (x in 1..timeTable.columns)
+                    stackpane { borderpane(); gridpaneConstraints { columnRowIndex(x, 0) } }
+                setMargin(this, Insets(90.0, 25.0, 120.0, 25.0))
             }
         }
+        val dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
+        for (y in 0 until timeTable.rows) {
+            tablePane.label {
+                text = timeTable.date.plusDays(y.toLong()).format(dateFormatter)
+                gridpaneConstraints { columnRowIndex(0, y + 1) }
+                paddingAll = 5
+            }
+            editors.add(ArrayList())
+            for (x in 0 until timeTable.columns)
+                addCell(x, y, timeTable[y][x])
+        }
+        for (x in 0 until timeTable.columns) {
+            addTimeSpans(x)
+            addTitle(x)
+        }
+    }
 
     init {
         tab.content = root
