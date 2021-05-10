@@ -198,20 +198,18 @@ class TimeTableEditor : Fragment() {
             timeSpans.addListener { _: Change<out TimeSpan?>? -> addTimeSpans(column) }
             val firstSpan = timeSpans[0]
             val secondSpan = timeSpans[1]
-            (if (secondSpan == null) centerProperty() else leftProperty()).set(
-                label {
-                    text = firstSpan?.toString() ?: "-/-"
-                    alignment = CENTER
-                    maxWidthProperty().bind(
-                        this@with.widthProperty() /
-                                (if (secondSpan == null) 2 else 1)
-                    )
-                    maxHeightProperty().bind(
-                        this@with.heightProperty() / 2
-                    )
-                    setMargin(this, Insets(2.5, 5.0, 5.0, 2.5, ))
-                }
-            )
+            left = label {
+                text = firstSpan?.toString() ?: "-/-"
+                alignment = CENTER
+                maxWidthProperty().bind(
+                    this@with.widthProperty() /
+                            (if (secondSpan == null) 2 else 1)
+                )
+                maxHeightProperty().bind(
+                    this@with.heightProperty() / 2
+                )
+                setMargin(this, Insets(2.5, 5.0, 5.0, 2.5, ))
+            }
 
             if (secondSpan != null) right = label {
                 text = secondSpan.toString()
