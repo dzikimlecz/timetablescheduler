@@ -64,7 +64,7 @@ class TimeTableEditor : Fragment() {
                 paddingTop = 20
                 alignment = TOP_CENTER
                 isGridLinesVisible = true
-                for (x in 1..timeTable.columns)
+                for (x in 0..timeTable.columns)
                     stackpane { borderpane(); gridpaneConstraints { columnRowIndex(x, 0) } }
                 setMargin(this, Insets(90.0, 25.0, 120.0, 25.0))
             }
@@ -258,14 +258,16 @@ class TimeTableEditor : Fragment() {
     }
 
     fun exportTable() {
-        val params = SnapshotParameters()
-        params.transform = Transform.scale(exportScale, exportScale)
-        params.viewport = generateViewPort()
+        val params = SnapshotParameters().apply {
+            transform = Transform.scale(exportScale, exportScale)
+//            viewport = generateViewPort()
+        }
         val img = tablePane.snapshot(params, null)
         find<MainView>().manager.exportTableImage(img, timeTable.name)
     }
 
     private fun generateViewPort() = with(tablePane) {
+        // FIXME: 10.05.2021 Doesn't consider width of elements' margins. Needs complete rethink
         val margin = paddingTop.toDouble()
         var x = 0
         var width = .0
