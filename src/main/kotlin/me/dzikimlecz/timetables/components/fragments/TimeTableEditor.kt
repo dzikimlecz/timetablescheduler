@@ -205,7 +205,9 @@ class TimeTableEditor : Fragment() {
                         this@with.widthProperty() /
                                 (if (secondSpan == null) 2 else 1)
                     )
-                    maxHeight = 20.0
+                    maxHeightProperty().bind(
+                        this@with.heightProperty() / 2
+                    )
                     setMargin(this, Insets(2.5, 5.0, 5.0, 2.5, ))
                 }
             )
@@ -219,7 +221,6 @@ class TimeTableEditor : Fragment() {
                 maxHeightProperty().bind(
                     this@with.heightProperty() / 2
                 )
-                maxHeight = 20.0
                 setMargin(this, Insets(2.5, 2.5, 5.0, 5.0, ))
             }
         }
