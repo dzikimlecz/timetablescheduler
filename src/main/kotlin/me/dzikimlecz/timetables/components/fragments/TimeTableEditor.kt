@@ -7,6 +7,7 @@ import javafx.geometry.Orientation
 import javafx.geometry.Pos.CENTER
 import javafx.geometry.Pos.TOP_CENTER
 import javafx.geometry.Rectangle2D
+import javafx.scene.Node
 import javafx.scene.SnapshotParameters
 import javafx.scene.control.Button
 import javafx.scene.control.Tab
@@ -316,7 +317,7 @@ class TimeTableEditor : Fragment() {
         tablePane.editorPanes().filter(predicate).forEach {
             it += button {
                 setMaxSize(POSITIVE_INFINITY, POSITIVE_INFINITY)
-                buttons[this] = getRowIndex(it) to getColumnIndex(it)
+                buttons[this] = locate(it)
             }
         }
         okButton.action {
@@ -375,12 +376,23 @@ class TimeTableEditor : Fragment() {
     }
 }
 
+/**
+ * Returns node of the given location constraints located in the applied GridPane
+ */
 private fun GridPane.get(x: Int, y: Int) =
         children.firstOrNull { getColumnIndex(it) == x && getRowIndex(it) == y }
 
+/**
+ * Removes node of the given location constraints located in the applied GridPane
+ */
 private fun GridPane.remove(x: Int, y: Int) =
     children.remove(get(x, y))
 
 private fun GridPane.editorPanes() =
     children.filterIsInstance<StackPane>()
 
+/**
+ * Returns GridPane location constrains of the given [node] in o form of Pair of 2 ints.
+ */
+private fun locate(node: Node?) =
+    getRowIndex(node) to getColumnIndex(node)
