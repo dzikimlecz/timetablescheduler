@@ -10,12 +10,14 @@ import javafx.geometry.Rectangle2D
 import javafx.scene.SnapshotParameters
 import javafx.scene.control.Button
 import javafx.scene.control.Tab
+import javafx.scene.control.TextInputDialog
 import javafx.scene.layout.BorderPane
 import javafx.scene.layout.BorderPane.setMargin
 import javafx.scene.layout.GridPane
 import javafx.scene.layout.GridPane.getColumnIndex
 import javafx.scene.layout.GridPane.getRowIndex
 import javafx.scene.layout.StackPane
+import javafx.scene.text.TextAlignment
 import javafx.scene.transform.Transform
 import me.dzikimlecz.timetables.components.fragments.TimeTableEditor.Companion.ViewMode.EDIT
 import me.dzikimlecz.timetables.components.fragments.TimeTableEditor.Companion.ViewMode.VIEW
@@ -166,8 +168,9 @@ class TimeTableEditor : Fragment() {
         }
         val borderPane = stackPane.children.filterIsInstance<BorderPane>().first()
         with(borderPane) {
-            val title = timeTable.titles[x].get() ?: ""
-            top = label(title) {
+            top = label {
+                textProperty().bind(timeTable.titles[x])
+                textAlignment = TextAlignment.CENTER
                 maxWidthProperty().bind(this@with.widthProperty())
                 maxHeight = 20.0
                 setMargin(this, Insets(5.0, 5.0, 2.5, 5.0))
@@ -351,6 +354,18 @@ class TimeTableEditor : Fragment() {
 
     private fun getCell(x: Int, y: Int) =
         tablePane.get(x + 1, y + 1)
+
+    fun adjustTitles() {
+        val buttons = overlayGrid { getRowIndex(it) == 0 }
+        for ((i, button) in buttons.keys.withIndex()) button.setOnAction {
+            val result = TextInputDialog().apply {
+                headerText = "Zmiana nazwy zajęć"
+                contentText = "Podaj nazwę zajęć dla tej kolumny"
+            }.showAndWait().orElseGet { "" }
+            timeTable.titles[i].set(result)
+            button.removeFromParent()
+        }
+    }
 
     companion object {
         enum class ViewMode {

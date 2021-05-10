@@ -35,6 +35,7 @@ class EditToolBar : TimeTableEditorToolBar() {
                 CLEAN -> parentEditor.cleanColumns()
                 DETAILS -> showDetails()
                 TIME_SPANS -> parentEditor.adjustTimeSpans()
+                TITLE -> parentEditor.adjustTitles()
                 else -> {}
             }
         }
@@ -87,7 +88,9 @@ class EditToolBar : TimeTableEditorToolBar() {
             DETAILS("Więcej", CELL, ROW, COLUMN),
             TIME_SPANS("Czas trwania zajęć", COLUMN),
             HORIZONTAL_DIVIDE("Podziel w pionie", CELL),
-            VERTICAL_DIVIDE("Podziel w poziomie", CELL);
+            VERTICAL_DIVIDE("Podziel w poziomie", CELL),
+            TITLE("Nazwa Zajęć", COLUMN),
+            ;
 
             companion object {
                 fun String?.toChangedValue() = try {
