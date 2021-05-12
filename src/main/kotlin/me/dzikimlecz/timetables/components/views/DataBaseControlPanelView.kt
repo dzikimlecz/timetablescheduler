@@ -1,16 +1,22 @@
 package me.dzikimlecz.timetables.components.views
 
+import javafx.application.Platform
 import javafx.collections.FXCollections.emptyObservableList
 import javafx.collections.FXCollections.observableArrayList
 import javafx.collections.ObservableList
 import javafx.geometry.Orientation.VERTICAL
 import javafx.scene.control.Alert.AlertType.ERROR
+import javafx.scene.control.Alert.AlertType.WARNING
 import javafx.scene.control.ListCell
+import javafx.scene.control.ListView
 import javafx.scene.control.MultipleSelectionModel
 import javafx.scene.control.TextInputDialog
+import javafx.scene.layout.BorderPane
 import javafx.scene.text.Font.font
 import javafx.stage.StageStyle.UTILITY
 import me.dzikimlecz.lecturers.Lecturer
+import me.dzikimlecz.timetables.components.views.dialogs.LecturerSetUpView
+import me.dzikimlecz.timetables.managers.ServerAccessException
 import me.dzikimlecz.timetables.timetable.TimeTable
 import tornadofx.*
 import javafx.util.Callback as Factory
@@ -19,6 +25,8 @@ import javafx.util.Callback as Factory
 class DataBaseControlPanelView: View() {
     val lecturers by param<List<Lecturer>>()
     val tables by param<List<TimeTable>>()
+    private val manager = find<MainView>().manager
+    private val db = manager.db
 
     override val root = borderpane {
             paddingVertical = 500
@@ -46,27 +54,22 @@ class DataBaseControlPanelView: View() {
                 right = flowpane {
                     orientation = VERTICAL
                     vgap = 10.0
-                    button("Pokaż czasy Pracy") {
-
+                    button("Pokaż czasy Pracy").setOnAction {
+                        TODO()
                     }
-                    button("Dodaj Wykładowcę") {
-
+                    button("Dodaj Wykładowcę").setOnAction {
+                        val lecturerSetUpView = find<LecturerSetUpView>()
+                        lecturerSetUpView.openModal(block = true, resizable = false)
+                        val lecturer = lecturerSetUpView.lecturerContainer.get()!!
+                        runAsync() { tryToUpload(lecturer) }
                     }
                     val deleteLecturerLabel = "Usuń Wykładowcę"
-                    button(deleteLecturerLabel) {
-                        action {
-                            TextInputDialog().apply {
-                                initStyle(UTILITY)
-                                title = deleteLecturerLabel
-                                contentText = "Podaj Kod Wykładowcy do usunięcia"
-                            }.showAndWait().ifPresent {
-                                try {
-                                    find<MainView>().manager.db.removeLecturer(it)
-                                } catch (e: Exception) {
-                                    alert(ERROR, "Nie można usunąć wykładowcy $it", e.message)
-                                }
-                            }
-                        }
+                    button(deleteLecturerLabel).setOnAction {
+                        TextInputDialog().apply {
+                            initStyle(UTILITY)
+                            headerText = deleteLecturerLabel
+                            contentText = "Podaj Kod Wykładowcy do usunięcia"
+                        }.showAndWait().ifPresent { runAsync { tryToDeleteLecturer(it) } }
                     }
                 }
             }
@@ -92,15 +95,88 @@ class DataBaseControlPanelView: View() {
                 right = flowpane {
                     orientation = VERTICAL
                     vgap = 10.0
-                    button("Otwórz Plan") {
+                    button("Otwórz Plan").setOnAction {
+                        withSelectedTable {
+                            manager.displayTable(it)
+                        }
                     }
-                    button("Pobierz Plan") {
+                    button("Pobierz Plan").setOnAction {
+                        withSelectedTable {
+                            manager.activeTable = it
+                            manager.saveTable()
+                        }
                     }
                     button("Usuń Plan") {
+                        withSelectedTable {
+                            runAsync { tryToDeleteTable(it.name) }
+                        }
                     }
+
                 }
             }
         }
+
+    private fun tryToUpload(lecturer: Lecturer) {
+        val lookForLecturer = db.lookForLecturer(lecturer.code)
+        if (lookForLecturer !== null) {
+            Platform.runLater {
+                alert(
+                    WARNING,
+                    "Wykładowca o tym kodzie już istnieje!",
+                    """Nie można utworzyć 2 wykładowców o kodzie ${lecturer.code} 
+                        Istnieje już wykładowca o tym kodzie: ${lookForLecturer.name}""".trimIndent()
+                )
+            }
+            return
+        }
+        try {
+            db.sendLecturer(lecturer)
+        } catch (e: ServerAccessException) {
+            Platform.runLater { handleServerAccessException(e, "Nie udało się przesłać wykładowcy!") }
+        } catch (e: Exception) {
+            Platform.runLater { alert(ERROR, "Nie można dodać wykładowcy $lecturer", e.message) }
+        }
+    }
+
+    private fun BorderPane.withSelectedTable(action: (TimeTable) -> Unit) {
+        if (left is ListView<*>) {
+            @Suppress("UNCHECKED_CAST")
+            val listView = left as ListView<TimeTable>
+            val selectedItem: TimeTable? = listView.selectionModel.selectedItem
+            if (selectedItem !== null)
+                action(selectedItem)
+            else alert(WARNING, "Nie wybrano Planu")
+        }
+    }
+
+    private fun tryToDeleteLecturer(code: String) {
+        try {
+            db.removeLecturer(code)
+        } catch (e: ServerAccessException) {
+            Platform.runLater { handleServerAccessException(e, "Nie udało się usunąć wykładowcy!") }
+        } catch (e: Exception) {
+            Platform.runLater { alert(ERROR, "Nie można usunąć wykładowcy $code", e.message) }
+        }
+    }
+
+    private fun tryToDeleteTable(name: String) {
+        try {
+            db.removeTable(name)
+        } catch (e: ServerAccessException) {
+            Platform.runLater { handleServerAccessException(e, "Nie udało się usunąć planu!") }
+        } catch (e: Exception) {
+            Platform.runLater { alert(ERROR, "Nie można usunąć planu $name", e.message) }
+        }
+    }
+
+    private fun handleServerAccessException(e: ServerAccessException, header: String) {
+        alert(
+            ERROR,
+            header,
+            """Kod błędu ${e.code}
+               Odpowiedź serwera: ${e.reason}""".trimIndent()
+        )
+    }
 
     companion object {
         private val labelFont = font(20.0)

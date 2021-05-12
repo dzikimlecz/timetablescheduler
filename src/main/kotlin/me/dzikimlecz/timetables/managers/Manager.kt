@@ -19,13 +19,11 @@ import javax.imageio.ImageIO
 import kotlin.reflect.KProperty1
 
 class Manager {
-    private lateinit var lastTable : TimeTable
+    lateinit var activeTable : TimeTable
     private val filesManager by lazy { FilesManager() }
-    val dataBaseConnectionManager: DataBaseConnectionManager = KhttpDataBaseConnectionManager()
-    val db = dataBaseConnectionManager
-
-    val activeTable : TimeTable
-        get() = lastTable
+    private val dataBaseConnectionManager: DataBaseConnectionManager = KhttpDataBaseConnectionManager()
+    val db
+        get() = dataBaseConnectionManager
 
     private fun newTable(properties: Map<KProperty1<TimeTable, Any>, String>): TimeTable {
         val columns = (properties[TimeTable::columns] ?: badProperty("columns", true))
@@ -38,11 +36,11 @@ class Manager {
         } catch (e: Exception) {
             badProperty("date", false)
         }
-        lastTable = TimeTable(columns, rows, date, name)
-        return lastTable
+        activeTable = TimeTable(columns, rows, date, name)
+        return activeTable
     }
 
-    fun saveTable() = try { filesManager.saveTable(lastTable) }
+    fun saveTable() = try { filesManager.saveTable(activeTable) }
         catch (e: FileAlreadyExistsException) { describedExport() }
         catch (e: Exception) { alert(ERROR,"Błąd Zapisu", e.message) }
 
@@ -56,12 +54,12 @@ class Manager {
         val customName = properties["name"] ?: return
         val customPath = properties["path"] ?: return
         if (customName != "\u0000" && customPath != "\u0000")
-            filesManager.saveTable(lastTable, customPath, true, customName)
+            filesManager.saveTable(activeTable, customPath, true, customName)
         else if (customPath != "\u0000")
-            filesManager.saveTable(lastTable, customPath, true)
+            filesManager.saveTable(activeTable, customPath, true)
         else if (customName != "\u0000")
-            filesManager.saveTable(lastTable, enforce = true, name = customName)
-        else filesManager.saveTable(lastTable, enforce = true)
+            filesManager.saveTable(activeTable, enforce = true, name = customName)
+        else filesManager.saveTable(activeTable, enforce = true)
     }
 
     fun importTable() {
@@ -77,15 +75,15 @@ class Manager {
             alert(ERROR,"Błąd odczytu", e.message)
             return
         }
-        lastTable = table
-        find<MainView>().displayTable(table)
+        activeTable = table
+        displayTable(table)
     }
 
     fun setUpTable() {
         val map = mutableMapOf<KProperty1<TimeTable, Any>, String>()
         find<TimeTableSetUpView>(params = mapOf(TimeTableSetUpView::tableProperties to map))
             .openModal(UTILITY, resizable = false, block = true)
-        try { find<MainView>().displayTable(newTable(map)) } catch (e: Exception) {
+        try { displayTable(newTable(map)) } catch (e: Exception) {
             alert(ERROR,"Błąd", e.message)
             e.printStackTrace()
         }
@@ -122,5 +120,10 @@ class Manager {
         if (!file.exists()) file.createNewFile()
         ImageIO.write(image, "png", file)
     }.start()
+
+    fun displayTable(table: TimeTable) {
+        find<MainView>().displayTable(table)
+        activeTable = table
+    }
 
 }
