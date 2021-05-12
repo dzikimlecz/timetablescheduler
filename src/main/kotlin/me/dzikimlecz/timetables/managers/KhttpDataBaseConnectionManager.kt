@@ -28,18 +28,20 @@ class KhttpDataBaseConnectionManager: DataBaseConnectionManager {
         else null
     }
 
-    override fun sendTable(table: TimeTable) {
+    override fun sendTable(table: TimeTable) =
+        sendTable(Json.encodeToString(timetableSerializer, table))
 
+    override fun sendTable(data: String) {
         val postResponse = post(
             "$address/timetables",
             headers = mapOf("Content-Type" to "application/json"),
-            data = Json.encodeToString(timetableSerializer, table)
+            data = data
         )
         if (!postResponse.isOk()) {
             val patchResponse = patch(
                 "$address/timetables",
                 headers = mapOf("Content-Type" to "application/json"),
-                data = Json.encodeToString(timetableSerializer, table)
+                data = data
             )
             check (patchResponse.isOk()) {
                 """Could not create new, nor update an existing table.

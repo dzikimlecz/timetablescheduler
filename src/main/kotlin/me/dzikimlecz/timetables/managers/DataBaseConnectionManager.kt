@@ -19,6 +19,8 @@ interface DataBaseConnectionManager {
 
     fun sendTable(table: TimeTable)
 
+    fun sendTable(data: String)
+
     fun removeTable(name: String)
 
     fun getLecturers(): List<Lecturer>
