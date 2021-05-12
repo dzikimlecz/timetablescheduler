@@ -15,10 +15,12 @@ import javafx.scene.layout.BorderPane
 import javafx.scene.text.Font.font
 import javafx.stage.StageStyle.UTILITY
 import me.dzikimlecz.lecturers.Lecturer
+import me.dzikimlecz.timetables.components.views.dialogs.ImportView
 import me.dzikimlecz.timetables.components.views.dialogs.LecturerSetUpView
 import me.dzikimlecz.timetables.managers.ServerAccessException
 import me.dzikimlecz.timetables.timetable.TimeTable
 import tornadofx.*
+import java.io.File
 import javafx.util.Callback as Factory
 
 
@@ -111,10 +113,23 @@ class DataBaseControlPanelView: View() {
                             runAsync { tryToDeleteTable(it.name) }
                         }
                     }
-
+                    button("Dodaj Plan").setOnAction {
+                        val importView = find<ImportView>()
+                        importView.openModal(block = true, resizable = false)
+                        val file = importView.chosenFile ?: return@setOnAction
+                        runAsync { sendTable(file) }
+                    }
                 }
             }
         }
+
+    private fun sendTable(file: File) = try {
+        db.sendTable(file.readText())
+    } catch (e: ServerAccessException) {
+        Platform.runLater { e.handle("Nie udało się przesłać planu.") }
+    } catch (e: Exception) {
+        Platform.runLater { alert(ERROR, "Błąd przesyłania: ${e.message}") }
+    }
 
     private fun tryToUpload(lecturer: Lecturer) {
         val lookForLecturer = db.lookForLecturer(lecturer.code)
@@ -132,7 +147,7 @@ class DataBaseControlPanelView: View() {
         try {
             db.sendLecturer(lecturer)
         } catch (e: ServerAccessException) {
-            Platform.runLater { handleServerAccessException(e, "Nie udało się przesłać wykładowcy!") }
+            Platform.runLater { e.handle("Nie udało się przesłać wykładowcy!") }
         } catch (e: Exception) {
             Platform.runLater { alert(ERROR, "Nie można dodać wykładowcy $lecturer", e.message) }
         }
@@ -153,7 +168,7 @@ class DataBaseControlPanelView: View() {
         try {
             db.removeLecturer(code)
         } catch (e: ServerAccessException) {
-            Platform.runLater { handleServerAccessException(e, "Nie udało się usunąć wykładowcy!") }
+            Platform.runLater { e.handle("Nie udało się usunąć wykładowcy!") }
         } catch (e: Exception) {
             Platform.runLater { alert(ERROR, "Nie można usunąć wykładowcy $code", e.message) }
         }
@@ -163,18 +178,18 @@ class DataBaseControlPanelView: View() {
         try {
             db.removeTable(name)
         } catch (e: ServerAccessException) {
-            Platform.runLater { handleServerAccessException(e, "Nie udało się usunąć planu!") }
+            Platform.runLater { e.handle("Nie udało się usunąć planu!") }
         } catch (e: Exception) {
             Platform.runLater { alert(ERROR, "Nie można usunąć planu $name", e.message) }
         }
     }
 
-    private fun handleServerAccessException(e: ServerAccessException, header: String) {
+    private fun ServerAccessException.handle(header: String) {
         alert(
             ERROR,
             header,
-            """Kod błędu ${e.code}
-               Odpowiedź serwera: ${e.reason}""".trimIndent()
+            """Kod błędu $code
+               Odpowiedź serwera: $reason""".trimIndent()
         )
     }
 
