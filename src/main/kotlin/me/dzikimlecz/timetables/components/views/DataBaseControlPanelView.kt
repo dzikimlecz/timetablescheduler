@@ -1,6 +1,6 @@
 package me.dzikimlecz.timetables.components.views
 
-import javafx.application.Platform
+import javafx.application.Platform.runLater
 import javafx.collections.FXCollections.emptyObservableList
 import javafx.collections.FXCollections.observableArrayList
 import javafx.collections.ObservableList
@@ -14,6 +14,9 @@ import javafx.scene.control.TextInputDialog
 import javafx.scene.layout.BorderPane
 import javafx.scene.text.Font.font
 import javafx.stage.StageStyle.UTILITY
+import kotlinx.serialization.builtins.ListSerializer
+import kotlinx.serialization.builtins.serializer
+import kotlinx.serialization.json.Json
 import me.dzikimlecz.lecturers.Lecturer
 import me.dzikimlecz.timetables.components.views.dialogs.ImportView
 import me.dzikimlecz.timetables.components.views.dialogs.LecturerSetUpView
@@ -126,15 +129,23 @@ class DataBaseControlPanelView: View() {
     private fun sendTable(file: File) = try {
         db.sendTable(file.readText())
     } catch (e: ServerAccessException) {
-        Platform.runLater { e.handle("Nie udało się przesłać planu.") }
+        if (e.code == 424) {
+            val text = e.reason
+            val missingCodes = Json.decodeFromString(ListSerializer(String.serializer()), text)
+            runLater {
+                openInternalWindow<MissingLecturers>(params = mapOf(MissingLecturers::missingCodes to missingCodes))
+            }
+        } else runLater {
+            e.handle("Nie udało się przesłać planu.")
+        }
     } catch (e: Exception) {
-        Platform.runLater { alert(ERROR, "Błąd przesyłania: ${e.message}") }
+        runLater { alert(ERROR, "Błąd przesyłania: ${e.message}") }
     }
 
     private fun tryToUpload(lecturer: Lecturer) {
         val lookForLecturer = db.lookForLecturer(lecturer.code)
         if (lookForLecturer !== null) {
-            Platform.runLater {
+            runLater {
                 alert(
                     WARNING,
                     "Wykładowca o tym kodzie już istnieje!",
@@ -147,9 +158,9 @@ class DataBaseControlPanelView: View() {
         try {
             db.sendLecturer(lecturer)
         } catch (e: ServerAccessException) {
-            Platform.runLater { e.handle("Nie udało się przesłać wykładowcy!") }
+            runLater { e.handle("Nie udało się przesłać wykładowcy!") }
         } catch (e: Exception) {
-            Platform.runLater { alert(ERROR, "Nie można dodać wykładowcy $lecturer", e.message) }
+            runLater { alert(ERROR, "Nie można dodać wykładowcy $lecturer", e.message) }
         }
     }
 
@@ -164,24 +175,20 @@ class DataBaseControlPanelView: View() {
         }
     }
 
-    private fun tryToDeleteLecturer(code: String) {
-        try {
-            db.removeLecturer(code)
-        } catch (e: ServerAccessException) {
-            Platform.runLater { e.handle("Nie udało się usunąć wykładowcy!") }
-        } catch (e: Exception) {
-            Platform.runLater { alert(ERROR, "Nie można usunąć wykładowcy $code", e.message) }
-        }
+    private fun tryToDeleteLecturer(code: String) = try {
+        db.removeLecturer(code)
+    } catch (e: ServerAccessException) {
+        runLater { e.handle("Nie udało się usunąć wykładowcy!") }
+    } catch (e: Exception) {
+        runLater { alert(ERROR, "Nie można usunąć wykładowcy $code", e.message) }
     }
 
-    private fun tryToDeleteTable(name: String) {
-        try {
-            db.removeTable(name)
-        } catch (e: ServerAccessException) {
-            Platform.runLater { e.handle("Nie udało się usunąć planu!") }
-        } catch (e: Exception) {
-            Platform.runLater { alert(ERROR, "Nie można usunąć planu $name", e.message) }
-        }
+    private fun tryToDeleteTable(name: String) = try {
+        db.removeTable(name)
+    } catch (e: ServerAccessException) {
+        runLater { e.handle("Nie udało się usunąć planu!") }
+    } catch (e: Exception) {
+        runLater { alert(ERROR, "Nie można usunąć planu $name", e.message) }
     }
 
     private fun ServerAccessException.handle(header: String) {
@@ -220,3 +227,25 @@ private class NoSelectionModel<T> : MultipleSelectionModel<T>() {
     override fun selectPrevious() {}
     override fun selectNext() {}
 }
+
+internal class MissingLecturers: View("Brakujący Wykładowcy!") {
+    val missingCodes by param<List<String>>()
+
+    override val root = form {
+        fieldset("W bazie nie ma części wykładowców z tego planu") {
+            label("Brakujący wykładowcy:")
+            listview(missingCodes.asObservable()) {
+                selectionModel = NoSelectionModel()
+            }
+            label("Dodaj ich, a następnie ponownie prześlij plan") {
+                isWrapText = true
+            }
+            button("Ok") {
+                isDefaultButton = true
+                action(::close)
+            }
+        }
+    }
+}
+
+
