@@ -18,20 +18,22 @@ import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
 import me.dzikimlecz.lecturers.Lecturer
-import me.dzikimlecz.timetables.components.views.dialogs.ImportView
 import me.dzikimlecz.timetables.components.views.dialogs.LecturerSetUpView
+import me.dzikimlecz.timetables.managers.DataBaseConnectionManager
+import me.dzikimlecz.timetables.managers.Manager
 import me.dzikimlecz.timetables.managers.ServerAccessException
 import me.dzikimlecz.timetables.timetable.TimeTable
 import tornadofx.*
-import java.io.File
+import java.lang.Thread.sleep
+import java.time.format.DateTimeFormatter
 import javafx.util.Callback as Factory
 
 
 class DataBaseControlPanelView: View() {
-    val lecturers by param<List<Lecturer>>()
-    val tables by param<List<TimeTable>>()
-    private val manager = find<MainView>().manager
-    private val db = manager.db
+    private var lecturersList by singleAssign<ListView<Lecturer>>()
+    private var tablesList by singleAssign<ListView<TimeTable>>()
+    private val manager: Manager = find<MainView>().manager
+    val db by param<DataBaseConnectionManager>()
 
     override val root = borderpane {
             paddingVertical = 500
@@ -40,7 +42,8 @@ class DataBaseControlPanelView: View() {
                 top = label("Wykładowcy") {
                     font = labelFont
                 }
-                left = listview(observableArrayList(lecturers)) {
+                left {
+                    lecturersList = listview(observableArrayList()) {
                     selectionModel.clearSelection()
                     selectionModel = NoSelectionModel()
                     cellFactory = Factory {
@@ -56,17 +59,20 @@ class DataBaseControlPanelView: View() {
                         }
                     }
                 }
+                }
                 right = flowpane {
                     orientation = VERTICAL
                     vgap = 10.0
                     button("Pokaż czasy Pracy").setOnAction {
                         TODO()
+                        refresh()
                     }
                     button("Dodaj Wykładowcę").setOnAction {
                         val lecturerSetUpView = find<LecturerSetUpView>()
                         lecturerSetUpView.openModal(block = true, resizable = false)
                         val lecturer = lecturerSetUpView.lecturerContainer.get()!!
                         runAsync() { tryToUpload(lecturer) }
+                        refresh()
                     }
                     val deleteLecturerLabel = "Usuń Wykładowcę"
                     button(deleteLecturerLabel).setOnAction {
@@ -75,6 +81,7 @@ class DataBaseControlPanelView: View() {
                             headerText = deleteLecturerLabel
                             contentText = "Podaj Kod Wykładowcy do usunięcia"
                         }.showAndWait().ifPresent { runAsync { tryToDeleteLecturer(it) } }
+                        refresh()
                     }
                 }
             }
@@ -82,7 +89,8 @@ class DataBaseControlPanelView: View() {
                 top = label("Plany w Bazie Danych") {
                     font = labelFont
                 }
-                left = listview(observableArrayList(tables)) {
+                left {
+                    tablesList = listview(observableArrayList()) {
                     cellFactory = Factory {
                         object : ListCell<TimeTable>() {
                             override fun updateItem(table: TimeTable?, empty: Boolean) {
@@ -90,12 +98,13 @@ class DataBaseControlPanelView: View() {
                                 graphic = if (empty || table === null) null
                                 else borderpane {
                                     left = label(table.name) { font = listFont }
-                                    val text = "${table.date.dayOfMonth}.${table.date.monthValue}.${table.date.year}"
+                                    val text = DateTimeFormatter.ofPattern("dd.MM.yyyy").format(table.date)
                                     right = label(text) { font = listFont }
                                 }
                             }
                         }
                     }
+                }
                 }
                 right = flowpane {
                     orientation = VERTICAL
@@ -103,31 +112,46 @@ class DataBaseControlPanelView: View() {
                     button("Otwórz Plan").setOnAction {
                         withSelectedTable {
                             manager.displayTable(it)
+                            refresh()
                         }
                     }
                     button("Pobierz Plan").setOnAction {
                         withSelectedTable {
                             manager.activeTable = it
                             manager.saveTable()
+                            refresh()
                         }
                     }
-                    button("Usuń Plan") {
+                    button("Usuń Plan").setOnAction {
                         withSelectedTable {
                             runAsync { tryToDeleteTable(it.name) }
+                            refresh()
                         }
                     }
                     button("Dodaj Plan").setOnAction {
-                        val importView = find<ImportView>()
-                        importView.openModal(block = true, resizable = false)
-                        val file = importView.chosenFile ?: return@setOnAction
-                        runAsync { sendTable(file) }
+                        val table = manager.openTable() ?: return@setOnAction
+                        runAsync { sendTable(table) }
+                        refresh()
                     }
                 }
             }
+        refresh()
         }
 
-    private fun sendTable(file: File) = try {
-        db.sendTable(file.readText())
+    fun refresh() = runAsync {
+        sleep(100)
+        val timeTables = db.getTimeTables()
+        val lecturers = db.getLecturers()
+        runLater {
+            tablesList.items.clear()
+            tablesList.items += timeTables
+            lecturersList.items.clear()
+            lecturersList.items += lecturers
+        }
+    }
+
+    private fun sendTable(data: TimeTable) = try {
+        db.sendTable(data)
     } catch (e: ServerAccessException) {
         if (e.code == 424) {
             val text = e.reason
@@ -195,8 +219,9 @@ class DataBaseControlPanelView: View() {
         alert(
             ERROR,
             header,
-            """Kod błędu $code
-               Odpowiedź serwera: $reason""".trimIndent()
+            """
+                Kod błędu $code
+                Odpowiedź serwera: $reason""".trimIndent()
         )
     }
 
@@ -240,9 +265,11 @@ internal class MissingLecturers: View("Brakujący Wykładowcy!") {
             label("Dodaj ich, a następnie ponownie prześlij plan") {
                 isWrapText = true
             }
-            button("Ok") {
-                isDefaultButton = true
-                action(::close)
+            buttonbar {
+                button("Ok") {
+                    isDefaultButton = true
+                    action(::close)
+                }
             }
         }
     }

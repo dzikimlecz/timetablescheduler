@@ -5,8 +5,8 @@ import javafx.scene.control.Tab
 import javafx.scene.control.TabPane
 import javafx.scene.layout.Background
 import javafx.scene.layout.BackgroundFill
+import javafx.scene.layout.BorderPane
 import javafx.scene.paint.Color
-import me.dzikimlecz.lecturers.Lecturer
 import me.dzikimlecz.timetables.components.fragments.TimeTableEditor
 import me.dzikimlecz.timetables.managers.Manager
 import me.dzikimlecz.timetables.timetable.TimeTable
@@ -16,9 +16,9 @@ import me.dzikimlecz.timetables.components.views.DataBaseControlPanelView as Dat
 private const val defaultTitle = "Układacz planów 3tysionce !!!"
 
 class MainView : View(defaultTitle) {
-    val manager by lazy { Manager() }
+    val manager: Manager by lazy { Manager() }
 
-    override val root = borderpane {
+    override val root: BorderPane = borderpane {
         left = vbox {
             spacing = 3E1
             background = Background(BackgroundFill(Color.LIGHTGREY, null, null))
@@ -46,15 +46,12 @@ class MainView : View(defaultTitle) {
         selectionModel.select(tab)
     }
 
-    fun showDataBaseControlPane(lecturers: List<Lecturer>, tables: List<TimeTable>) =
+    fun showDataBaseControlPane(panel: DataBasePanel) =
         with(root.center as TabPane) {
             val controPanelId = "databaseControlPanel"
             val tab = tabs.firstOrNull { it.id == controPanelId }
                 ?: Tab().apply {
-                    content = find<DataBasePanel>(params = mapOf(
-                        DataBasePanel::lecturers to lecturers,
-                        DataBasePanel::tables to tables,
-                    )).root
+                    content = panel.root
                     id = controPanelId
                     text = "Baza Planów"
                     tabs += this

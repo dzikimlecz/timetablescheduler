@@ -6,6 +6,7 @@ import javafx.scene.control.Alert.AlertType.ERROR
 import javafx.scene.image.Image
 import javafx.stage.StageStyle.UTILITY
 import me.dzikimlecz.timetables.DefaultPaths
+import me.dzikimlecz.timetables.components.views.DataBaseControlPanelView
 import me.dzikimlecz.timetables.components.views.MainView
 import me.dzikimlecz.timetables.components.views.dialogs.ExportView
 import me.dzikimlecz.timetables.components.views.dialogs.ImportView
@@ -13,6 +14,7 @@ import me.dzikimlecz.timetables.components.views.dialogs.TimeTableSetUpView
 import me.dzikimlecz.timetables.timetable.TimeTable
 import tornadofx.alert
 import tornadofx.find
+import tornadofx.runAsync
 import java.io.File
 import java.time.LocalDate
 import javax.imageio.ImageIO
@@ -22,8 +24,6 @@ class Manager {
     lateinit var activeTable : TimeTable
     private val filesManager by lazy { FilesManager() }
     private val dataBaseConnectionManager: DataBaseConnectionManager = KhttpDataBaseConnectionManager()
-    val db
-        get() = dataBaseConnectionManager
 
     private fun newTable(properties: Map<KProperty1<TimeTable, Any>, String>): TimeTable {
         val columns = (properties[TimeTable::columns] ?: badProperty("columns", true))
@@ -93,24 +93,15 @@ class Manager {
         }
     }
 
-    fun openDB() {
+    fun openDB() = runAsync {
         fun alert(e: Throwable) =
             Platform.runLater { alert(ERROR, "Błąd Połączenia!", e.message) }
-
-        try { dataBaseConnectionManager.tryToConnect() } catch (e: Exception) {
-            return alert(e)
-        }
-        val lecturers = try {
-            dataBaseConnectionManager.getLecturers()
-        } catch (e: IllegalStateException) {
-            return alert(e)
-        }
-        val tables = try {
-            dataBaseConnectionManager.getTimeTables()
-        } catch (e: IllegalStateException) {
-            return alert(e)
-        }
-        find<MainView>().showDataBaseControlPane(lecturers, tables)
+        try { dataBaseConnectionManager.tryToConnect() } catch (e: Exception) { return@runAsync alert(e) }
+        val panel = find<DataBaseControlPanelView>(
+            params = mapOf(DataBaseControlPanelView::db to dataBaseConnectionManager)
+        )
+        panel.refresh()
+        Platform.runLater { find<MainView>().showDataBaseControlPane(panel) }
     }
 
     private fun badProperty(name: String, missing: Boolean): Nothing {
