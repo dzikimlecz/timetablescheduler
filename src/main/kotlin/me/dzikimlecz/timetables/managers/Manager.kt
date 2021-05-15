@@ -97,11 +97,12 @@ class Manager {
         fun alert(e: Throwable) =
             Platform.runLater { alert(ERROR, "Błąd Połączenia!", e.message) }
         try { dataBaseConnectionManager.tryToConnect() } catch (e: Exception) { return@runAsync alert(e) }
-        val panel = find<DataBaseControlPanelView>(
-            params = mapOf(DataBaseControlPanelView::db to dataBaseConnectionManager)
-        )
-        panel.refresh()
-        Platform.runLater { find<MainView>().showDataBaseControlPane(panel) }
+        val panelProvider = {
+            find<DataBaseControlPanelView>(
+                params = mapOf(DataBaseControlPanelView::db to dataBaseConnectionManager)
+            ).apply { refresh() }
+        }
+        Platform.runLater { find<MainView>().showDataBaseControlPane(panelProvider) }
     }
 
     private fun badProperty(name: String, missing: Boolean): Nothing {
