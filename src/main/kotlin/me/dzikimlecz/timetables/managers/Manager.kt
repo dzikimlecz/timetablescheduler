@@ -63,20 +63,24 @@ class Manager {
     }
 
     fun importTable() {
+        val table = openTable() ?: return
+        activeTable = table
+        displayTable(table)
+    }
+
+    fun openTable(): TimeTable? {
         val importView = find<ImportView>(params = mapOf(ImportView::filesManager to filesManager))
         importView.openModal(block = true, resizable = false)
         if (importView.chosenFile == null)  {
             alert(ERROR, "Nie wybrano pliku")
-            return
+            return null
         }
-        val table = try {
-             filesManager.readTable(importView.chosenFile!!)
+        return try {
+            filesManager.readTable(importView.chosenFile!!)
         } catch(e: Exception) {
             alert(ERROR,"Błąd odczytu", e.message)
-            return
+            null
         }
-        activeTable = table
-        displayTable(table)
     }
 
     fun setUpTable() {
