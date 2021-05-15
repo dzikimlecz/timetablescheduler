@@ -266,7 +266,7 @@ class TimeTableEditor : Fragment() {
         find<MainView>().manager.exportTableImage(img, timeTable.name)
     }
 
-    private fun generateViewPort() = with(tablePane) {
+    @Deprecated("Doesn't work") private fun generateViewPort() = with(tablePane) {
         // FIXME: 10.05.2021 Doesn't consider width of elements' margins. Needs complete rethink
         val margin = paddingTop.toDouble()
         var x = 0
@@ -346,7 +346,7 @@ class TimeTableEditor : Fragment() {
             this.openInternalWindow<TimeSpanAdjustView>(
                 movable = false,
                 params = mapOf(
-                    TimeSpanAdjustView::column to i,
+                    TimeSpanAdjustView::column to i + 1,
                     TimeSpanAdjustView::table to timeTable,
                 )
             )
