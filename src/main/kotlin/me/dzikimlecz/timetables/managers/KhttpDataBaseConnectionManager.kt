@@ -43,7 +43,7 @@ class KhttpDataBaseConnectionManager: DataBaseConnectionManager {
                 headers = mapOf("Content-Type" to "application/json"),
                 data = data
             )
-            check (patchResponse.isOk()) {
+            patchResponse.checkSuccess {
                 """Could not create new, nor update an existing table.
                     post: ${postResponse.text}
                     patch: ${patchResponse.text}""".trimIndent()
@@ -80,7 +80,7 @@ class KhttpDataBaseConnectionManager: DataBaseConnectionManager {
                 headers = mapOf("Content-Type" to "application/json"),
                 data = Json.encodeToString(lecturerSerializer, lecturer)
             )
-            check (patchResponse.isOk()) {
+            patchResponse.checkSuccess {
                 """Could not create new, nor update an existing table.
                     post: ${postResponse.text}
                     patch: ${patchResponse.text}""".trimIndent()
@@ -93,8 +93,8 @@ class KhttpDataBaseConnectionManager: DataBaseConnectionManager {
 
 }
 
-fun Response.checkSuccess() {
-    if (!isOk()) throw ServerAccessException("Connection problem", statusCode, text)
+fun Response.checkSuccess(msg: () -> String = { "Connection problem" }) {
+    if (!isOk()) throw ServerAccessException(msg(), statusCode, text)
 }
 
 fun Response.isOk() = statusCode in 200..299
