@@ -23,7 +23,7 @@ dependencies {
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.7.0")
     implementation(kotlin("stdlib-jdk8"))
     implementation("khttp:khttp:1.0.0")
-    implementation(files("C:\\libs\\transferred-0.0.1-SNAPSHOT.jar"))
+    implementation(files("C:\\libs\\transferred-1.jar"))
 }
 javafx {
     version = "16"
