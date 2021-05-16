@@ -361,7 +361,10 @@ class TimeTableEditor : Fragment() {
         tablePane.get(x + 1, y + 1)
 
     fun adjustTitles() {
-        val buttons = overlayGrid { getRowIndex(it) == 0 }
+        val buttons = overlayGrid {
+            val (y, x) = locate(it)
+            x != 0 && y == 0
+        }
         for ((i, button) in buttons.keys.withIndex()) button.setOnAction {
             val result = TextInputDialog().apply {
                 headerText = "Zmiana nazwy zajęć"
