@@ -13,7 +13,6 @@ import javafx.scene.control.Button
 import javafx.scene.control.Tab
 import javafx.scene.control.TextInputDialog
 import javafx.scene.layout.BorderPane
-import javafx.scene.layout.BorderPane.setMargin
 import javafx.scene.layout.GridPane
 import javafx.scene.layout.GridPane.getColumnIndex
 import javafx.scene.layout.GridPane.getRowIndex
@@ -66,7 +65,7 @@ class TimeTableEditor : Fragment() {
                 isGridLinesVisible = true
                 for (x in 0..timeTable.columns)
                     stackpane { borderpane(); gridpaneConstraints { columnRowIndex(x, 0) } }
-                setMargin(this, Insets(90.0, 25.0, 120.0, 25.0))
+                margin = Insets(90.0, 25.0, 120.0, 25.0)
             }
         }
         val dateFormatter = DateTimeFormatter.ofPattern("dd.MM.yyyy")
@@ -174,7 +173,7 @@ class TimeTableEditor : Fragment() {
                 textAlignment = TextAlignment.CENTER
                 maxWidthProperty().bind(this@with.widthProperty())
                 maxHeight = 20.0
-                setMargin(this, Insets(5.0, 5.0, 2.5, 5.0))
+                margin = Insets(5.0, 5.0, 2.5, 5.0)
                 isWrapText = true
             }
         }
@@ -208,7 +207,7 @@ class TimeTableEditor : Fragment() {
                 maxHeightProperty().bind(
                     this@with.heightProperty() / 2
                 )
-                setMargin(this, Insets(2.5, 5.0, 5.0, 2.5, ))
+                margin = Insets(2.5, 5.0, 5.0, 2.5, )
             }
 
             if (secondSpan != null) right = label {
@@ -220,7 +219,7 @@ class TimeTableEditor : Fragment() {
                 maxHeightProperty().bind(
                     this@with.heightProperty() / 2
                 )
-                setMargin(this, Insets(2.5, 2.5, 5.0, 5.0, ))
+                margin = Insets(2.5, 2.5, 5.0, 5.0, )
             }
         }
     }
@@ -402,3 +401,7 @@ private fun GridPane.editorPanes() =
  */
 private fun locate(node: Node?) =
     getRowIndex(node) to getColumnIndex(node)
+
+var Node.margin: Insets
+    get() = BorderPane.getMargin(this) ?: Insets.EMPTY
+    set(value) = BorderPane.setMargin(this, value)
