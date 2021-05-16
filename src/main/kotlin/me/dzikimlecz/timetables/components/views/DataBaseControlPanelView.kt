@@ -58,7 +58,7 @@ class DataBaseControlPanelView: View() {
                             }
                         }
                     }
-                }
+                    }
                 }
                 right = flowpane {
                     orientation = VERTICAL
