@@ -64,14 +64,14 @@ class DataBaseControlPanelView: View() {
                     orientation = VERTICAL
                     vgap = 10.0
                     button("Pokaż czasy Pracy").setOnAction {
-                        TODO()
                         refresh()
+                        find<MainView>().displayLecturersWorkTime(lecturersList.items)
                     }
                     button("Dodaj Wykładowcę").setOnAction {
                         val lecturerSetUpView = find<LecturerSetUpView>()
                         lecturerSetUpView.openModal(block = true, resizable = false)
                         val lecturer = lecturerSetUpView.lecturerContainer.get()!!
-                        runAsync() { tryToUpload(lecturer) }
+                        runAsync { tryToUpload(lecturer) }
                         refresh()
                     }
                     val deleteLecturerLabel = "Usuń Wykładowcę"

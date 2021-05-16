@@ -7,6 +7,7 @@ import javafx.scene.layout.Background
 import javafx.scene.layout.BackgroundFill
 import javafx.scene.layout.BorderPane
 import javafx.scene.paint.Color
+import me.dzikimlecz.lecturers.Lecturer
 import me.dzikimlecz.timetables.components.fragments.TimeTableEditor
 import me.dzikimlecz.timetables.managers.Manager
 import me.dzikimlecz.timetables.timetable.TimeTable
@@ -65,4 +66,19 @@ class MainView : View(defaultTitle) {
         setWindowMinSize(800, 400)
         primaryStage.isMaximized = true
     }
+
+    fun displayLecturersWorkTime(items: Collection<Lecturer>) =
+        with(root.center as TabPane) {
+            val lecturerPanelId = "lecturersWorkTime"
+            val tab = tabs.firstOrNull { it.id == lecturerPanelId }
+                ?: Tab().apply {
+                    val panel = find<LecturerWorkTimeDisplay>()
+                    panel.refresh(items)
+                    content = panel.root
+                    id = lecturerPanelId
+                    text = "Czasy Pracy"
+                    tabs += this
+                }
+            selectionModel.select(tab)
+        }
 }
