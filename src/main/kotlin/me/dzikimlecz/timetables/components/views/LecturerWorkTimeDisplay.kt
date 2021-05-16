@@ -1,19 +1,18 @@
 package me.dzikimlecz.timetables.components.views
 
 import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.property.SimpleStringProperty
 import javafx.collections.FXCollections.observableArrayList
-import javafx.scene.control.ListCell
-import javafx.scene.control.ListView
+import javafx.scene.control.TableView
 import javafx.scene.layout.BorderPane
-import javafx.scene.text.Font
 import me.dzikimlecz.lecturers.Lecturer
 import me.dzikimlecz.lecturers.SettlingPeriod
 import tornadofx.*
 import java.time.LocalDate
-import javafx.util.Callback as Factory
 
 class LecturerWorkTimeDisplay: View() {
-    private var lecturersView by singleAssign<ListView<Lecturer>>()
+    private val lecturers = observableArrayList<Lecturer>()
+    private var table by singleAssign<TableView<Lecturer>>()
     private val filterStart = SimpleObjectProperty(LocalDate.now())
     private val filterEnd = SimpleObjectProperty(LocalDate.now().minusDays(1))
     private var timeFilter: (Map<SettlingPeriod, Int>) -> Map<SettlingPeriod, Int> = { it }
@@ -21,23 +20,21 @@ class LecturerWorkTimeDisplay: View() {
 
     override val root: BorderPane = borderpane {
         left {
-            lecturersView = listview(observableArrayList()) {
-                cellFactory = Factory {
-                    object : ListCell<Lecturer>() {
-                        override fun updateItem(item: Lecturer?, empty: Boolean) {
-                            super.updateItem(item, empty)
-                            graphic = if (empty || item === null) null
-                            else borderpane {
-                                left = label(item.name) { font = listFont }
-                                center = label(item.code) { font = listFont }
-                                right = label {
-                                    text = item.getHoursWorkedText()
-                                    font = listFont
-                                }
-                            }
-                        }
-                    }
+            table = tableview(lecturers) {
+                isEditable = false
+                column<Lecturer, String>("Imię i Nazwisko") {
+                    val lecturer = it.value
+                    SimpleStringProperty(lecturer.name)
                 }
+                column<Lecturer, String>("Kod") {
+                    val lecturer = it.value
+                    SimpleStringProperty(lecturer.code)
+                }
+                column<Lecturer, String>("Czas Pracy") {
+                    val lecturer = it.value
+                    SimpleStringProperty(lecturer.getHoursWorkedText())
+                }
+
             }
         }
         right {
@@ -62,7 +59,7 @@ class LecturerWorkTimeDisplay: View() {
                                         !period.end.isBefore(filterStart.get()) || !period.start.isAfter(filterEnd.get())
                                     }
                                 }
-                                lecturersView.refresh()
+                                table.refresh()
                             }
                         }
                     }
@@ -73,8 +70,8 @@ class LecturerWorkTimeDisplay: View() {
 
     fun refresh(lecturers: Collection<Lecturer>) {
         timeFilter = { it }
-        lecturersView.items.clear()
-        lecturersView.items += lecturers
+        this.lecturers.clear()
+        this.lecturers += lecturers
         filterStart.set(LocalDate.now())
         filterEnd.set(LocalDate.now().minusDays(1))
     }
@@ -86,9 +83,4 @@ class LecturerWorkTimeDisplay: View() {
         return "$hours h $minutes min"
     }
 
-
-    companion object {
-        private val labelFont = Font.font(20.0)
-        private val listFont = Font.font(14.0)
-    }
 }
