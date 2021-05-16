@@ -341,12 +341,15 @@ class TimeTableEditor : Fragment() {
     }
 
     fun adjustTimeSpans() {
-        val buttons = overlayGrid { getRowIndex(it) == 0 }
+        val buttons = overlayGrid {
+            val (y, x) = locate(it)
+            x != 0 && y == 0
+        }
         for ((i, button) in buttons.keys.withIndex()) button.setOnAction {
             this.openInternalWindow<TimeSpanAdjustView>(
                 movable = false,
                 params = mapOf(
-                    TimeSpanAdjustView::column to i + 1,
+                    TimeSpanAdjustView::column to i,
                     TimeSpanAdjustView::table to timeTable,
                 )
             )
