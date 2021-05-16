@@ -48,12 +48,12 @@ class MainView : View(defaultTitle) {
 
     fun showDataBaseControlPane(panelProvider: () -> DataBasePanel) =
         with(root.center as TabPane) {
-            val controPanelId = "databaseControlPanel"
-            val tab = tabs.firstOrNull { it.id == controPanelId }
+            val controlPanelId = "databaseControlPanel"
+            val tab = tabs.firstOrNull { it.id == controlPanelId }
                 ?: Tab().apply {
                     val panel = panelProvider()
                     content = panel.root
-                    id = controPanelId
+                    id = controlPanelId
                     text = "Baza Planów"
                     tabs += this
                 }
