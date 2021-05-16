@@ -1,5 +1,6 @@
 package me.dzikimlecz.timetables.components.views
 
+import javafx.scene.Node
 import javafx.scene.control.Button
 import javafx.scene.control.Tab
 import javafx.scene.control.TabPane
@@ -48,17 +49,8 @@ class MainView : View(defaultTitle) {
     }
 
     fun showDataBaseControlPane(panelProvider: () -> DataBasePanel) =
-        with(root.center as TabPane) {
-            val controlPanelId = "databaseControlPanel"
-            val tab = tabs.firstOrNull { it.id == controlPanelId }
-                ?: Tab().apply {
-                    val panel = panelProvider()
-                    content = panel.root
-                    id = controlPanelId
-                    text = "Baza Planów"
-                    tabs += this
-                }
-            selectionModel.select(tab)
+        injectSingletonTab("databaseControlPanel", "Baza Planów") {
+            panelProvider().root
         }
 
     override fun onBeforeShow() {
@@ -68,15 +60,19 @@ class MainView : View(defaultTitle) {
     }
 
     fun displayLecturersWorkTime(items: Collection<Lecturer>) =
+        injectSingletonTab("lecturersWorkTime", "Czasy Pracy") {
+            val panel = find<LecturerWorkTimeDisplay>()
+            panel.refresh(items)
+            panel.root
+        }
+
+    private fun injectSingletonTab(id: String, name: String, contentProducer: () -> Node)  =
         with(root.center as TabPane) {
-            val lecturerPanelId = "lecturersWorkTime"
-            val tab = tabs.firstOrNull { it.id == lecturerPanelId }
+            val tab = tabs.firstOrNull { it.id == id }
                 ?: Tab().apply {
-                    val panel = find<LecturerWorkTimeDisplay>()
-                    panel.refresh(items)
-                    content = panel.root
-                    id = lecturerPanelId
-                    text = "Czasy Pracy"
+                    content = contentProducer()
+                    this.id = id
+                    text = name
                     tabs += this
                 }
             selectionModel.select(tab)
