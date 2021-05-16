@@ -78,8 +78,8 @@ class LecturerWorkTimeDisplay: View() {
 
     private fun Lecturer.getHoursWorkedText(): String {
         val allMinutes = timeFilter(hoursWorked).values.sum()
-        val hours = allMinutes % 60
-        val minutes = allMinutes / 60
+        val hours = allMinutes / 60
+        val minutes = allMinutes % 60
         return "$hours h $minutes min"
     }
 
