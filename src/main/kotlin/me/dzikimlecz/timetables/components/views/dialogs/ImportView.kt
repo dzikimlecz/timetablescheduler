@@ -1,6 +1,7 @@
 package me.dzikimlecz.timetables.components.views.dialogs
 
 
+import javafx.scene.control.Alert.AlertType.ERROR
 import javafx.scene.control.CheckBox
 import javafx.scene.control.ListCell
 import javafx.scene.control.ListView
@@ -40,6 +41,7 @@ class ImportView : View("Otwórz") {
         }
 
     override fun onBeforeShow() {
+        file = null
         filesManager.refreshJsonFiles()
         useCustomPath.isSelected = false
     }
@@ -65,11 +67,26 @@ class ImportView : View("Otwórz") {
         }
 
         buttonbar {
-            button("Ok").setOnAction {
-                file = if (useCustomPath.isSelected)
-                    try { File(customPath.text) } catch(e: Exception) { null }
-                else filesList.selectedItem
-                close()
+            button("Ok") {
+                isDefaultButton = true
+                action {
+                    file =
+                        if (useCustomPath.isSelected) try {
+                            val file = File(customPath.text)
+                            if (!file.exists()) alert(
+                                ERROR,
+                                "Nie znaleziono pliku",
+                                "Plik o nazwie ${customPath.text} nie istnieje"
+                            )
+                            file
+                        } catch (e: Exception) { null }
+                        else filesList.selectedItem
+                    close()
+                }
+            }
+            button("Anuluj") {
+                isCancelButton = true
+                action(::close)
             }
         }
     }
