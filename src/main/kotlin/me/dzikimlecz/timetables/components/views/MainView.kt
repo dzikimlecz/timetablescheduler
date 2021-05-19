@@ -26,7 +26,7 @@ class MainView : View(defaultTitle) {
             background = Background(BackgroundFill(Color.LIGHTGREY, null, null))
             paddingTop = 15
             button("Nowy Plan").setOnAction { manager.setUpTable() }
-            button("Otwórz Plan").setOnAction { manager.importTable() }
+            button("Otwórz Plan").setOnAction { manager.openTable() }
             button("Otwórz Bazę Godzin").setOnAction { manager.openDB() }
             children.filterIsInstance<Button>().forEach {
                 it.prefWidth = 1.8E2

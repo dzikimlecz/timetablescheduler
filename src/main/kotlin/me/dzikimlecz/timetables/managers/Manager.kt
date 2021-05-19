@@ -62,13 +62,13 @@ class Manager {
         else filesManager.saveTable(activeTable, enforce = true)
     }
 
-    fun importTable() {
-        val table = openTable() ?: return
+    fun openTable() {
+        val table = importTable() ?: return
         activeTable = table
         displayTable(table)
     }
 
-    fun openTable(): TimeTable? {
+    fun importTable(): TimeTable? {
         val importView = find<ImportView>(params = mapOf(ImportView::filesManager to filesManager))
         importView.openModal(block = true, resizable = false)
         if (importView.chosenFile == null)  {

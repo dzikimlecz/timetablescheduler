@@ -129,7 +129,7 @@ class DataBaseControlPanelView: View() {
                         }
                     }
                     button("Dodaj Plan").setOnAction {
-                        val table = manager.openTable() ?: return@setOnAction
+                        val table = manager.importTable() ?: return@setOnAction
                         runAsync { sendTable(table) }
                         refresh()
                     }
