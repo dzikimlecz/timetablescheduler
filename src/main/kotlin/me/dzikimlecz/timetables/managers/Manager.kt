@@ -28,19 +28,15 @@ class Manager {
         catch (e: Exception) { alert(ERROR,"Błąd Zapisu", e.message) }
 
     fun describedExport() {
-        // FIXME: 08.05.2021 Looks like shit, works like shit
-        val properties = mutableMapOf<String, String>()
-        find<ExportView>(params = mapOf(ExportView::exportProperties to properties)).openModal(
-            UTILITY, block = true, resizable = false
-        )
-        val customName = properties["name"] ?: return
-        val customPath = properties["path"] ?: return
-        if (customName != "\u0000" && customPath != "\u0000")
-            filesManager.saveTable(activeTable, customPath, true, customName)
-        else if (customPath != "\u0000")
-            filesManager.saveTable(activeTable, customPath, true)
-        else if (customName != "\u0000")
-            filesManager.saveTable(activeTable, enforce = true, name = customName)
+        val exportView = find<ExportView>()
+        exportView.openModal(UTILITY, block = true, resizable = false)
+        val (path, name) = exportView.fileData ?: return
+        if (name !== null && path !== null)
+            filesManager.saveTable(activeTable, path, true, name)
+        else if (path !== null)
+            filesManager.saveTable(activeTable, path, true)
+        else if (name !== null)
+            filesManager.saveTable(activeTable, enforce = true, name = name)
         else filesManager.saveTable(activeTable, enforce = true)
     }
 

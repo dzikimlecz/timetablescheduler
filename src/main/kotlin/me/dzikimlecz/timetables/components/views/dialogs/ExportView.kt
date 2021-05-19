@@ -7,7 +7,10 @@ import tornadofx.*
 import java.io.File
 
 class ExportView : View("Zapisz jako") {
-    val exportProperties by param<MutableMap<String, String>>()
+    private var pathToName: Pair<String?, String?>? = null
+
+    val fileData
+        get() = pathToName
 
     private val customPath = SimpleStringProperty("")
     private val customName = SimpleStringProperty("")
@@ -49,23 +52,25 @@ class ExportView : View("Zapisz jako") {
             button("Ok") {
                 isDefaultButton = true
                 action {
-                    val customPath = customPath.get().ifBlank { null }
-                    val customName = customName.get().ifBlank { null }
-                    val useCustomName = !useDefaultName.get()
-                    val useCustomPath = !useDefaultPath.get()
-                    if (useCustomName && useCustomPath) fillProperties(customName, customPath)
-                    else if (useCustomName) fillProperties(customName)
-                    else if (useCustomPath) fillProperties(path = customPath)
-                    else fillProperties()
+                    val path = if (useDefaultPath.get()) null else customPath.get().ifBlank { null }
+                    val name = if (useDefaultName.get()) null else customName.get().ifBlank { null }
+                    pathToName = path to name
                     close()
                 }
+            }
+            button("Anuluj") {
+                isCancelButton = true
+                action(::close)
             }
         }
     }
 
-    private fun fillProperties(name: String? = null, path: String? = null) {
-        exportProperties["name"] = name ?: "\u0000"
-        exportProperties["path"] = path ?: "\u0000"
+    override fun onBeforeShow() {
+        customPath.set("")
+        customName.set("")
+        useDefaultName.set(true)
+        useDefaultPath.set(true)
+        pathToName = null
     }
 
     private fun setNameFieldDisplayed(active: Boolean) {
