@@ -9,7 +9,6 @@ import tornadofx.*
 import java.time.LocalDate
 import java.time.LocalDate.now
 import java.time.format.DateTimeFormatter.ISO_LOCAL_DATE
-import kotlin.reflect.KProperty1
 
 class TimeTableSetUpView : View("Nowy Plan") {
 
@@ -17,7 +16,6 @@ class TimeTableSetUpView : View("Nowy Plan") {
     private val rows = SimpleStringProperty("")
     private val columns = SimpleStringProperty("")
     private val date = SimpleObjectProperty<LocalDate>(now())
-    val tableProperties by param<MutableMap<KProperty1<TimeTable, Any>, String>>()
     var table: TimeTable? = null
 
     override val root = form {
@@ -58,22 +56,33 @@ class TimeTableSetUpView : View("Nowy Plan") {
             }
         }
 
-        button("Ok") {
-            font = bigFont
-            action {
-                tableProperties[TimeTable::name] = name.get().ifBlank { now().format(ISO_LOCAL_DATE) }
-                tableProperties[TimeTable::rows] = rows.get().ifBlank { "1" }
-                tableProperties[TimeTable::columns] = columns.get().ifBlank { "1" }
-                tableProperties[TimeTable::date] = date.get().format(ISO_LOCAL_DATE)
-                close()
+        buttonbar {
+            button("Ok") {
+                isDefaultButton = true
+                font = bigFont
+                action {
+                    val name = name.get().ifBlank { now().format(ISO_LOCAL_DATE) }
+                    val rows = rows.get().toIntOrNull() ?: 1
+                    val columns = columns.get().toIntOrNull() ?: 1
+                    table = TimeTable(columns, rows, date.get(), name)
+                    close()
+                }
+            }
+            button("Anuluj") {
+                isCancelButton = true
+                font = bigFont
+                action(::close)
             }
         }
+
+
     }
 
-    override fun onBeforeShow() = try {
+    override fun onBeforeShow() {
         listOf(name, rows, columns).forEach { it.set("") }
         date.set(now())
-    } catch(_: Exception) {}
+        table = null
+    }
 }
 
 fun TextField.filterNumbers() = filterInput {

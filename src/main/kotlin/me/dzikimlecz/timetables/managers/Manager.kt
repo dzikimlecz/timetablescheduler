@@ -16,37 +16,19 @@ import tornadofx.alert
 import tornadofx.find
 import tornadofx.runAsync
 import java.io.File
-import java.time.LocalDate
 import javax.imageio.ImageIO
-import kotlin.reflect.KProperty1
 
 class Manager {
     lateinit var activeTable : TimeTable
     private val filesManager by lazy { FilesManager() }
     private val dataBaseConnectionManager: DataBaseConnectionManager = KhttpDataBaseConnectionManager()
 
-    private fun newTable(properties: Map<KProperty1<TimeTable, Any>, String>): TimeTable {
-        val columns = (properties[TimeTable::columns] ?: badProperty("columns", true))
-            .toIntOrNull() ?: badProperty("columns", false)
-        val rows = (properties[TimeTable::rows] ?: badProperty("rows", true))
-            .toIntOrNull() ?: badProperty("rows", false)
-        val name = properties[TimeTable::name] ?: badProperty("name", true)
-        val date = try {
-            LocalDate.parse(properties[TimeTable::date] ?: badProperty("date", true))
-        } catch (e: Exception) {
-            badProperty("date", false)
-        }
-        activeTable = TimeTable(columns, rows, date, name)
-        return activeTable
-    }
-
     fun saveTable() = try { filesManager.saveTable(activeTable) }
         catch (e: FileAlreadyExistsException) { describedExport() }
         catch (e: Exception) { alert(ERROR,"Błąd Zapisu", e.message) }
 
-
     fun describedExport() {
-        // FIXME: 08.05.2021 Looks like shit
+        // FIXME: 08.05.2021 Looks like shit, works like shit
         val properties = mutableMapOf<String, String>()
         find<ExportView>(params = mapOf(ExportView::exportProperties to properties)).openModal(
             UTILITY, block = true, resizable = false
@@ -72,22 +54,24 @@ class Manager {
         val importView = find<ImportView>(params = mapOf(ImportView::filesManager to filesManager))
         importView.openModal(block = true, resizable = false)
         val chosenFile = importView.chosenFile
-        return if (chosenFile == null) null
-        else try {
-            filesManager.readTable(chosenFile)
-        } catch(e: Exception) {
-            alert(ERROR,"Błąd odczytu", e.message)
-            null
-        }
+        return if (chosenFile !== null)
+            try {
+                filesManager.readTable(chosenFile)
+            } catch(e: Exception) {
+                alert(ERROR,"Błąd odczytu", e.message)
+                null
+            }
+        else null
     }
 
     fun setUpTable() {
-        val map = mutableMapOf<KProperty1<TimeTable, Any>, String>()
-        find<TimeTableSetUpView>(params = mapOf(TimeTableSetUpView::tableProperties to map))
-            .openModal(UTILITY, resizable = false, block = true)
-        try { displayTable(newTable(map)) } catch (e: Exception) {
-            alert(ERROR,"Błąd", e.message)
-            e.printStackTrace()
+        val tableSetUpView = find<TimeTableSetUpView>()
+        tableSetUpView.openModal(UTILITY, resizable = false, block = true)
+        val table = tableSetUpView.table
+        if (table !== null) try {
+            displayTable(table)
+        } catch (e: Exception) {
+            alert(ERROR, "Błąd", e.message)
         }
     }
 
@@ -101,11 +85,6 @@ class Manager {
             ).apply { refresh() }
         }
         Platform.runLater { find<MainView>().showDataBaseControlPane(panelProvider) }
-    }
-
-    private fun badProperty(name: String, missing: Boolean): Nothing {
-        val cause = if (missing) "Missing" else "Wrongly formatted"
-        throw IllegalArgumentException("$cause property: $name")
     }
 
     fun exportTableImage(img: Image, name: String) = Thread {
