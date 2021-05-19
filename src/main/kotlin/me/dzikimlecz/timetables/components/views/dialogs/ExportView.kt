@@ -1,6 +1,7 @@
 package me.dzikimlecz.timetables.components.views.dialogs
 
-import javafx.scene.control.CheckBox
+import javafx.beans.property.SimpleBooleanProperty
+import javafx.beans.property.SimpleStringProperty
 import me.dzikimlecz.timetables.DefaultPaths
 import tornadofx.*
 import java.io.File
@@ -8,60 +9,56 @@ import java.io.File
 class ExportView : View("Zapisz jako") {
     val exportProperties by param<MutableMap<String, String>>()
 
-    private var nameSet by singleAssign<Fieldset>()
-    private val nameField = field("Nazwa Pliku")
-    private val nameTextField = textfield()
-    private var pathSet by singleAssign<Fieldset>()
-    private val pathField = field("Lokalizacja")
-    private val pathTextField = textfield()
+    private val customPath = SimpleStringProperty("")
+    private val customName = SimpleStringProperty("")
 
-    init {
-        nameField += nameTextField
-        with(pathField) {
-            this += pathTextField
-            button("Wybierz") {
-                action {
-                    val file = chooseDirectory(
-                        "Wybierz folder",
-                        File(DefaultPaths.EXPORT.value),
-                        currentWindow
-                    )
-                    pathField.text = file?.absolutePath ?: ""
-                }
+    private val useDefaultName = SimpleBooleanProperty(true).apply {
+        addListener { _, _, newValue -> setNameFieldDisplayed(!newValue) }
+    }
+
+    private val useDefaultPath = SimpleBooleanProperty(true).apply {
+        addListener { _, _, newValue -> togglePathSelector(!newValue) }
+    }
+
+    private var nameSet by singleAssign<Fieldset>()
+    private val nameField = field("Nazwa Pliku") { textfield(customName) }
+
+    private var pathSet by singleAssign<Fieldset>()
+    private val pathField = field("Lokalizacja") {
+        textfield(customPath)
+        button("Wybierz") {
+            action {
+                val file = chooseDirectory(
+                    "Wybierz folder",
+                    File(DefaultPaths.EXPORT.value),
+                    currentWindow
+                )
+                customPath.set(file?.absolutePath ?: "")
             }
         }
     }
 
     override val root = form {
         nameSet = fieldset("Nazwa") {
-            checkbox("Użyj nazwy planu jako nazwy pliku") {
-                isSelected = true
-                action {
-                    setNameFieldDisplayed(!isSelected)
-                }
-            }
+            checkbox("Użyj nazwy planu jako nazwy pliku", useDefaultName)
         }
         pathSet = fieldset("Lokalizacja") {
-            checkbox("Zapisz w domyślnej lokalizacji (Zalecane)") {
-                isSelected = true
-                action {
-                    togglePathSelector(!isSelected)
-                }
-            }
+            checkbox("Zapisz w domyślnej lokalizacji (Zalecane)", useDefaultPath)
         }
         buttonbar {
-            button("Ok").setOnAction {
-                val useCustomName =
-                    nameSet.children.stream().anyMatch { it is CheckBox && !it.isSelected }
-                val useCustomPath =
-                    pathField.children.stream().anyMatch { it is CheckBox && !it.isSelected }
-                val customPath = pathTextField.text.ifBlank { null }
-                val customName = nameTextField.text.ifBlank { null }
-                if (useCustomName && useCustomPath) fillProperties(customName, customPath)
-                else if (useCustomName) fillProperties(customName)
-                else if (useCustomPath) fillProperties(path = customPath)
-                else fillProperties()
-                close()
+            button("Ok") {
+                isDefaultButton = true
+                action {
+                    val customPath = customPath.get().ifBlank { null }
+                    val customName = customName.get().ifBlank { null }
+                    val useCustomName = !useDefaultName.get()
+                    val useCustomPath = !useDefaultPath.get()
+                    if (useCustomName && useCustomPath) fillProperties(customName, customPath)
+                    else if (useCustomName) fillProperties(customName)
+                    else if (useCustomPath) fillProperties(path = customPath)
+                    else fillProperties()
+                    close()
+                }
             }
         }
     }
@@ -72,18 +69,15 @@ class ExportView : View("Zapisz jako") {
     }
 
     private fun setNameFieldDisplayed(active: Boolean) {
-        if (active) with(nameSet) {
-            this += nameField
-        } else nameField.removeFromParent()
+        if (active) nameSet += nameField
+        else nameField.removeFromParent()
         root.scene.window.sizeToScene()
     }
 
     private fun togglePathSelector(active: Boolean) {
-        if (active) with(pathSet) {
-            this += pathField
-        } else pathField.removeFromParent()
+        if (active) pathSet += pathField
+        else pathField.removeFromParent()
         root.scene.window.sizeToScene()
     }
-
 
 }
