@@ -41,6 +41,7 @@ class ImportView : View("Otwórz") {
         }
 
     override fun onBeforeShow() {
+        filesList.selectionModel.select(null)
         file = null
         filesManager.refreshJsonFiles()
         useCustomPath.isSelected = false
