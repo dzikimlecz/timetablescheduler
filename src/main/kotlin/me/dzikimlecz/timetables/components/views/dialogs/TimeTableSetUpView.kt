@@ -16,7 +16,10 @@ class TimeTableSetUpView : View("Nowy Plan") {
     private val rows = SimpleStringProperty("")
     private val columns = SimpleStringProperty("")
     private val date = SimpleObjectProperty<LocalDate>(now())
-    var table: TimeTable? = null
+    private var _table: TimeTable? = null
+
+    val table
+        get() = _table
 
     override val root = form {
         paddingAll = 20
@@ -64,7 +67,7 @@ class TimeTableSetUpView : View("Nowy Plan") {
                     val name = name.get().ifBlank { now().format(ISO_LOCAL_DATE) }
                     val rows = rows.get().toIntOrNull() ?: 1
                     val columns = columns.get().toIntOrNull() ?: 1
-                    table = TimeTable(columns, rows, date.get(), name)
+                    _table = TimeTable(columns, rows, date.get(), name)
                     close()
                 }
             }
@@ -81,7 +84,7 @@ class TimeTableSetUpView : View("Nowy Plan") {
     override fun onBeforeShow() {
         listOf(name, rows, columns).forEach { it.set("") }
         date.set(now())
-        table = null
+        _table = null
     }
 }
 
