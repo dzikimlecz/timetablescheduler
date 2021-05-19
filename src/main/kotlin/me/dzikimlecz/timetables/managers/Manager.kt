@@ -71,12 +71,10 @@ class Manager {
     fun importTable(): TimeTable? {
         val importView = find<ImportView>(params = mapOf(ImportView::filesManager to filesManager))
         importView.openModal(block = true, resizable = false)
-        if (importView.chosenFile == null)  {
-            alert(ERROR, "Nie wybrano pliku")
-            return null
-        }
-        return try {
-            filesManager.readTable(importView.chosenFile!!)
+        val chosenFile = importView.chosenFile
+        return if (chosenFile == null) null
+        else try {
+            filesManager.readTable(chosenFile)
         } catch(e: Exception) {
             alert(ERROR,"Błąd odczytu", e.message)
             null
