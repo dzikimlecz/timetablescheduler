@@ -21,7 +21,7 @@ class TimeTable(
 ) : Iterable<ObservableList<Cell>> {
 
 
-    val columnsProperty = SimpleIntegerProperty(0)
+    val columnsProperty = SimpleIntegerProperty(-1)
     var columns by columnsProperty
 
     val columnsTimeSpan: ObservableList<ObservableList<TimeSpan?>> = observableArrayList()
@@ -70,7 +70,8 @@ class TimeTable(
             }
             while (table.size < newValue) {
                 val newRow = observableArrayList<Cell>()
-                for (j in 0 until columns) newRow.add(Cell())
+                // FIXME: 28/05/2021 should be rows not columns
+                for (j in 0 until (this.columns.takeUnless { it < 0 } ?: columns)) newRow.add(Cell())
                 table.add(newRow)
             }
             while (table.size > newValue)  table.removeLast()
