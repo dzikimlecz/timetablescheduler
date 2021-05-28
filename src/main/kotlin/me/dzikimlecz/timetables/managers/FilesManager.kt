@@ -4,6 +4,7 @@ import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import kotlinx.serialization.json.Json
 import me.dzikimlecz.timetables.DefaultPaths
+import me.dzikimlecz.timetables.managers.FilesManager.Companion.ExportResult.*
 import me.dzikimlecz.timetables.timetable.TimeTable
 import tornadofx.sortByDescending
 import java.io.File
@@ -48,28 +49,27 @@ class FilesManager(
             if (file.exists()) checkIdentity(file, timeTable)
             else serialize(timeTable, file)
         when (resultStatus) {
-            0 -> return
-            1 -> serialize(timeTable, file)
-            -1 -> throw IOException("Brak dostępu do pliku")
-            2 -> if (enforce) serialize(timeTable, file) else throw FileAlreadyExistsException(file,
+            ACCESS_DENIED -> throw IOException("Brak dostępu do pliku")
+            SUCCESS -> return
+            CONTINUE -> serialize(timeTable, file)
+            IDENTITY_PROBLEM -> if (enforce) serialize(timeTable, file) else throw FileAlreadyExistsException(file,
                 null, "Ten plik może zawierać już inny plan!")
-            3 -> throw IOException("Błąd zapisu")
-            else -> throw IOException()
+            SAVING_ERROR -> throw IOException("Błąd zapisu")
         }
     }
 
-    private fun serialize(timeTable: TimeTable, file: File) : Int {
+    private fun serialize(timeTable: TimeTable, file: File) : ExportResult {
         val serialized = try {
             Json.encodeToString(TimeTable.serializer(), timeTable)
         } catch (e: Exception) {
-            return 3
+            return SAVING_ERROR
         }
         file.createNewFile()
-        return if (!file.canWrite()) -1 else try {
+        return if (!file.canWrite()) ACCESS_DENIED else try {
             file.writeText(serialized)
-            0
+            SUCCESS
         } catch (e: Exception) {
-            3
+            SAVING_ERROR
         }
     }
 
@@ -99,12 +99,14 @@ class FilesManager(
     }
 
     companion object {
-        private fun checkIdentity(file: File, timeTable: TimeTable) : Int {
-            require(file.exists())
-            if (!file.canRead()) return if (file.canWrite()) 2 else -1
+        private fun checkIdentity(file: File, timeTable: TimeTable) : ExportResult {
+            require(file.exists()) {
+                "Can't check if content of non-existent file: $file corresponds to the given table: ${timeTable.name}"
+            }
+            if (!file.canRead()) return if (file.canWrite()) IDENTITY_PROBLEM else ACCESS_DENIED
             val serialized = file.readText()
             val table = Json.decodeFromString(TimeTable.serializer(), serialized)
-            return if (table.softEquals(timeTable)) 1 else 2
+            return if (table.softEquals(timeTable)) CONTINUE else IDENTITY_PROBLEM
         }
 
         private fun getProperFile(
@@ -116,6 +118,14 @@ class FilesManager(
                 .format(DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT))
                 .replace(Regex("[<>\"/\\\\:.|?*]"), "-") + ".json"
         )
+
+        private enum class ExportResult {
+            ACCESS_DENIED,
+            SUCCESS,
+            CONTINUE,
+            IDENTITY_PROBLEM,
+            SAVING_ERROR,
+        }
     }
 
 
