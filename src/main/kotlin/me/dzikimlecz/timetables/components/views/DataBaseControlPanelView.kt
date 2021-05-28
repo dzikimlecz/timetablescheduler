@@ -131,15 +131,15 @@ class DataBaseControlPanelView: View() {
                     button("Dodaj Plan").setOnAction {
                         val table = manager.importTable() ?: return@setOnAction
                         runAsync { sendTable(table) }
-                        refresh()
+                        refresh(250)
                     }
                 }
             }
         refresh()
         }
 
-    fun refresh() = runAsync {
-        sleep(100)
+    fun refresh(sleepTime: Long = 100) = runAsync {
+        sleep(sleepTime)
         val timeTables = db.getTimeTables()
         val lecturers = db.getLecturers()
         runLater {
