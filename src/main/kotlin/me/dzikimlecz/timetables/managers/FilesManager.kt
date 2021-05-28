@@ -30,7 +30,7 @@ class FilesManager(
         refreshJsonFiles()
     }
 
-
+    // FIXME: 28/05/2021 saving existing table faces some strange bug of path that could have not been found
     fun saveTable(
         timeTable: TimeTable,
         path: String = defaultSavePath,
@@ -38,9 +38,15 @@ class FilesManager(
         name: String? = null,
     ) {
         val file =
-            if (name !== null) File(path, name) else getProperFile(this, timeTable, path)
-        val resultStatus = if (file.exists()) checkIdentity(file, timeTable)
-        else serialize(timeTable, file)
+            if (name !== null) File(
+                path,
+                name.takeIf { it.endsWith(".json") }
+                    ?.replace(Regex("[<>\"/\\\\:|?*]"), "-") ?: "$name.json"
+            )
+            else getProperFile(this, timeTable, path)
+        val resultStatus =
+            if (file.exists()) checkIdentity(file, timeTable)
+            else serialize(timeTable, file)
         when (resultStatus) {
             0 -> return
             1 -> serialize(timeTable, file)
@@ -108,7 +114,7 @@ class FilesManager(
         ) = File(path,
             table.name + "_" + table.date
                 .format(DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT))
-                .replace(Regex("[:.]"), "-") + ".json"
+                .replace(Regex("[<>\"/\\\\:.|?*]"), "-") + ".json"
         )
     }
 
