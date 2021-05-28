@@ -18,13 +18,13 @@ class KhttpDataBaseConnectionManager: DataBaseConnectionManager {
     override fun getTimeTables(): List<TimeTable> {
         val response = get("$address/timetables")
         response.checkSuccess()
-        return response.jsonArray.map { Json.decodeFromString(timetableSerializer, it.toString()) }
+        return response.jsonArray.map { Json { ignoreUnknownKeys = true }.decodeFromString(timetableSerializer, it.toString()) }
     }
 
     override fun lookForTable(name: String): TimeTable? {
         val response = get("$address/timetables/$name")
         return if (response.isOk())
-            Json.decodeFromString(timetableSerializer, response.jsonObject.toString())
+            Json { ignoreUnknownKeys = true }.decodeFromString(timetableSerializer, response.jsonObject.toString())
         else null
     }
 
@@ -37,7 +37,8 @@ class KhttpDataBaseConnectionManager: DataBaseConnectionManager {
             headers = mapOf("Content-Type" to "application/json"),
             data = data
         )
-        if (!postResponse.isOk()) {
+        if (postResponse.statusCode == 424) throw ServerAccessException("Missing Lecturers", 424, postResponse.text)
+        else if (!postResponse.isOk()) {
             val patchResponse = patch(
                 "$address/timetables",
                 headers = mapOf("Content-Type" to "application/json"),
@@ -63,7 +64,7 @@ class KhttpDataBaseConnectionManager: DataBaseConnectionManager {
     override fun lookForLecturer(name: String): Lecturer? {
         val response = get("$address/lecturers/$name")
         return if (response.isOk())
-            Json.decodeFromString(lecturerSerializer, response.jsonObject.toString())
+            Json { ignoreUnknownKeys = true }.decodeFromString(lecturerSerializer, response.jsonObject.toString())
         else null
     }
 
