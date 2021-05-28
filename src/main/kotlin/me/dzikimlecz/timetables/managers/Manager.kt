@@ -25,7 +25,9 @@ class Manager {
 
     fun saveTable() = try { filesManager.saveTable(activeTable) }
         catch (e: FileAlreadyExistsException) { describedExport() }
-        catch (e: Exception) { alert(ERROR,"Błąd Zapisu", e.message) }
+        catch (e: Exception) {
+            alert(ERROR,"Błąd Zapisu", e.message)
+        }
 
     fun describedExport() {
         val exportView = find<ExportView>()
