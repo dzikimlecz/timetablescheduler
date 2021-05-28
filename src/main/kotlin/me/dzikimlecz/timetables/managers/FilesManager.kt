@@ -31,7 +31,8 @@ class FilesManager(
         refreshJsonFiles()
     }
 
-    // FIXME: 28/05/2021 saving existing table faces some strange bug of path that could have not been found
+    // FIXME: 28/05/2021 saving existing table faces some strange bug of path that could have not been found .
+    //  actually it does not appear every time.
     fun saveTable(
         timeTable: TimeTable,
         path: String = defaultSavePath,

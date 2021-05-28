@@ -115,7 +115,7 @@ class TimeTable(
         return result
     }
 
-    fun softEquals(other: Any?) =
+    fun softEquals(other: Any) =
         this === other || (other is TimeTable && other.name == name && other.date == date)
 
 }
