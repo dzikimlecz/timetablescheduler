@@ -83,6 +83,7 @@ class DataBaseControlPanelView: View() {
                         }.showAndWait().ifPresent { runAsync { tryToDeleteLecturer(it) } }
                         refresh()
                     }
+                    button("Odśwież").setOnAction { refresh(0) }
                 }
             }
             right = borderpane {
