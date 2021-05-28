@@ -156,9 +156,12 @@ class DataBaseControlPanelView: View() {
     } catch (e: ServerAccessException) {
         if (e.code == 424) {
             val text = e.reason
-            val missingCodes = Json.decodeFromString(ListSerializer(String.serializer()), text)
+            val missingCodes = Json.decodeFromString(ListSerializer(String.serializer()), text).distinct()
             runLater {
-                openInternalWindow<MissingLecturers>(params = mapOf(MissingLecturers::missingCodes to missingCodes))
+                val missingCodesView = find<MissingLecturers>(
+                    params = mapOf(MissingLecturers::missingCodes to missingCodes)
+                )
+                missingCodesView.openModal(stageStyle = UTILITY)
             }
         } else runLater {
             e.handle("Nie udało się przesłać planu.")
@@ -256,11 +259,12 @@ private class NoSelectionModel<T> : MultipleSelectionModel<T>() {
 
 internal class MissingLecturers: View("Brakujący Wykładowcy!") {
     val missingCodes by param<List<String>>()
+    private val items = observableArrayList<String>()
 
     override val root = form {
         fieldset("W bazie nie ma części wykładowców z tego planu") {
             label("Brakujący wykładowcy:")
-            listview(missingCodes.asObservable()) {
+            listview(items) {
                 selectionModel = NoSelectionModel()
             }
             label("Dodaj ich, a następnie ponownie prześlij plan") {
@@ -273,6 +277,12 @@ internal class MissingLecturers: View("Brakujący Wykładowcy!") {
                 }
             }
         }
+    }
+
+    override fun onBeforeShow() {
+        super.onBeforeShow()
+        items.clear()
+        items += missingCodes
     }
 }
 
