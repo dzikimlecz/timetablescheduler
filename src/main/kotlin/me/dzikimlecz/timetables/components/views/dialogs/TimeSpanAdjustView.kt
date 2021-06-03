@@ -7,7 +7,7 @@ import javafx.scene.control.Alert.AlertType.ERROR
 import me.dzikimlecz.timetables.timetable.TimeSpan
 import me.dzikimlecz.timetables.timetable.TimeTable
 import tornadofx.*
-import java.time.format.DateTimeFormatter.ISO_TIME
+import java.time.format.DateTimeFormatter.ofPattern
 
 class TimeSpanAdjustView : View("Dopasuj Czas trwania") {
     val table by param<TimeTable>()
@@ -66,9 +66,10 @@ class TimeSpanAdjustView : View("Dopasuj Czas trwania") {
         super.onBeforeShow()
         val spans: MutableList<TimeSpan?> = table.columnsTimeSpan[column]
         areTwoSpansUsed.set(spans.none { it === null })
-        val spanStrings  = spans.map {
-            arrayOf((it?.start?.format(ISO_TIME) ?: ""), (it?.end?.format(ISO_TIME) ?: ""))
-        }
+        val spanStrings = spans.map { arrayOf(
+            it?.start?.format(ofPattern("HH:mm")) ?: "",
+            it?.end?.format(ofPattern("HH:mm")) ?: "",
+        ) }
         for ((i, text) in texts.withIndex())
             for (j in 0..1) text[j].set(spanStrings[i][j])
     }
