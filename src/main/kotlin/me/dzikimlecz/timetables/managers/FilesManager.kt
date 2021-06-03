@@ -33,17 +33,17 @@ class FilesManager(
 
     // FIXME: 28/05/2021 saving existing table faces some strange bug of path that could have not been found .
     //  actually it does not appear every time.
+    //  sometimes it just doesn't work at all, other times in the same circumstances works flawlessly
     fun saveTable(
         timeTable: TimeTable,
         path: String = defaultSavePath,
         enforce: Boolean = false,
         name: String? = null,
     ) {
+        val filename = name?.replace(Regex("[<>\"/\\\\:|?*]"), "-")
         val file =
-            if (name !== null) File(
-                path,
-                name.takeIf { it.endsWith(".json") }
-                    ?.replace(Regex("[<>\"/\\\\:|?*]"), "-") ?: "$name.json"
+            if (filename !== null) File(
+                path, filename.takeIf { it.endsWith(".json") } ?: "$filename.json"
             )
             else getProperFile(this, timeTable, path)
         val resultStatus =
