@@ -22,15 +22,20 @@ class TimeSpanAdjustView : View("Dopasuj Czas trwania") {
         } }
     }
 
+    private var secondTimeSpanFields by singleAssign<Fieldset>()
+
     override val root = form {
         fieldset("1. Czas trwania") {
             initForTimeSpans(0)
+            checkbox("Ustaw 2 czasy trwania", areTwoSpansUsed)
+                .selectedProperty().addListener { _, _, newValue ->
+                    if (newValue) secondTimeSpanFields.initForTimeSpans(1)
+                    else secondTimeSpanFields.children.removeIf { it is Field }
+                    secondTimeSpanFields.isVisible = newValue
+                    currentStage?.sizeToScene()
+                }
         }
-        checkbox("Ustaw 2 czasy trwania", areTwoSpansUsed)
-        fieldset("2. Czas trwania") {
-            visibleProperty().bind(areTwoSpansUsed)
-            initForTimeSpans(1)
-        }
+        secondTimeSpanFields = fieldset("2. Czas trwania")
         buttonbar {
             button("Anuluj") {
                 isCancelButton = true
@@ -64,8 +69,10 @@ class TimeSpanAdjustView : View("Dopasuj Czas trwania") {
 
     override fun onBeforeShow() {
         super.onBeforeShow()
+        secondTimeSpanFields.isVisible = false
+        secondTimeSpanFields.children.removeIf { it is Field }
         val spans: MutableList<TimeSpan?> = table.columnsTimeSpan[column]
-        areTwoSpansUsed.set(spans.none { it === null })
+        areTwoSpansUsed.value = spans.none { it === null }
         val spanStrings = spans.map { arrayOf(
             it?.start?.format(ofPattern("HH:mm")) ?: "",
             it?.end?.format(ofPattern("HH:mm")) ?: "",
