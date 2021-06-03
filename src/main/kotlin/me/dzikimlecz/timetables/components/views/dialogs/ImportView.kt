@@ -21,24 +21,21 @@ class ImportView : View("Otwórz") {
     private var filesList: ListView<File> by singleAssign()
     private var useCustomPath: CheckBox by singleAssign()
     private val customPath = textfield()
-    private val pathField = field()
-        init {
-            with(pathField) {
-                this += customPath
-                button("Wybierz") {
-                    action {
-                        val files = chooseFile(
-                            "Wybierz plik",
-                            arrayOf(FileChooser.ExtensionFilter("Plany","*.json")),
-                            File(DefaultPaths.EXPORT.value),
-                            owner = currentStage
-                        )
-                        if (files.isEmpty()) return@action
-                        customPath.text = files[0].absolutePath
-                    }
-                }
+    private val pathField = field() {
+        this += customPath
+        button("Wybierz") {
+            action {
+                val files = chooseFile(
+                    "Wybierz plik",
+                    arrayOf(FileChooser.ExtensionFilter("Plany","*.json")),
+                    File(DefaultPaths.EXPORT.value),
+                    owner = currentStage
+                )
+                if (files.isEmpty()) return@action
+                customPath.text = files[0].absolutePath
             }
         }
+    }
 
     override fun onBeforeShow() {
         filesList.selectionModel.select(null)
