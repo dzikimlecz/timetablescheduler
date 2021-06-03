@@ -26,11 +26,11 @@ class TimeSpanAdjustView : View("Dopasuj Czas trwania") {
         fieldset("1. Czas trwania") {
             initForTimeSpans(0)
         }
+        checkbox("Ustaw 2 czasy trwania", areTwoSpansUsed)
         fieldset("2. Czas trwania") {
             visibleProperty().bind(areTwoSpansUsed)
             initForTimeSpans(1)
         }
-        checkbox("Ustaw 2 czasy trwania", areTwoSpansUsed)
         buttonbar {
             button("Anuluj") {
                 isCancelButton = true
