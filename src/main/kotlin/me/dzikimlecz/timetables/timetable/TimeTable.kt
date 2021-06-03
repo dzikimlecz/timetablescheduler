@@ -70,7 +70,6 @@ class TimeTable(
             }
             while (table.size < newValue) {
                 val newRow = observableArrayList<Cell>()
-                // FIXME: 28/05/2021 should be rows not columns
                 for (j in 0 until (this.columns.takeUnless { it < 0 } ?: columns)) newRow.add(Cell())
                 table.add(newRow)
             }
