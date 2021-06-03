@@ -11,12 +11,13 @@ import me.dzikimlecz.lecturers.SettlingPeriod
 import me.dzikimlecz.timetables.components.fragments.margin
 import tornadofx.*
 import java.time.LocalDate
+import java.time.LocalDate.now
 
 class LecturerWorkTimeDisplay: View() {
     private val lecturers = observableArrayList<Lecturer>()
     private var table by singleAssign<TableView<Lecturer>>()
-    private val filterStart = SimpleObjectProperty(LocalDate.now())
-    private val filterEnd = SimpleObjectProperty(LocalDate.now().plusDays(1))
+    private val filterStart = SimpleObjectProperty<LocalDate>(now())
+    private val filterEnd = SimpleObjectProperty<LocalDate>(now().plusDays(1))
     private var timeFilter: (SettlingPeriod) -> Boolean = { true }
 
     private val lecturerToTimeWorkedProperty = mutableMapOf<Lecturer, SimpleStringProperty>()
@@ -44,14 +45,10 @@ class LecturerWorkTimeDisplay: View() {
         right = form {
             fieldset("Filtruj daty") {
                 field("Początek") {
-                    datepicker(filterStart) {
-
-                    }
+                    datepicker(filterStart)
                 }
                 field("Koniec") {
-                    datepicker(filterEnd) {
-
-                    }
+                    datepicker(filterEnd)
                 }
                 buttonbar {
                     button("Ok") {
@@ -78,8 +75,8 @@ class LecturerWorkTimeDisplay: View() {
         timeFilter = { true }
         this.lecturers.clear()
         this.lecturers += lecturers
-        filterStart.set(LocalDate.now())
-        filterEnd.set(LocalDate.now().plusDays(1))
+        filterStart.set(now())
+        filterEnd.set(now().plusDays(1))
     }
 
     private fun Lecturer.updateHoursWorkedText(): String {
