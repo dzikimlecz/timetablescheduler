@@ -19,6 +19,7 @@ import javafx.scene.layout.GridPane.getRowIndex
 import javafx.scene.layout.StackPane
 import javafx.scene.text.TextAlignment
 import javafx.scene.transform.Transform
+import javafx.stage.StageStyle
 import me.dzikimlecz.timetables.components.fragments.TimeTableEditor.Companion.ViewMode.EDIT
 import me.dzikimlecz.timetables.components.fragments.TimeTableEditor.Companion.ViewMode.VIEW
 import me.dzikimlecz.timetables.components.fragments.toolbars.EditToolBar
@@ -345,13 +346,12 @@ class TimeTableEditor : Fragment() {
             x != 0 && y == 0
         }
         for ((i, button) in buttons.keys.withIndex()) button.setOnAction {
-            this.openInternalWindow<TimeSpanAdjustView>(
-                movable = false,
+            find<TimeSpanAdjustView>(
                 params = mapOf(
                     TimeSpanAdjustView::column to i,
                     TimeSpanAdjustView::table to timeTable,
                 )
-            )
+            ).openModal(stageStyle = StageStyle.UTILITY, resizable = false)
             button.removeFromParent()
         }
     }
