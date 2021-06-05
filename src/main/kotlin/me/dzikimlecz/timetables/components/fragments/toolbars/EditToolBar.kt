@@ -85,11 +85,11 @@ class EditToolBar : TimeTableEditorToolBar() {
             ADD("Dodaj", ROW, COLUMN),
             REMOVE("Usuń", ROW, COLUMN),
             CLEAN("Wyczyść", CELL, ROW, COLUMN),
-            DETAILS("Więcej", CELL, ROW, COLUMN),
             TIME_SPANS("Czas trwania zajęć", COLUMN),
             HORIZONTAL_DIVIDE("Podziel w pionie", CELL),
             VERTICAL_DIVIDE("Podziel w poziomie", CELL),
             TITLE("Nazwa Zajęć", COLUMN),
+            DETAILS("Więcej", CELL, ROW, COLUMN),
             ;
 
             companion object {
