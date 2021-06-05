@@ -20,7 +20,6 @@ class TimeTable(
     @Required var name: String = ""
 ) : Iterable<ObservableList<Cell>> {
 
-
     val columnsProperty = SimpleIntegerProperty(-1)
     var columns by columnsProperty
 
@@ -118,14 +117,15 @@ class TimeTable(
     fun softEquals(other: Any) =
         this === other || (other is TimeTable && other.name == name && other.date == date)
 
-}
-
-fun timeTableOf(table: List<List<Cell>>) : TimeTable {
-    require(table.isEmpty() || table.stream().allMatch {it.size == table[0].size})
-        {"This list is not a table!"}
-    val timeTable = TimeTable(if (table.isNotEmpty()) table[0].size else 0, table.size)
-    for ((y, row) in table.withIndex())
-        for((x, cell) in row.withIndex())
-            timeTable[y][x] = cell
-    return timeTable
+    companion object {
+        fun of(table: List<List<Cell>>) : TimeTable {
+            require(table.isEmpty() || table.stream().allMatch {it.size == table[0].size})
+            {"This list is not a table!"}
+            val timeTable = TimeTable(if (table.isNotEmpty()) table[0].size else 0, table.size)
+            for ((y, row) in table.withIndex())
+                for((x, cell) in row.withIndex())
+                    timeTable[y][x] = cell
+            return timeTable
+        }
+    }
 }
