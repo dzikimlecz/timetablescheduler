@@ -1,15 +1,12 @@
 package me.dzikimlecz.timetables.components.views
 
 import javafx.application.Platform.runLater
-import javafx.collections.FXCollections.emptyObservableList
 import javafx.collections.FXCollections.observableArrayList
-import javafx.collections.ObservableList
 import javafx.geometry.Orientation.VERTICAL
 import javafx.scene.control.Alert.AlertType.ERROR
 import javafx.scene.control.Alert.AlertType.WARNING
 import javafx.scene.control.ListCell
 import javafx.scene.control.ListView
-import javafx.scene.control.MultipleSelectionModel
 import javafx.scene.control.TextInputDialog
 import javafx.scene.layout.BorderPane
 import javafx.scene.text.Font.font
@@ -18,7 +15,9 @@ import kotlinx.serialization.builtins.ListSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json
 import me.dzikimlecz.lecturers.Lecturer
+import me.dzikimlecz.timetables.components.NoSelectionModel
 import me.dzikimlecz.timetables.components.views.dialogs.LecturerSetUpView
+import me.dzikimlecz.timetables.components.views.dialogs.MissingLecturers
 import me.dzikimlecz.timetables.managers.DataBaseConnectionManager
 import me.dzikimlecz.timetables.managers.Manager
 import me.dzikimlecz.timetables.managers.ServerAccessException
@@ -232,57 +231,6 @@ class DataBaseControlPanelView: View() {
     companion object {
         private val labelFont = font(20.0)
         private val listFont = font(14.0)
-    }
-}
-
-/**
- * ## Selection Model, that doesn't allow user to select anything.
- * Used in ListViews, which are used solely for displaying purpose
- */
-private class NoSelectionModel<T> : MultipleSelectionModel<T>() {
-    override fun getSelectedIndices(): ObservableList<Int> = emptyObservableList()
-    override fun getSelectedItems(): ObservableList<T> = emptyObservableList()
-    override fun selectIndices(index: Int, vararg indices: Int) {}
-    override fun selectAll() {}
-    override fun selectFirst() {}
-    override fun selectLast() {}
-    override fun clearAndSelect(index: Int) {}
-    override fun select(index: Int) {}
-    override fun select(obj: T) {}
-    override fun clearSelection(index: Int) {}
-    override fun clearSelection() {}
-    override fun isSelected(index: Int): Boolean = false
-    override fun isEmpty(): Boolean = true
-    override fun selectPrevious() {}
-    override fun selectNext() {}
-}
-
-internal class MissingLecturers: View("Brakujący Wykładowcy!") {
-    val missingCodes by param<List<String>>()
-    private val items = observableArrayList<String>()
-
-    override val root = form {
-        fieldset("W bazie nie ma części wykładowców z tego planu") {
-            label("Brakujący wykładowcy:")
-            listview(items) {
-                selectionModel = NoSelectionModel()
-            }
-            label("Dodaj ich, a następnie ponownie prześlij plan") {
-                isWrapText = true
-            }
-            buttonbar {
-                button("Ok") {
-                    isDefaultButton = true
-                    action(::close)
-                }
-            }
-        }
-    }
-
-    override fun onBeforeShow() {
-        super.onBeforeShow()
-        items.clear()
-        items += missingCodes
     }
 }
 
