@@ -32,10 +32,6 @@ class TimeSpanAdjustView : View("Dopasuj Czas trwania") {
         }
         secondTimeSpanFields = fieldset("2. Czas trwania")
         buttonbar {
-            button("Anuluj") {
-                isCancelButton = true
-                action(this@TimeSpanAdjustView::close)
-            }
             button("Ok") {
                 isDefaultButton = true
                 action {
@@ -49,6 +45,10 @@ class TimeSpanAdjustView : View("Dopasuj Czas trwania") {
                     }
                     close()
                 }
+            }
+            button("Anuluj") {
+                isCancelButton = true
+                action(this@TimeSpanAdjustView::close)
             }
         }
     }

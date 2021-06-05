@@ -48,7 +48,14 @@ class DetailsView : View("Szczegóły Planu") {
                 }
             }
             buttonbar {
-                button("Ok").setOnAction { commit() }
+                button("Ok") {
+                    isDefaultButton = true
+                    action(::commit)
+                }
+                button("Anuluj") {
+                    isCancelButton = false
+                    action(::close)
+                }
             }
         }
     }
