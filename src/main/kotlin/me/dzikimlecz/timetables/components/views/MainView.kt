@@ -15,8 +15,6 @@ import me.dzikimlecz.timetables.timetable.TimeTable
 import tornadofx.*
 import me.dzikimlecz.timetables.components.views.DataBaseControlPanelView as DataBasePanel
 
-private const val defaultTitle = "Układacz planów 3tysionce !!!"
-
 class MainView : View(defaultTitle) {
     val manager: Manager by lazy { Manager() }
 
@@ -77,4 +75,8 @@ class MainView : View(defaultTitle) {
                 }
             selectionModel.select(tab)
         }
+
+    companion object {
+        private const val defaultTitle = "Układacz planów 3tysionce !!!"
+    }
 }
