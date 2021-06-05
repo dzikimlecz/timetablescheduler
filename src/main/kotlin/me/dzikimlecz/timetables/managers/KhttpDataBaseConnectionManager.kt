@@ -7,6 +7,7 @@ import khttp.post
 import khttp.responses.Response
 import kotlinx.serialization.json.Json
 import me.dzikimlecz.lecturers.Lecturer
+import me.dzikimlecz.timetables.managers.DataBaseConnectionManager.Companion.address
 import me.dzikimlecz.timetables.managers.DataBaseConnectionManager.Companion.lecturerSerializer
 import me.dzikimlecz.timetables.managers.DataBaseConnectionManager.Companion.timetableSerializer
 import me.dzikimlecz.timetables.timetable.TimeTable

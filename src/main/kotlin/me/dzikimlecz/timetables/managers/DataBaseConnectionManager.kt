@@ -8,8 +8,6 @@ import me.dzikimlecz.lecturers.Lecturer
 import me.dzikimlecz.lecturers.LecturerTransferredSurrogate
 import me.dzikimlecz.timetables.timetable.TimeTable
 
-const val address = "http://localhost:8080/timetableapi/"
-
 interface DataBaseConnectionManager {
     fun tryToConnect()
 
@@ -32,6 +30,7 @@ interface DataBaseConnectionManager {
     fun removeLecturer(name: String)
 
     companion object {
+        const val address = "http://localhost:8080/timetableapi/"
         val timetableSerializer = TimeTable.serializer()
         val lecturerSerializer = object: KSerializer<Lecturer> {
             override fun deserialize(decoder: Decoder): Lecturer =
