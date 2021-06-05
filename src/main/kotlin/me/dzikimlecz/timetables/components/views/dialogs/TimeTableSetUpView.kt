@@ -89,5 +89,5 @@ class TimeTableSetUpView : View("Nowy Plan") {
 }
 
 fun TextField.filterNumbers() = filterInput {
-    it.controlNewText.isInt() && it.text.length + text.length <= 2
+    it.controlNewText.isInt() && it.controlNewText.length <= 2
 }
