@@ -7,7 +7,6 @@ import javafx.geometry.Orientation
 import javafx.geometry.Pos.CENTER
 import javafx.geometry.Pos.TOP_CENTER
 import javafx.geometry.Rectangle2D
-import javafx.scene.Node
 import javafx.scene.SnapshotParameters
 import javafx.scene.control.Button
 import javafx.scene.control.Tab
@@ -24,6 +23,10 @@ import me.dzikimlecz.timetables.components.fragments.TimeTableEditor.Companion.V
 import me.dzikimlecz.timetables.components.fragments.TimeTableEditor.Companion.ViewMode.VIEW
 import me.dzikimlecz.timetables.components.fragments.toolbars.EditToolBar
 import me.dzikimlecz.timetables.components.fragments.toolbars.ViewToolBar
+import me.dzikimlecz.timetables.components.get
+import me.dzikimlecz.timetables.components.locate
+import me.dzikimlecz.timetables.components.margin
+import me.dzikimlecz.timetables.components.remove
 import me.dzikimlecz.timetables.components.views.MainView
 import me.dzikimlecz.timetables.components.views.dialogs.TimeSpanAdjustView
 import me.dzikimlecz.timetables.timetable.Cell
@@ -32,6 +35,9 @@ import me.dzikimlecz.timetables.timetable.TimeTable
 import tornadofx.*
 import java.time.format.DateTimeFormatter
 import kotlin.Double.Companion.POSITIVE_INFINITY
+import kotlin.collections.component1
+import kotlin.collections.component2
+import kotlin.collections.set
 
 
 class TimeTableEditor : Fragment() {
@@ -39,7 +45,6 @@ class TimeTableEditor : Fragment() {
     val tab by param<Tab>()
     private val viewModeProperty = SimpleObjectProperty(VIEW)
     private val editors: MutableList<MutableList<CellEditor>> = ArrayList()
-
     private var tablePane by singleAssign<GridPane>()
 
     private val viewToolBar = find<ViewToolBar>(params = mapOf(ViewToolBar::parentEditor to this))
@@ -377,31 +382,10 @@ class TimeTableEditor : Fragment() {
         enum class ViewMode {
             EDIT, VIEW
         }
+
         private const val exportScale = 2.0
+
+        fun GridPane.editorPanes() =
+            children.filterIsInstance<StackPane>()
     }
 }
-
-/**
- * Returns node of the given location constraints located in the applied GridPane
- */
-private fun GridPane.get(x: Int, y: Int) =
-        children.firstOrNull { getColumnIndex(it) == x && getRowIndex(it) == y }
-
-/**
- * Removes node of the given location constraints located in the applied GridPane
- */
-private fun GridPane.remove(x: Int, y: Int) =
-    children.remove(get(x, y))
-
-private fun GridPane.editorPanes() =
-    children.filterIsInstance<StackPane>()
-
-/**
- * Returns GridPane location constrains of the given [node] in o form of Pair of 2 ints.
- */
-private fun locate(node: Node?) =
-    getRowIndex(node) to getColumnIndex(node)
-
-var Node.margin: Insets
-    get() = BorderPane.getMargin(this) ?: Insets.EMPTY
-    set(value) = BorderPane.setMargin(this, value)
