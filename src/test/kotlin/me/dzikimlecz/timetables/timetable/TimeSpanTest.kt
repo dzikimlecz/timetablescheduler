@@ -2,6 +2,7 @@ package me.dzikimlecz.timetables.timetable
 
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.fail
 import java.time.LocalTime
 
 internal class TimeSpanTest {
@@ -74,5 +75,51 @@ internal class TimeSpanTest {
         assertThrows(IllegalArgumentException::class.java) {
             TimeSpan.of(time2, time3)
         }
+    }
+
+    @Test
+    fun `should validate strings as beginnings of the TimeSpan string representations`() {
+        // given
+        val strings = listOf(
+            "",
+            "1",
+            "5",
+            "15",
+            "17",
+            "1:",
+            "9:",
+            "19:",
+            "29:",
+            "2:1",
+            "3:5",
+            "13:5",
+            "23:6",
+            "3:50",
+            "2:41",
+            "13:66",
+            "43:66",
+        )
+        // when
+            val matcher = { st: String -> TimeSpan.validateAsBeginning(st) }
+        // then
+            assertTrue(strings.all(matcher))
+    }
+
+    @Test
+    fun `should not validate invalid strings as TimeSpan beginnings`() {
+        // given
+        val strings = listOf(
+            "p",
+            "122",
+            "15::",
+            "21:22:",
+            "21:223",
+            "1:1:",
+            "9::2",
+        )
+        // when
+        val matcher = { st: String -> TimeSpan.validateAsBeginning(st) }
+        // then
+        strings.asSequence().filter(matcher).forEach { fail("""String "$it" shouldn't match, but it does.""") }
     }
 }
