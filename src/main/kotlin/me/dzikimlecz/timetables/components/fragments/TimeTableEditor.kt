@@ -33,7 +33,6 @@ import tornadofx.*
 import java.time.format.DateTimeFormatter
 import kotlin.Double.Companion.POSITIVE_INFINITY
 
-private const val exportScale = 2.0
 
 class TimeTableEditor : Fragment() {
     val timeTable by param<TimeTable>()
@@ -208,7 +207,7 @@ class TimeTableEditor : Fragment() {
                 maxHeightProperty().bind(
                     this@with.heightProperty() / 2
                 )
-                margin = Insets(2.5, 5.0, 5.0, 2.5, )
+                margin = Insets(2.5, 5.0, 5.0, 2.5 )
             }
 
             if (secondSpan != null) right = label {
@@ -220,7 +219,7 @@ class TimeTableEditor : Fragment() {
                 maxHeightProperty().bind(
                     this@with.heightProperty() / 2
                 )
-                margin = Insets(2.5, 2.5, 5.0, 5.0, )
+                margin = Insets(2.5, 2.5, 5.0, 5.0)
             }
         }
     }
@@ -378,6 +377,7 @@ class TimeTableEditor : Fragment() {
         enum class ViewMode {
             EDIT, VIEW
         }
+        private const val exportScale = 2.0
     }
 }
 
