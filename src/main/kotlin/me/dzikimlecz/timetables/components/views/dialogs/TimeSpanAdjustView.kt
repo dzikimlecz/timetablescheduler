@@ -14,12 +14,7 @@ class TimeSpanAdjustView : View("Dopasuj Czas trwania") {
     val column by param<Int>()
     private val areTwoSpansUsed = SimpleBooleanProperty()
     private val texts = List<Array<StringProperty>>(2) {
-        Array(2) { SimpleStringProperty("").apply {
-            addListener { observable, oldValue, newValue ->
-                if (!TimeSpan.validateAsBeginning(newValue))
-                    (observable as StringProperty).value = oldValue
-            }
-        } }
+        Array(2) { SimpleStringProperty("") }
     }
 
     private var secondTimeSpanFields by singleAssign<Fieldset>()
@@ -60,10 +55,14 @@ class TimeSpanAdjustView : View("Dopasuj Czas trwania") {
 
     private fun Fieldset.initForTimeSpans(row: Int) {
         field("Początek") {
-            textfield(texts[row][0])
+            textfield(texts[row][0]) {
+                filterInput { TimeSpan.validateAsBeginning(text) }
+            }
         }
         field("Koniec") {
-            textfield(texts[row][1])
+            textfield(texts[row][1]) {
+                filterInput { TimeSpan.validateAsBeginning(text) }
+            }
         }
     }
 
