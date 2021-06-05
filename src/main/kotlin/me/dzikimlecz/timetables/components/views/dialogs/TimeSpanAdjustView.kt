@@ -56,12 +56,12 @@ class TimeSpanAdjustView : View("Dopasuj Czas trwania") {
     private fun Fieldset.initForTimeSpans(row: Int) {
         field("Początek") {
             textfield(texts[row][0]) {
-                filterInput { TimeSpan.validateAsBeginning(text) }
+                filterInput { TimeSpan.validateAsBeginning(it.controlNewText) }
             }
         }
         field("Koniec") {
             textfield(texts[row][1]) {
-                filterInput { TimeSpan.validateAsBeginning(text) }
+                filterInput { TimeSpan.validateAsBeginning(it.controlNewText) }
             }
         }
     }
