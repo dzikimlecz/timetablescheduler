@@ -69,10 +69,10 @@ object TimeTableSerializer : KSerializer<TimeTable> {
                 val size = table[0].size
                 require(table.stream().allMatch { it.size == size }) { "This list is not a table!" }
                 require((timeSpans?.size ?: size) == size) {
-                    "Size of time spans: ${timeSpans?.size} doesn't match size of the table: $size)"
+                    "Size of time spans: ${timeSpans?.size} doesn't match size of the table: $size"
                 }
                 require((titles?.size ?: size) == size) {
-                    "Size of titles: ${titles?.size} doesn't match size of the table: $size)"
+                    "Size of titles: ${titles?.size} doesn't match size of the table: $size"
                 }
             }
         }

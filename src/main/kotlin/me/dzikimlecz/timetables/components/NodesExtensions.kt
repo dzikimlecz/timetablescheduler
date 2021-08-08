@@ -18,7 +18,7 @@ fun GridPane.remove(x: Int, y: Int) =
     children.remove(get(x, y))
 
 /**
- * Returns GridPane location constrains of the given [node] in o form of Pair of 2 ints.
+ * Returns GridPane location constrains of the given [node] in o form of a Pair of 2 ints.
  */
 fun locate(node: Node?) =
     GridPane.getRowIndex(node) to GridPane.getColumnIndex(node)

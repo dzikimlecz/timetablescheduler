@@ -317,7 +317,7 @@ class TimeTableEditor : Fragment() {
         // ensures that cells are overlaid exactly once
         removeOverlayFromCells()
         val buttons = mutableMapOf<Button, Pair<Int, Int>>()
-        // overlays and add button with it coordinates to buttons map
+        // overlays button and add it with its coordinates to buttons' map
         tablePane.editorPanes().filter(predicate).forEach {
             it += button {
                 setMaxSize(POSITIVE_INFINITY, POSITIVE_INFINITY)

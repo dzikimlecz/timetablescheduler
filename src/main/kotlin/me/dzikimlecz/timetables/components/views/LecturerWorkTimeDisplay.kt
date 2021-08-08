@@ -1,3 +1,5 @@
+@file:Suppress("RemoveExplicitTypeArguments", "RemoveExplicitTypeArguments")
+
 package me.dzikimlecz.timetables.components.views
 
 import javafx.beans.property.SimpleObjectProperty

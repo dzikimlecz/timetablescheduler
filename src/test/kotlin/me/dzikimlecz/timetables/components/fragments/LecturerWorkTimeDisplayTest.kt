@@ -8,7 +8,7 @@ import tornadofx.launch
 internal class LecturerWorkTimeDisplayTest {
     @Test
     fun `should show the window`() {
-        class TestApp : App(LecturerWorkTimeDisplay::class) {}
+        class TestApp : App(LecturerWorkTimeDisplay::class)
         launch<TestApp>()
     }
 }

@@ -5,19 +5,12 @@ import tornadofx.isInt
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
-import java.time.temporal.ChronoUnit.MINUTES
 
 @Serializable
 class TimeSpan private constructor(@Serializable(with = TimeSerializer::class) val start: LocalTime,
                                    @Serializable(with = TimeSerializer::class) val end: LocalTime) {
 
     init { require(start.isBefore(end)) { "Start must be before an end" } }
-
-    val minutes: Long
-        get() = start.until(end, MINUTES)
-
-    val duration: LocalTime
-        get() = LocalTime.of(minutes.toInt() / 60, minutes.toInt() % 60)
 
     override fun toString(): String {
         val formatter = DateTimeFormatter.ofLocalizedTime(FormatStyle.SHORT)
@@ -26,7 +19,7 @@ class TimeSpan private constructor(@Serializable(with = TimeSerializer::class) v
 
     companion object {
         private val separator = Regex("[:;,.-]")
-        val pattern = Regex("\\d{1,2}[:;,.-]\\d{2}")
+        private val pattern = Regex("\\d{1,2}[:;,.-]\\d{2}")
 
         private val spans = mutableSetOf<TimeSpan>()
 
@@ -57,7 +50,7 @@ class TimeSpan private constructor(@Serializable(with = TimeSerializer::class) v
             catch(e: Exception) { throw IllegalArgumentException("TimeSpan could not be created", e) }
         }
 
-        fun validate(st: String) = pattern.matches(st)
+        private fun validate(st: String) = pattern.matches(st)
 
         fun validateAsBeginning(st: String) = when(st.length) {
             0 -> true

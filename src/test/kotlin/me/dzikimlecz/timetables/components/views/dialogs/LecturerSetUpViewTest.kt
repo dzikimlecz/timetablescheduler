@@ -8,7 +8,7 @@ internal class LecturerSetUpViewTest {
 
     @Test
     fun `should show the window`() {
-        class TestApp : App(LecturerSetUpView::class) {}
+        class TestApp : App(LecturerSetUpView::class)
         launch<TestApp>()
     }
 
