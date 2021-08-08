@@ -8,7 +8,7 @@ import javafx.scene.control.TableView
 import javafx.scene.layout.BorderPane
 import me.dzikimlecz.lecturers.Lecturer
 import me.dzikimlecz.lecturers.SettlingPeriod
-import me.dzikimlecz.timetables.components.fragments.margin
+import me.dzikimlecz.timetables.components.margin
 import tornadofx.*
 import java.time.LocalDate
 import java.time.LocalDate.now
@@ -67,8 +67,8 @@ class LecturerWorkTimeDisplay: View() {
         }
 
 
-        left.margin = Insets(100.0, 100.0, 300.0, 500.0, )
-        right.margin = Insets(100.0, 500.0, 300.0, 100.0, )
+        left.margin = Insets(100.0, 100.0, 300.0, 500.0)
+        right.margin = Insets(100.0, 500.0, 300.0, 100.0)
     }
 
     fun refresh(lecturers: Collection<Lecturer>) {
