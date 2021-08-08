@@ -5,13 +5,18 @@ plugins {
     kotlin("plugin.serialization") version "1.5.0"
     application
     id("org.openjfx.javafxplugin") version "0.0.9"
+    id("com.github.johnrengelman.shadow") version "7.0.0"
 }
 
 group = "me.dzikimlecz"
 version = "1.0"
 
 repositories {
-    jcenter()
+    mavenCentral()
+    maven {
+        name = "jitpack.io"
+        url = uri("https://jitpack.io")
+    }
 }
 
 dependencies {
@@ -22,21 +27,21 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.7.0")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:5.7.0")
     implementation(kotlin("stdlib-jdk8"))
-    implementation("khttp:khttp:1.0.0")
+    implementation("com.github.jkcclemens:khttp:-SNAPSHOT")
     implementation(files("C:\\libs\\transferred-1.jar"))
 }
+
 javafx {
     version = "16"
     modules("javafx.controls", "javafx.swing")
 }
-
 
 tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "1.8"
 }
 
 application {
-    mainClass.set("me.dzikimlecz.AppKt")
+    mainClass.set("me.dzikimlecz.timetables.AppKt")
 }
 
 tasks.withType<Test> {
@@ -47,7 +52,13 @@ val compileKotlin: KotlinCompile by tasks
 compileKotlin.kotlinOptions {
     jvmTarget = "1.8"
 }
+
 val compileTestKotlin: KotlinCompile by tasks
 compileTestKotlin.kotlinOptions {
     jvmTarget = "1.8"
+}
+
+val jar: Jar by tasks
+jar.manifest {
+    attributes["Main-Class"] = "me.dzikimlecz.timetables.AppKt"
 }
