@@ -17,7 +17,7 @@ import java.time.format.FormatStyle
 import kotlin.streams.toList
 
 class FilesManager(
-    private val defaultSavePath: String = DefaultPaths.SAVE.value
+    private val defaultSavePath: String = DefaultPaths.SAVE.value!!
 ) {
     private val files: ObservableList<File> = FXCollections.observableArrayList()
 
@@ -83,11 +83,6 @@ class FilesManager(
         } catch (e: Exception) {
             throw IOException("Zawartość pliku została naruszona. Odczyt niemożliwy", e)
         }
-    }
-
-    fun readTable(name: String, path: String = defaultSavePath) : TimeTable {
-        val file = File(path, "$name.json")
-        return readTable(file)
     }
 
     fun refreshJsonFiles() {
