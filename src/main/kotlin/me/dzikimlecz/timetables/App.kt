@@ -6,10 +6,8 @@ import tornadofx.launch
 import java.io.File
 
 fun main() {
-    DefaultPaths.values()
-        .mapNotNull { it.value }
-        .map { File(it) }
-        .forEach { if (!it.exists()) it.mkdirs() }
+    DefaultPaths.checkPaths()
+
     launch<App>()
 }
 
@@ -19,5 +17,14 @@ enum class DefaultPaths(val value: String?) {
     SAVE("${System.getenv("APPDATA")}\\TimeTableScheduler"),
     EXPORT("${System.getProperty("user.home")}\\Documents\\TimeTableScheduler"),
     SERVER(null),
+    ;
+
+    companion object {
+        fun checkPaths() = values()
+            .mapNotNull { it.value }
+            .map { File(it) }
+            .forEach { if (!it.exists()) it.mkdirs() }
+
+    }
 }
 
