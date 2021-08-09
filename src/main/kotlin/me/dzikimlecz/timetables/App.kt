@@ -7,8 +7,8 @@ import java.io.File
 
 fun main() {
     DefaultPaths.values()
-        .dropWhile { it.value === null }
-        .map { File(it.value!!) }
+        .mapNotNull { it.value }
+        .map { File(it) }
         .forEach { if (!it.exists()) it.mkdirs() }
     launch<App>()
 }
