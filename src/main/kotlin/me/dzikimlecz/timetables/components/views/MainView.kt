@@ -88,6 +88,6 @@ class MainView : View(defaultTitle) {
         }
 
     companion object {
-        private const val defaultTitle = "Układacz planów 3tysionce !!!"
+        private const val defaultTitle = "Tabelki"
     }
 }
