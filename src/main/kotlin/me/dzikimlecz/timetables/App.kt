@@ -13,14 +13,15 @@ fun main() {
 
 class App : tornadofx.App(MainView::class)
 
-enum class DefaultPaths(val value: String?) {
-    SAVE("${System.getenv("APPDATA")}\\TimeTableScheduler"),
-    EXPORT("${System.getProperty("user.home")}\\Documents\\TimeTableScheduler"),
-    SERVER(null),
+enum class DefaultPaths(val value: String?, val isDirectory: Boolean) {
+    SAVE("${System.getenv("APPDATA")}\\TimeTableScheduler", true),
+    EXPORT("${System.getProperty("user.home")}\\Documents\\TimeTableScheduler", true),
+    SERVER_EXECUTABLE(null, false),
     ;
 
     companion object {
         fun checkPaths() = values()
+            .filter(DefaultPaths::isDirectory)
             .mapNotNull { it.value }
             .map { File(it) }
             .forEach { if (!it.exists()) it.mkdirs() }
