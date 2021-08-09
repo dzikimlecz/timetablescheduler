@@ -4,6 +4,7 @@ import javafx.scene.Node
 import javafx.scene.control.Button
 import javafx.scene.control.Tab
 import javafx.scene.control.TabPane
+import javafx.scene.image.Image
 import javafx.scene.layout.Background
 import javafx.scene.layout.BackgroundFill
 import javafx.scene.layout.BorderPane
@@ -16,7 +17,17 @@ import tornadofx.*
 import me.dzikimlecz.timetables.components.views.DataBaseControlPanelView as DataBasePanel
 
 class MainView : View(defaultTitle) {
-    val manager: Manager by lazy { Manager() }
+    val manager = Manager()
+
+    init {
+        primaryStage.icons.addAll(
+            Image("scheduler512.png"),
+            Image("scheduler256.png"),
+            Image("scheduler128.png"),
+            Image("scheduler64.png"),
+            Image("scheduler32.png"),
+        )
+    }
 
     override val root: BorderPane = borderpane {
         left = vbox {
