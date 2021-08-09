@@ -6,6 +6,7 @@ import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 import me.dzikimlecz.lecturers.Lecturer
 import me.dzikimlecz.lecturers.LecturerTransferredSurrogate
+import me.dzikimlecz.timetables.DefaultPaths
 import me.dzikimlecz.timetables.timetable.TimeTable
 
 interface DataBaseConnectionManager {
@@ -30,7 +31,7 @@ interface DataBaseConnectionManager {
     fun removeLecturer(name: String)
 
     companion object {
-        const val address = "http://localhost:8080/timetableapi/"
+        val address = DefaultPaths.SERVER_ADDRESS.value
         val timetableSerializer = TimeTable.serializer()
         val lecturerSerializer = object: KSerializer<Lecturer> {
             override fun deserialize(decoder: Decoder): Lecturer =

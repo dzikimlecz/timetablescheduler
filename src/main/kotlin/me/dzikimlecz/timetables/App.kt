@@ -17,6 +17,7 @@ enum class DefaultPaths(val value: String?, val isDirectory: Boolean) {
     SAVE("${System.getenv("APPDATA")}\\TimeTableScheduler", true),
     EXPORT("${System.getProperty("user.home")}\\Documents\\TimeTableScheduler", true),
     SERVER_EXECUTABLE(null, false),
+    SERVER_ADDRESS("http://localhost:8080/timetableapi/", false),
     ;
 
     companion object {
