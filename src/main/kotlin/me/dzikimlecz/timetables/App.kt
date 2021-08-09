@@ -30,3 +30,9 @@ enum class DefaultPaths(val value: String?, val isDirectory: Boolean) {
     }
 }
 
+private fun File.execute(): Boolean {
+    val canExecute = canExecute()
+    if (canExecute) Runtime.getRuntime().exec(path)
+    return canExecute
+}
+
