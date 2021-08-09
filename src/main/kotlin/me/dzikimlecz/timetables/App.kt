@@ -4,10 +4,11 @@ import me.dzikimlecz.timetables.components.views.MainView
 
 import tornadofx.launch
 import java.io.File
+import java.net.SocketTimeoutException
 
 fun main() {
     DefaultPaths.checkPaths()
-
+    DefaultPaths.initServer()
     launch<App>()
 }
 
@@ -27,6 +28,15 @@ enum class DefaultPaths(val value: String?, val isDirectory: Boolean) {
             .map { File(it) }
             .forEach { if (!it.exists()) it.mkdirs() }
 
+        fun initServer(): Boolean {
+            val file = File(SERVER_EXECUTABLE.value ?: return false)
+            return try {
+                khttp.get(SERVER_ADDRESS.value ?: return false, timeout = 4.0)
+                true
+            } catch (e: SocketTimeoutException) {
+                file.execute()
+            }
+        }
     }
 }
 
