@@ -15,8 +15,8 @@ fun main() {
 class App : tornadofx.App(MainView::class)
 
 enum class DefaultPaths(val value: String?, val isDirectory: Boolean) {
-    SAVE("${System.getenv("APPDATA")}\\Tabelki", true),
-    EXPORT("${System.getProperty("user.home")}\\Documents\\Tabelki", true),
+    SAVE("${System.getenv("APPDATA")}\\Plany", true),
+    EXPORT("${System.getProperty("user.home")}\\Documents\\Plany", true),
     SERVER_EXECUTABLE("${System.getenv("APPDATA")}\\TabelkiSerwer\\TabelkiSerwer.exe", false),
     SERVER_ADDRESS("http://localhost:8080/timetableapi/", false),
     ;
