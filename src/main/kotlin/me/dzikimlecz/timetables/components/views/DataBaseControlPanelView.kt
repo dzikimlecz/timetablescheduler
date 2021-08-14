@@ -35,108 +35,108 @@ class DataBaseControlPanelView: View() {
     val db by param<DataBaseConnectionManager>()
 
     override val root = borderpane {
-            paddingVertical = 500
-            paddingHorizontal = 1000
-            left = borderpane {
-                top = label("Wykładowcy") {
-                    font = labelFont
-                }
-                left {
-                    lecturersList = listview(observableArrayList()) {
-                    selectionModel.clearSelection()
-                    selectionModel = NoSelectionModel()
-                    cellFactory = Factory {
-                        object : ListCell<Lecturer>() {
-                            override fun updateItem(item: Lecturer?, empty: Boolean) {
-                                super.updateItem(item, empty)
-                                graphic = if (empty || item === null) null
-                                else borderpane {
-                                    left = label(item.name) { font = listFont }
-                                    right = label(item.code) { font = listFont }
-                                }
-                            }
-                        }
-                    }
-                    }
-                }
-                right = flowpane {
-                    orientation = VERTICAL
-                    vgap = 10.0
-                    button("Pokaż czasy Pracy").setOnAction {
-                        refresh()
-                        find<MainView>().displayLecturersWorkTime(lecturersList.items)
-                    }
-                    button("Dodaj Wykładowcę").setOnAction {
-                        val lecturerSetUpView = find<LecturerSetUpView>()
-                        lecturerSetUpView.openModal(block = true, resizable = false)
-                        val lecturer = lecturerSetUpView.lecturerContainer.get()!!
-                        runAsync { tryToUpload(lecturer) }
-                        refresh()
-                    }
-                    val deleteLecturerLabel = "Usuń Wykładowcę"
-                    button(deleteLecturerLabel).setOnAction {
-                        TextInputDialog().apply {
-                            initStyle(UTILITY)
-                            headerText = deleteLecturerLabel
-                            contentText = "Podaj Kod Wykładowcy do usunięcia"
-                        }.showAndWait().ifPresent { runAsync { tryToDeleteLecturer(it) } }
-                        refresh()
-                    }
-                    button("Odśwież").setOnAction { refresh(0) }
-                }
+        paddingVertical = 500
+        paddingHorizontal = 1000
+        left = borderpane {
+            top = label("Wykładowcy") {
+                font = labelFont
             }
-            right = borderpane {
-                top = label("Plany w Bazie Danych") {
-                    font = labelFont
-                }
-                left {
-                    tablesList = listview(observableArrayList()) {
-                    cellFactory = Factory {
-                        object : ListCell<TimeTable>() {
-                            override fun updateItem(table: TimeTable?, empty: Boolean) {
-                                super.updateItem(table, empty)
-                                graphic = if (empty || table === null) null
-                                else borderpane {
-                                    left = label(table.name) { font = listFont }
-                                    val text = DateTimeFormatter.ofPattern("dd.MM.yyyy").format(table.date)
-                                    right = label(text) { font = listFont }
-                                }
+            left {
+                lecturersList = listview(observableArrayList()) {
+                selectionModel.clearSelection()
+                selectionModel = NoSelectionModel()
+                cellFactory = Factory {
+                    object : ListCell<Lecturer>() {
+                        override fun updateItem(item: Lecturer?, empty: Boolean) {
+                            super.updateItem(item, empty)
+                            graphic = if (empty || item === null) null
+                            else borderpane {
+                                left = label(item.name) { font = listFont }
+                                right = label(item.code) { font = listFont }
                             }
                         }
                     }
                 }
                 }
-                right = flowpane {
-                    orientation = VERTICAL
-                    vgap = 10.0
-                    button("Otwórz Plan").setOnAction {
-                        withSelectedTable {
-                            manager.displayTable(it)
-                            refresh()
-                        }
-                    }
-                    button("Pobierz Plan").setOnAction {
-                        withSelectedTable {
-                            manager.activeTable = it
-                            manager.saveTable()
-                            refresh()
-                        }
-                    }
-                    button("Usuń Plan").setOnAction {
-                        withSelectedTable {
-                            runAsync { tryToDeleteTable(it.name) }
-                            refresh()
-                        }
-                    }
-                    button("Dodaj Plan").setOnAction {
-                        val table = manager.importTable() ?: return@setOnAction
-                        runAsync { sendTable(table) }
-                        refresh(250)
-                    }
-                }
             }
-        refresh()
+            right = flowpane {
+                orientation = VERTICAL
+                vgap = 10.0
+                button("Pokaż czasy Pracy").setOnAction {
+                    refresh()
+                    find<MainView>().displayLecturersWorkTime(lecturersList.items)
+                }
+                button("Dodaj Wykładowcę").setOnAction {
+                    val lecturerSetUpView = find<LecturerSetUpView>()
+                    lecturerSetUpView.openModal(block = true, resizable = false)
+                    val lecturer = lecturerSetUpView.lecturerContainer.get()!!
+                    runAsync { tryToUpload(lecturer) }
+                    refresh()
+                }
+                val deleteLecturerLabel = "Usuń Wykładowcę"
+                button(deleteLecturerLabel).setOnAction {
+                    TextInputDialog().apply {
+                        initStyle(UTILITY)
+                        headerText = deleteLecturerLabel
+                        contentText = "Podaj Kod Wykładowcy do usunięcia"
+                    }.showAndWait().ifPresent { runAsync { tryToDeleteLecturer(it) } }
+                    refresh()
+                }
+                button("Odśwież").setOnAction { refresh(0) }
+            }
         }
+        right = borderpane {
+            top = label("Plany w Bazie Danych") {
+                font = labelFont
+            }
+            left {
+                tablesList = listview(observableArrayList()) {
+                cellFactory = Factory {
+                    object : ListCell<TimeTable>() {
+                        override fun updateItem(table: TimeTable?, empty: Boolean) {
+                            super.updateItem(table, empty)
+                            graphic = if (empty || table === null) null
+                            else borderpane {
+                                left = label(table.name) { font = listFont }
+                                val text = DateTimeFormatter.ofPattern("dd.MM.yyyy").format(table.date)
+                                right = label(text) { font = listFont }
+                            }
+                        }
+                    }
+                }
+            }
+            }
+            right = flowpane {
+                orientation = VERTICAL
+                vgap = 10.0
+                button("Otwórz Plan").setOnAction {
+                    withSelectedTable {
+                        manager.displayTable(it)
+                        refresh()
+                    }
+                }
+                button("Pobierz Plan").setOnAction {
+                    withSelectedTable {
+                        manager.activeTable = it
+                        manager.saveTable()
+                        refresh()
+                    }
+                }
+                button("Usuń Plan").setOnAction {
+                    withSelectedTable {
+                        runAsync { tryToDeleteTable(it.name) }
+                        refresh()
+                    }
+                }
+                button("Dodaj Plan").setOnAction {
+                    val table = manager.importTable() ?: return@setOnAction
+                    runAsync { sendTable(table) }
+                    refresh(250)
+                }
+            }
+        }
+    refresh()
+    }
 
     fun refresh(sleepTime: Long = 100) = runAsync {
         sleep(sleepTime)
