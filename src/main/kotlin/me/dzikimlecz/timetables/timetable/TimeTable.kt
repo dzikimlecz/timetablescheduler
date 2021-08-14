@@ -40,15 +40,14 @@ class TimeTable(
             while(titles.size < newValue) titles += SimpleStringProperty("")
 
             while(columnsTimeSpan.size > newValue) columnsTimeSpan.removeLast()
-            while(columnsTimeSpan.size < newValue) {
-                val element: ObservableList<TimeSpan?> = observableArrayList(null, null)
-                element.sizeProperty.addListener { _, _, _ ->
-                    throw OperationNotSupportedException("Lists of TimeSpans must have fixed size.")
+            while(columnsTimeSpan.size < newValue)
+                columnsTimeSpan +=  observableArrayList<TimeSpan?>(null, null).apply {
+                    sizeProperty.addListener { _, _, _ ->
+                        throw OperationNotSupportedException("Lists of TimeSpans must have fixed size.")
+                    }
                 }
-                columnsTimeSpan += element
-            }
 
-            val size = { table.firstOrNull()?.size ?: newValue }
+            fun size() = table.firstOrNull()?.size ?: newValue
             while (size() < newValue)
                 table.forEach { it.add(Cell()) }
             while (size() > newValue)
