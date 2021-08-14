@@ -131,11 +131,11 @@ class TimeTableEditor : Fragment() {
                 addTitle(columnIndex)
             }
             while (editors.last().size > newValue) {
-                tablePane.remove(editors.last().size - 1, 0)
-                for ((y, row) in editors.withIndex()) {
-                    tablePane.remove(editors.last().size - 1, y + 1)
-                    row.last().cell.clean()
-                    row.removeLast()
+                tablePane.remove(editors.last().size, 0 )
+                for (y in 0 until timeTable.rows) {
+                    tablePane.remove(editors.last().size, y + 1)
+                    editors[y].last().cell.clean()
+                    editors[y].removeLast()
                 }
             }
         }
