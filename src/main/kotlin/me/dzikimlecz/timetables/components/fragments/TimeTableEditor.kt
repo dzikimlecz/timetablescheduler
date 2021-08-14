@@ -122,10 +122,13 @@ class TimeTableEditor : Fragment() {
         timeTable.columnsProperty.addListener { _, _, newVal ->
             val newValue = newVal.toInt()
             while (editors.last().size < newValue) {
-                for (y in 0 until editors.size)
+                for (y in 0 until editors.size) {
                     addCell(editors.last().size, y, timeTable[y][editors.last().size])
-                val columnIndex = editors.first().size - 1
+                }
+                val columnIndex = editors.first().lastIndex
+                tablePane.stackpane { borderpane(); gridpaneConstraints { columnRowIndex(columnIndex + 1, 0) } }
                 addTimeSpans(columnIndex)
+                addTitle(columnIndex)
             }
             while (editors.last().size > newValue) {
                 tablePane.remove(editors.last().size - 1, 0)
