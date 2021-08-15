@@ -40,12 +40,12 @@ class TimeTable(
             while(titles.size < newValue) titles += SimpleStringProperty("")
 
             while(columnsTimeSpan.size > newValue) columnsTimeSpan.removeLast()
-            while(columnsTimeSpan.size < newValue)
-                columnsTimeSpan +=  observableArrayList<TimeSpan?>(null, null).apply {
-                    sizeProperty.addListener { _, _, _ ->
-                        throw OperationNotSupportedException("Lists of TimeSpans must have fixed size.")
-                    }
+            while(columnsTimeSpan.size < newValue) observableArrayList<TimeSpan?>(null, null).apply {
+                sizeProperty.addListener { _, _, _ ->
+                    throw OperationNotSupportedException("Lists of TimeSpans must have fixed size.")
                 }
+                columnsTimeSpan += this
+            }
 
             fun size() = table.firstOrNull()?.size ?: newValue
             while (size() < newValue)
