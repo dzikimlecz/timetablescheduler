@@ -95,7 +95,7 @@ class KhttpDataBaseConnectionManager: DataBaseConnectionManager {
 
 }
 
-fun Response.checkSuccess(msg: () -> String = { "Connection problem" }) {
+inline fun Response.checkSuccess(msg: () -> String = { "Connection problem" }) {
     if (!isOk()) throw ServerAccessException(msg(), statusCode, text)
 }
 
