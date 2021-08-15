@@ -35,8 +35,8 @@ class DataBaseControlPanelView: View() {
     val db by param<DataBaseConnectionManager>()
 
     override val root = borderpane {
-        paddingVertical = 500
-        paddingHorizontal = 1000
+        paddingHorizontalProperty.bind(primaryStage.widthProperty() * 0.3)
+        paddingVerticalProperty.bind(primaryStage.heightProperty() * 0.5)
         left = borderpane {
             top = label("Wykładowcy") {
                 font = labelFont
