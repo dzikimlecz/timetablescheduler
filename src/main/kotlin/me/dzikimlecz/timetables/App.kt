@@ -7,8 +7,8 @@ import java.io.File
 import java.net.ConnectException
 
 fun main() {
-    DefaultPaths.checkPaths()
-    DefaultPaths.initServer()
+    checkPaths()
+    initServer()
     launch<App>()
 }
 
@@ -19,24 +19,21 @@ enum class DefaultPaths(val value: String?, val isDirectory: Boolean) {
     EXPORT("${System.getProperty("user.home")}\\Documents\\Plany", true),
     SERVER_EXECUTABLE("${System.getenv("APPDATA")}\\TabelkiSerwer\\TabelkiSerwer.exe", false),
     SERVER_ADDRESS("http://localhost:8080/timetableapi/", false),
-    ;
+}
 
-    companion object {
-        fun checkPaths() = values()
-            .filter(DefaultPaths::isDirectory)
-            .mapNotNull { it.value }
-            .map { File(it) }
-            .forEach { if (!it.exists()) it.mkdirs() }
+private fun checkPaths() = DefaultPaths.values()
+    .filter(DefaultPaths::isDirectory)
+    .mapNotNull { it.value }
+    .map { File(it) }
+    .forEach { if (!it.exists()) it.mkdirs() }
 
-        fun initServer(): Boolean {
-            val file = File(SERVER_EXECUTABLE.value ?: return false)
-            return try {
-                khttp.get(SERVER_ADDRESS.value ?: return false)
-                true
-            } catch (e: ConnectException) {
-                file.execute()
-            }
-        }
+private fun initServer(): Boolean {
+    val file = File(DefaultPaths.SERVER_EXECUTABLE.value ?: return false)
+    return try {
+        khttp.get(DefaultPaths.SERVER_ADDRESS.value ?: return false)
+        true
+    } catch (e: ConnectException) {
+        file.execute()
     }
 }
 
