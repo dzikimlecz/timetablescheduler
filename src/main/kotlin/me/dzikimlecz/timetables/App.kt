@@ -21,22 +21,29 @@ enum class DefaultPaths(val value: String?, val isDirectory: Boolean) {
     SERVER_ADDRESS("http://localhost:8080/timetableapi/", false),
 }
 
+// Creates folders, with paths specified in DefaultPaths enum, if they don't exist
 private fun checkPaths() = DefaultPaths.values()
+    // not all paths are directories. some are files, some are web urls
     .filter(DefaultPaths::isDirectory)
+    // path may be null (temporary lack of the implementation)
     .mapNotNull { it.value }
     .map { File(it) }
     .forEach { if (!it.exists()) it.mkdirs() }
 
+// starts up TimeTable server
 private fun initServer(): Boolean {
     val file = File(DefaultPaths.SERVER_EXECUTABLE.value ?: return false)
     return try {
+        // if server was already running doesn't execute the file. Otherwise, an exception should be thrown
         khttp.get(DefaultPaths.SERVER_ADDRESS.value ?: return false)
         true
     } catch (e: ConnectException) {
+        // runs server's executable if connecting to it wasn't possible.
         file.execute()
     }
 }
 
+// executes file if it's possible returns true if exe was started. false otherwise.
 private fun File.execute(): Boolean {
     val canExecute = canExecute()
     if (canExecute) Runtime.getRuntime().exec(path)
