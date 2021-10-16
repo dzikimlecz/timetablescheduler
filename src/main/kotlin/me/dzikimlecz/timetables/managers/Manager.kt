@@ -1,11 +1,10 @@
 package me.dzikimlecz.timetables.managers
 
-import javafx.application.Platform
+import javafx.application.Platform.runLater
 import javafx.embed.swing.SwingFXUtils
 import javafx.scene.control.Alert.AlertType.ERROR
 import javafx.scene.image.Image
 import javafx.stage.StageStyle.UTILITY
-import me.dzikimlecz.timetables.DefaultPaths
 import me.dzikimlecz.timetables.components.views.DataBaseControlPanelView
 import me.dzikimlecz.timetables.components.views.MainView
 import me.dzikimlecz.timetables.components.views.dialogs.ExportView
@@ -16,30 +15,21 @@ import tornadofx.alert
 import tornadofx.find
 import tornadofx.runAsync
 import java.io.File
-import javax.imageio.ImageIO
 
 class Manager {
     lateinit var activeTable : TimeTable
-    private val filesManager by lazy { FilesManager() }
+    private val filesManager = FilesManager()
     private val dataBaseConnectionManager: DataBaseConnectionManager = KhttpDataBaseConnectionManager()
 
-    fun saveTable() = try { filesManager.saveTable(activeTable) }
-        catch (e: FileAlreadyExistsException) { describedExport() }
-        catch (e: Exception) {
-            alert(ERROR,"Błąd Zapisu", e.message)
-        }
+    fun saveTable() =
+        try { filesManager.saveTable(activeTable) }
+        catch (e: FileAlreadyExistsException) { describedSaving() }
+        catch (e: Exception) { alert(ERROR,"Błąd Zapisu", e.message) }
 
-    fun describedExport() {
+    fun describedSaving() {
         val exportView = find<ExportView>()
-        exportView.openModal(UTILITY, block = true, resizable = false)
-        val (path, name) = exportView.fileData ?: return
-        if (name !== null && path !== null)
-            filesManager.saveTable(activeTable, path, true, name)
-        else if (path !== null)
-            filesManager.saveTable(activeTable, path, true)
-        else if (name !== null)
-            filesManager.saveTable(activeTable, enforce = true, name = name)
-        else filesManager.saveTable(activeTable, enforce = true)
+        exportView.openModal(stageStyle = UTILITY, block = true, resizable = false)
+        saveWithGivenData(exportView.fileData)
     }
 
     fun openTable() {
@@ -50,51 +40,68 @@ class Manager {
 
     fun importTable(): TimeTable? {
         val importView = find<ImportView>(params = mapOf(ImportView::filesManager to filesManager))
-        importView.openModal(block = true, resizable = false)
-        val chosenFile = importView.chosenFile
-        return if (chosenFile !== null)
-            try {
-                filesManager.readTable(chosenFile)
-            } catch(e: Exception) {
-                alert(ERROR,"Błąd odczytu", e.message)
-                null
-            }
-        else null
+        importView.openModal(stageStyle = UTILITY, block = true, resizable = false)
+        return readTable(importView.chosenFile)
     }
 
     fun setUpTable() {
         val tableSetUpView = find<TimeTableSetUpView>()
         tableSetUpView.openModal(UTILITY, resizable = false, block = true)
-        val table = tableSetUpView.table
-        if (table !== null) try {
-            displayTable(table)
-        } catch (e: Exception) {
-            alert(ERROR, "Błąd", e.message)
-        }
+        val table = tableSetUpView.buildTable ?: return
+        displayTable(table)
     }
 
     fun openDatabasePanel() = runAsync {
-        fun alert(e: Throwable) =
-            Platform.runLater { alert(ERROR, "Błąd Połączenia!", e.message) }
-        try { dataBaseConnectionManager.tryToConnect() } catch (e: Exception) { return@runAsync alert(e) }
-        val panelProvider = {
-            find<DataBaseControlPanelView>(
-                params = mapOf(DataBaseControlPanelView::db to dataBaseConnectionManager)
-            ).apply { refresh() }
-        }
-        Platform.runLater { find<MainView>().showDataBaseControlPane(panelProvider) }
+        val failedToConnect = !tryToConnect()
+        if (failedToConnect) return@runAsync
+        runLater(::displayDatabasePanel)
     }
 
-    fun exportTableImage(img: Image, name: String) = Thread {
+    fun exportTableImage(img: Image, name: String) = runAsync {
         val image = SwingFXUtils.fromFXImage(img, null)
-        val file = File(DefaultPaths.EXPORT.value, "$name.png")
-        if (!file.exists()) file.createNewFile()
-        ImageIO.write(image, "png", file)
-    }.start()
+        filesManager.saveImage(name, image)
+    }
 
     fun displayTable(table: TimeTable) {
         find<MainView>().displayTable(table)
         activeTable = table
+    }
+
+    private fun saveWithGivenData(saveData: Pair<String?, String?>?) {
+        val (path, name) = saveData ?: return
+        if (name !== null && path !== null)
+            filesManager.saveTable(activeTable, path, true, name)
+        else if (path !== null)
+            filesManager.saveTable(activeTable, path, true)
+        else if (name !== null)
+            filesManager.saveTable(activeTable, enforce = true, name = name)
+        else filesManager.saveTable(activeTable, enforce = true)
+    }
+
+    private fun readTable(chosenFile: File?): TimeTable? =
+        if (chosenFile === null) null
+        else try {
+            filesManager.readTable(chosenFile)
+        } catch (e: Exception) {
+            alert(ERROR, "Błąd odczytu", e.message)
+            null
+        }
+
+    private fun tryToConnect(): Boolean =
+        try {
+            dataBaseConnectionManager.tryToConnect()
+            true
+        } catch (e: Exception) {
+            runLater { alert(ERROR, "Błąd Połączenia!", e.message) }
+            false
+        }
+
+    private fun displayDatabasePanel() {
+        find<MainView>().showDataBaseControlPane {
+            find<DataBaseControlPanelView>(
+                params = mapOf(DataBaseControlPanelView::db to dataBaseConnectionManager)
+            ).apply { refresh() }
+        }
     }
 
 }

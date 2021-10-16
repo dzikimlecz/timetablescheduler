@@ -16,7 +16,7 @@ class ViewToolBar : TimeTableEditorToolBar()  {
         }
         button("Zapisz jako") {
             action {
-                find<MainView>().manager.describedExport()
+                find<MainView>().manager.describedSaving()
             }
         }
         button("Eksportuj") {

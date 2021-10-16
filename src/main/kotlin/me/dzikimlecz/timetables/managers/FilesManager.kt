@@ -7,6 +7,7 @@ import me.dzikimlecz.timetables.DefaultPaths
 import me.dzikimlecz.timetables.managers.FilesManager.Companion.ExportResult.*
 import me.dzikimlecz.timetables.timetable.TimeTable
 import tornadofx.sortByDescending
+import java.awt.image.BufferedImage
 import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
@@ -14,6 +15,7 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
+import javax.imageio.ImageIO
 import kotlin.streams.toList
 
 class FilesManager(
@@ -92,6 +94,12 @@ class FilesManager(
         .filter { it.toString().endsWith(".json") }.filter { files.stream().noneMatch {
                     file -> file.name == it.name } }.toList())
         files.sortByDescending { it.lastModified() }
+    }
+
+    fun saveImage(name: String, image: BufferedImage?): Boolean {
+        val file = File(DefaultPaths.EXPORT.value, "$name.png")
+        if (!file.exists()) file.createNewFile()
+        return ImageIO.write(image, "png", file)
     }
 
     companion object {

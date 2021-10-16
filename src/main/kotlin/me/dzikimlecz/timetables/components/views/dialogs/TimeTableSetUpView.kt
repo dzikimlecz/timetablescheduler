@@ -20,7 +20,7 @@ class TimeTableSetUpView : View("Nowy Plan") {
     private val date = SimpleObjectProperty<LocalDate>(now())
     private var _table: TimeTable? = null
 
-    val table
+    val buildTable
         get() = _table
 
     override val root = form {
