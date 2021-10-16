@@ -16,7 +16,7 @@ import tornadofx.find
 import tornadofx.runAsync
 import java.io.File
 
-class Manager {
+class MainViewManager {
     lateinit var activeTable : TimeTable
     private val filesManager = FilesManager()
     private val dataBaseConnectionManager: DataBaseConnectionManager = KhttpDataBaseConnectionManager()

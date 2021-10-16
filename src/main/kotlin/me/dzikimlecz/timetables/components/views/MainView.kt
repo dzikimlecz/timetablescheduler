@@ -10,7 +10,7 @@ import javafx.scene.layout.VBox
 import javafx.scene.paint.Color
 import me.dzikimlecz.lecturers.Lecturer
 import me.dzikimlecz.timetables.components.fragments.TimeTableEditor
-import me.dzikimlecz.timetables.managers.Manager
+import me.dzikimlecz.timetables.managers.MainViewManager
 import me.dzikimlecz.timetables.timetable.TimeTable
 import tornadofx.*
 import me.dzikimlecz.timetables.components.views.DataBaseControlPanelView as DataBasePanel
@@ -18,7 +18,7 @@ import me.dzikimlecz.timetables.components.views.DataBaseControlPanelView as Dat
 // Main scene of the app
 class MainView : View(defaultTitle) {
 
-    val manager = Manager()
+    val manager = MainViewManager()
 
     init { addIcons() }
 

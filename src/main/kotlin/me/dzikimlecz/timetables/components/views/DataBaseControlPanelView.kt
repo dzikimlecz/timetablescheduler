@@ -19,7 +19,7 @@ import me.dzikimlecz.timetables.components.NoSelectionModel
 import me.dzikimlecz.timetables.components.views.dialogs.LecturerSetUpView
 import me.dzikimlecz.timetables.components.views.dialogs.MissingLecturers
 import me.dzikimlecz.timetables.managers.DataBaseConnectionManager
-import me.dzikimlecz.timetables.managers.Manager
+import me.dzikimlecz.timetables.managers.MainViewManager
 import me.dzikimlecz.timetables.managers.ServerAccessException
 import me.dzikimlecz.timetables.timetable.TimeTable
 import tornadofx.*
@@ -31,7 +31,7 @@ import javafx.util.Callback as Factory
 class DataBaseControlPanelView: View() {
     private var lecturersList by singleAssign<ListView<Lecturer>>()
     private var tablesList by singleAssign<ListView<TimeTable>>()
-    private val manager: Manager = find<MainView>().manager
+    private val manager: MainViewManager = find<MainView>().manager
     val db by param<DataBaseConnectionManager>()
 
     override val root = borderpane {
