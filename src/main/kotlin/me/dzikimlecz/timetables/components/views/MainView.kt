@@ -5,9 +5,8 @@ import javafx.scene.control.Button
 import javafx.scene.control.Tab
 import javafx.scene.control.TabPane
 import javafx.scene.image.Image
-import javafx.scene.layout.Background
-import javafx.scene.layout.BackgroundFill
 import javafx.scene.layout.BorderPane
+import javafx.scene.layout.VBox
 import javafx.scene.paint.Color
 import me.dzikimlecz.lecturers.Lecturer
 import me.dzikimlecz.timetables.components.fragments.TimeTableEditor
@@ -16,10 +15,56 @@ import me.dzikimlecz.timetables.timetable.TimeTable
 import tornadofx.*
 import me.dzikimlecz.timetables.components.views.DataBaseControlPanelView as DataBasePanel
 
+// Main scene of the app
 class MainView : View(defaultTitle) {
+
     val manager = Manager()
 
-    init {
+    init { addIcons() }
+
+    override val root: BorderPane =
+        borderpane {
+            left = vbox {
+                button("Nowy Plan")
+                    .setOnAction { manager.setUpTable() }
+                button("Otwórz Plan")
+                    .setOnAction { manager.openTable() }
+                button("Otwórz Bazę Godzin")
+                    .setOnAction { manager.openDatabasePanel() }
+                style()
+            }
+            center = tabpane {
+                bindWindowAndSelectedTabTitle()
+            }
+        }
+
+    override fun onBeforeShow() {
+        super.onBeforeShow()
+        setWindowMinSize(800, 400)
+        primaryStage.isMaximized = true
+    }
+
+    fun displayTable(table: TimeTable) =
+        Tab().apply {
+            injectEditorOf(table)
+            addToTabs()
+            select()
+        }
+
+
+    fun showDataBaseControlPane(panelProvider: () -> DataBasePanel) =
+        selectOrCreateTab("databaseControlPanel", "Baza Planów") {
+            panelProvider().root
+        }
+
+
+    fun displayLecturersWorkTime(items: Collection<Lecturer>) =
+        selectOrCreateTab("lecturersWorkTime", "Czasy Pracy") {
+            find<LecturerWorkTimeDisplay>().apply { refresh(items) }.root
+        }
+
+    // includes icon of the program in 5 different resolutions.
+    private fun addIcons() {
         primaryStage.icons.addAll(
             Image("scheduler512.png"),
             Image("scheduler256.png"),
@@ -29,63 +74,53 @@ class MainView : View(defaultTitle) {
         )
     }
 
-    override val root: BorderPane = borderpane {
-        left = vbox {
-            spacing = 3E1
-            background = Background(BackgroundFill(Color.LIGHTGREY, null, null))
-            paddingTop = 15
-            button("Nowy Plan").setOnAction { manager.setUpTable() }
-            button("Otwórz Plan").setOnAction { manager.openTable() }
-            button("Otwórz Bazę Godzin").setOnAction { manager.openDB() }
-            children.filterIsInstance<Button>().forEach {
-                it.prefWidth = 1.8E2
-                it.prefHeight = 5E1
-            }
-        }
-        center = tabpane {
-            selectionModel.selectedItemProperty().addListener { _, _, newValue ->
-                title = newValue?.text ?: defaultTitle
-            }
-        }
-
+    private fun VBox.style() {
+        setPrefSizeForButtons(180.0, 50.0)
+        style { backgroundColor.add(Color.LIGHTGREY) }
+        paddingTop = 15
+        spacing = 30.0
     }
 
-    fun displayTable(table: TimeTable) = with(root.center as TabPane) {
-        val tab = Tab()
-        find<TimeTableEditor>(mapOf(TimeTableEditor::timeTable to table, TimeTableEditor::tab to tab))
-        tabs += tab
-        selectionModel.select(tab)
+    private fun VBox.setPrefSizeForButtons(width: Double, height: Double) {
+        children.filterIsInstance<Button>().forEach {
+            it.prefWidth = width
+            it.prefHeight = height
+        }
     }
 
-    fun showDataBaseControlPane(panelProvider: () -> DataBasePanel) =
-        injectSingletonTab("databaseControlPanel", "Baza Planów") {
-            panelProvider().root
+    private fun TabPane.bindWindowAndSelectedTabTitle() {
+        selectionModel.selectedItemProperty().addListener { _, _, newValue ->
+            title = newValue?.text ?: defaultTitle
         }
-
-    override fun onBeforeShow() {
-        super.onBeforeShow()
-        setWindowMinSize(800, 400)
-        primaryStage.isMaximized = true
     }
 
-    fun displayLecturersWorkTime(items: Collection<Lecturer>) =
-        injectSingletonTab("lecturersWorkTime", "Czasy Pracy") {
-            val panel = find<LecturerWorkTimeDisplay>()
-            panel.refresh(items)
-            panel.root
+    private fun selectOrCreateTab(id: String, name: String, contentProducer: () -> Node) {
+        val tab: Tab = findTab(id)
+            ?: createTab(id, name, contentProducer).addToTabs()
+        tab.select()
+    }
+
+    private fun findTab(id: String): Tab? =
+        applyOnTabPane { tabs.firstOrNull { it.id == id } }
+
+    private fun Tab.injectEditorOf(table: TimeTable) =
+        find<TimeTableEditor>(params = mapOf(TimeTableEditor::timeTable to table, TimeTableEditor::tab to this))
+
+    private fun Tab.addToTabs(): Tab =
+        applyOnTabPane {
+            tabs += this@addToTabs
+            this@addToTabs
         }
 
-    private fun injectSingletonTab(id: String, name: String, contentProducer: () -> Node)  =
-        with(root.center as TabPane) {
-            val tab = tabs.firstOrNull { it.id == id }
-                ?: Tab().apply {
-                    content = contentProducer()
-                    this.id = id
-                    text = name
-                    tabs += this
-                }
-            selectionModel.select(tab)
+    private fun createTab(id: String, name: String, contentProducer: () -> Node): Tab =
+        Tab().apply {
+            content = contentProducer()
+            this.id = id
+            text = name
         }
+
+    private inline fun <R> applyOnTabPane(applied: (TabPane.() -> R)): R =
+        (root.center as TabPane).applied()
 
     companion object {
         private const val defaultTitle = "Tabelki"

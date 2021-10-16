@@ -73,7 +73,7 @@ class Manager {
         }
     }
 
-    fun openDB() = runAsync {
+    fun openDatabasePanel() = runAsync {
         fun alert(e: Throwable) =
             Platform.runLater { alert(ERROR, "Błąd Połączenia!", e.message) }
         try { dataBaseConnectionManager.tryToConnect() } catch (e: Exception) { return@runAsync alert(e) }
