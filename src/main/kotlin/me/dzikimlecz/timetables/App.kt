@@ -30,11 +30,10 @@ private fun checkPaths() = DefaultPaths.values()
     .map { File(it) }
     .forEach { if (!it.exists()) it.mkdirs() }
 
-// starts up TimeTable server
+// starts up TimeTable server if it's off
 private fun initServer(): Boolean {
     val file = File(DefaultPaths.SERVER_EXECUTABLE.value ?: return false)
     return try {
-        // if server was already running doesn't execute the file. Otherwise, an exception should be thrown
         khttp.get(DefaultPaths.SERVER_ADDRESS.value ?: return false)
         true
     } catch (e: ConnectException) {
@@ -44,9 +43,9 @@ private fun initServer(): Boolean {
 }
 
 // executes file if it's possible returns true if exe was started. false otherwise.
-private fun File.execute(): Boolean {
-    val canExecute = canExecute()
-    if (canExecute) Runtime.getRuntime().exec(path)
-    return canExecute
-}
+private fun File.execute(): Boolean =
+    if (canExecute()) {
+        Runtime.getRuntime().exec(path)
+        true
+    } else false
 
