@@ -102,8 +102,8 @@ class FilesManager(
         return ImageIO.write(image, "png", file)
     }
 
-    companion object {
-        private fun checkIdentity(file: File, timeTable: TimeTable) : ExportResult {
+    private companion object {
+        fun checkIdentity(file: File, timeTable: TimeTable) : ExportResult {
             require(file.exists()) {
                 "Can't check if content of non-existent file: $file corresponds to the given table: ${timeTable.name}"
             }
@@ -113,7 +113,7 @@ class FilesManager(
             return if (table.softEquals(timeTable)) CONTINUE else IDENTITY_PROBLEM
         }
 
-        private fun getProperFile(
+        fun getProperFile(
             filesManager: FilesManager,
             table: TimeTable,
             path: String = filesManager.defaultSavePath
@@ -123,7 +123,7 @@ class FilesManager(
                 .replace(Regex("[<>\"/\\\\:.|?*]"), "-") + ".json"
         )
 
-        private enum class ExportResult {
+        enum class ExportResult {
             ACCESS_DENIED,
             SUCCESS,
             CONTINUE,
