@@ -164,7 +164,7 @@ class TimeTableEditor : Fragment() {
 
     private fun addTitle(x: Int) {
         val columnIndex = x + 1
-        if (columnIndex < 0) throw IndexOutOfBoundsException(columnIndex)
+        if (columnIndex < 0) throw IndexOutOfBoundsException("$columnIndex")
         val stackPane = tablePane.get(columnIndex, 0) as StackPane
         with(stackPane) {
             maxWidthProperty().bind(
@@ -189,7 +189,7 @@ class TimeTableEditor : Fragment() {
 
     private fun addTimeSpans(column: Int) {
         val columnIndex = column + 1
-        if (columnIndex < 0) throw IndexOutOfBoundsException(columnIndex)
+        if (columnIndex < 0) throw IndexOutOfBoundsException("$columnIndex")
         val stackPane = tablePane.get(columnIndex, 0) as StackPane
         with(stackPane) {
             maxWidthProperty().bind(
