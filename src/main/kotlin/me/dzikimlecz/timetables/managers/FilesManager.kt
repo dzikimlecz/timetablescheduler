@@ -94,10 +94,9 @@ class FilesManager(
         files.sortByDescending { it.lastModified() }
     }
 
-    fun saveImage(name: String, image: BufferedImage?): Boolean {
-        val file = File(DefaultPaths.EXPORT.value, "$name.png")
-        if (!file.exists()) file.createNewFile()
-        return ImageIO.write(image, "png", file)
+    fun saveImage(name: String, image: BufferedImage) {
+        val file = File(DefaultPaths.EXPORT.value, "${name.fileNameCompatible}.png")
+        ImageIO.write(image, "png", file)
     }
 
    private fun getProperFile(table: TimeTable, path: String = defaultSavePath) =
