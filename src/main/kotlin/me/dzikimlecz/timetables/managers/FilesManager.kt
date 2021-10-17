@@ -17,16 +17,15 @@ import java.nio.file.Paths
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
+import java.util.stream.Stream
 import javax.imageio.ImageIO
 import kotlin.streams.toList
 
 class FilesManager(private val defaultSavePath: String = DefaultPaths.SAVE.value!!) {
-    private val files: ObservableList<File> = FXCollections.observableArrayList()
-
-    val jsonFiles: ObservableList<File>
+    val jsonFiles: ObservableList<File> = FXCollections.observableArrayList()
         get() {
             refreshJsonFiles()
-            return files
+            return field
         }
 
     init {
@@ -68,12 +67,9 @@ class FilesManager(private val defaultSavePath: String = DefaultPaths.SAVE.value
     }
 
     fun refreshJsonFiles() {
-        files.addAll(
-            Files.walk(Paths.get(defaultSavePath)).filter { Files.isRegularFile(it) && Files.isReadable(it) }
-                .map { it.toFile() }
-        .filter { it.toString().endsWith(".json") }.filter { files.stream().noneMatch {
-                    file -> file.name == it.name } }.toList())
-        files.sortByDescending { it.lastModified() }
+        jsonFiles.clear()
+        jsonFiles += jsonFilesInDirectory(defaultSavePath)
+        jsonFiles.sortByDescending { it.lastModified() }
     }
 
     fun saveImage(name: String, image: BufferedImage) {
@@ -139,7 +135,7 @@ class FilesManager(private val defaultSavePath: String = DefaultPaths.SAVE.value
             SAVING_ERROR(true),
         }
 
-        private fun fail(status: ExportResult, file: File): Nothing =
+        fun fail(status: ExportResult, file: File): Nothing =
             when (status) {
                 ACCESS_DENIED -> throw IOException("Brak dostępu do pliku")
                 IDENTITY_PROBLEM -> throw FileAlreadyExistsException(file, null, "Ten plik może zawierać już inny plan!")
@@ -162,6 +158,17 @@ class FilesManager(private val defaultSavePath: String = DefaultPaths.SAVE.value
             } catch (e: Exception) {
                 SAVING_ERROR
             }
+
+        fun getFilesInDirectory(path: String): Stream<File> =
+            Files.walk(Paths.get(path))
+                .filter { Files.isRegularFile(it) }
+                .filter { Files.isReadable(it) }
+                .map { it.toFile() }
+
+        fun jsonFilesInDirectory(path: String) =
+            getFilesInDirectory(path)
+                .filter { it.extension == "json" }.toList()
+                .distinctBy { it.name }
 
     }
 }
