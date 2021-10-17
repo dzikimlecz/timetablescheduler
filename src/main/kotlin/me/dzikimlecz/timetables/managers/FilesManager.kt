@@ -13,6 +13,7 @@ import java.io.FileNotFoundException
 import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Paths
+import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.time.format.FormatStyle
 import javax.imageio.ImageIO
@@ -47,7 +48,7 @@ class FilesManager(
             if (filename !== null) File(
                 path, filename.takeIf { it.endsWith(".json") } ?: "$filename.json"
             )
-            else getProperFile(this, timeTable, path)
+            else getProperFile(timeTable, path)
         val resultStatus =
             if (file.exists()) checkIdentity(file, timeTable)
             else serialize(timeTable, file)
@@ -102,6 +103,9 @@ class FilesManager(
         return ImageIO.write(image, "png", file)
     }
 
+   private fun getProperFile(table: TimeTable, path: String = defaultSavePath) =
+       File(path, "${table.name}_${table.date.fileNameCompatibleString}")
+
     private companion object {
         fun checkIdentity(file: File, timeTable: TimeTable) : ExportResult {
             require(file.exists()) {
@@ -113,15 +117,10 @@ class FilesManager(
             return if (table.softEquals(timeTable)) CONTINUE else IDENTITY_PROBLEM
         }
 
-        fun getProperFile(
-            filesManager: FilesManager,
-            table: TimeTable,
-            path: String = filesManager.defaultSavePath
-        ) = File(path,
-            table.name + "_" + table.date
-                .format(DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT))
-                .replace(Regex("[<>\"/\\\\:.|?*]"), "-") + ".json"
-        )
+        val LocalDate.fileNameCompatibleString: String
+            get() = format(DateTimeFormatter.ofLocalizedDate(FormatStyle.SHORT))
+                .replace(Regex("[<>\"/\\\\:.|?*]"), "-")
+                .plus(".json")
 
         enum class ExportResult {
             ACCESS_DENIED,
@@ -131,6 +130,4 @@ class FilesManager(
             SAVING_ERROR,
         }
     }
-
-
 }
