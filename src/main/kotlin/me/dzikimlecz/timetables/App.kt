@@ -22,13 +22,14 @@ enum class DefaultPaths(val value: String?, val isDirectory: Boolean) {
 }
 
 // Creates folders, with paths specified in DefaultPaths enum, if they don't exist
-private fun checkPaths() = DefaultPaths.values()
-    // not all paths are directories. some are files, some are web urls
-    .filter(DefaultPaths::isDirectory)
-    // path may be null (temporary lack of the implementation)
-    .mapNotNull { it.value }
-    .map { File(it) }
-    .forEach { if (!it.exists()) it.mkdirs() }
+private fun checkPaths() =
+    DefaultPaths.values()
+        // not all paths are directories. some are files, some are web urls
+        .filter(DefaultPaths::isDirectory)
+        // path may be null (temporary lack of the implementation)
+        .mapNotNull { it.value }
+        .map { File(it) }
+        .forEach { if (!it.exists()) it.mkdirs() }
 
 // starts up TimeTable server if it's off
 private fun initServer(): Boolean {
