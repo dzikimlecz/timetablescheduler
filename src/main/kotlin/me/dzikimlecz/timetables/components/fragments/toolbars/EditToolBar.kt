@@ -1,23 +1,20 @@
 package me.dzikimlecz.timetables.components.fragments.toolbars
 
-import javafx.application.Platform
+import javafx.application.Platform.runLater
 import javafx.geometry.Orientation
 import javafx.scene.control.ChoiceBox
 import me.dzikimlecz.timetables.components.fragments.editors.TimeTableEditor
 import me.dzikimlecz.timetables.components.fragments.toolbars.EditToolBar.Companion.ApplicableTo.*
 import me.dzikimlecz.timetables.components.fragments.toolbars.EditToolBar.Companion.ChangedValue.*
 import me.dzikimlecz.timetables.components.fragments.toolbars.EditToolBar.Companion.ChangedValue.Companion.toChangedValue
-import me.dzikimlecz.timetables.components.views.dialogs.DetailsView
 import tornadofx.*
 
 class EditToolBar : TimeTableEditorToolBar() {
 
     override val root = toolbar {
-
-        button("Zatwierdź").setOnAction { parentEditor.viewMode = VIEW }
-
+        button("Zatwierdź")
+            .setOnAction { parentEditor.viewMode = TimeTableEditor.Companion.ViewMode.VIEW }
         separator()
-
         this += pane(ROW) {
             when (value.toChangedValue()) {
                 ADD -> parentEditor.timeTable.rows++
@@ -27,7 +24,6 @@ class EditToolBar : TimeTableEditorToolBar() {
                 else -> {}
             }
         }
-
         this += pane(COLUMN) {
             when (value.toChangedValue()) {
                 ADD -> parentEditor.timeTable.columns++
@@ -39,7 +35,6 @@ class EditToolBar : TimeTableEditorToolBar() {
                 else -> {}
             }
         }
-
         this += pane(CELL) {
             when (value.toChangedValue()) {
                 CLEAN -> parentEditor.cleanCells()
@@ -48,39 +43,37 @@ class EditToolBar : TimeTableEditorToolBar() {
                 else -> {}
             }
         }
-
         separator()
-
-        button("Szczegóły planu").setOnAction { showDetails() }
+        button("Szczegóły planu")
+            .setOnAction { showDetails() }
     }
 
-    private fun showDetails() = parentEditor.openInternalWindow<DetailsView>(
-        params = mapOf(DetailsView::table to parentEditor.timeTable)
-    )
+    private fun showDetails() =
+        parentEditor.openDetailsWindow()
 
 
-    private fun pane(applicable: Applicable, eventHandler: ChoiceBox<String>.() -> Unit) = stackpane {
+    private fun pane(applicableTo: ApplicableTo, eventHandler: ChoiceBox<String>.() -> Unit) = stackpane {
         val box = choicebox<String> {
             isVisible = false
-            val values = ChangedValue.values().filter { it.applicable.contains(applicable) }
+            val values = ChangedValue.values().filter { it.applicableTo.contains(applicableTo) }
             items.addAll(values.map { it.translation })
 
             setOnAction {
-                Platform.runLater { eventHandler(); isVisible = false; value = null }
+                runLater { eventHandler(); isVisible = false; value = null }
             }
         }
 
-        val label = button(applicable.translation) {
+        val button = button(applicableTo.translation) {
             action { box.isVisible = true; box.show() }
         }
-        box.prefWidthProperty().bind(label.widthProperty())
+        box.prefWidthProperty().bind(button.widthProperty())
     }
 
 
     companion object {
         private enum class ChangedValue(
             val translation: String,
-            vararg val applicable: Applicable,
+            vararg val applicableTo: ApplicableTo,
         ) {
             ADD("Dodaj", ROW, COLUMN),
             REMOVE("Usuń", ROW, COLUMN),
@@ -93,13 +86,14 @@ class EditToolBar : TimeTableEditorToolBar() {
             ;
 
             companion object {
+                // TODO: 17.10.2021 rename to something meaningful
                 fun String?.toChangedValue() = try {
                     values().filter { it.translation == this }[0]
                 } catch (e: Exception) { null }
             }
         }
 
-        private enum class Applicable(val translation: String) {
+        private enum class ApplicableTo(val translation: String) {
             CELL("Komórki"),
             ROW("Rzędy"),
             COLUMN("Kolumny"),

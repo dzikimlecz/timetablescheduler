@@ -28,6 +28,7 @@ import me.dzikimlecz.timetables.components.locate
 import me.dzikimlecz.timetables.components.margin
 import me.dzikimlecz.timetables.components.remove
 import me.dzikimlecz.timetables.components.views.MainView
+import me.dzikimlecz.timetables.components.views.dialogs.DetailsView
 import me.dzikimlecz.timetables.components.views.dialogs.TimeSpanAdjustView
 import me.dzikimlecz.timetables.timetable.Cell
 import me.dzikimlecz.timetables.timetable.TimeSpan
@@ -380,6 +381,9 @@ class TimeTableEditor : Fragment() {
             button.removeFromParent()
         }
     }
+
+    fun openDetailsWindow() =
+        openInternalWindow<DetailsView>(params = mapOf(DetailsView::table to timeTable))
 
     companion object {
         enum class ViewMode {
