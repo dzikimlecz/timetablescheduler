@@ -1,4 +1,4 @@
-package me.dzikimlecz.timetables.components.editors
+package me.dzikimlecz.timetables.components.fragments.editors
 
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.ListChangeListener.Change
@@ -19,8 +19,8 @@ import javafx.scene.layout.StackPane
 import javafx.scene.text.TextAlignment
 import javafx.scene.transform.Transform
 import javafx.stage.StageStyle
-import me.dzikimlecz.timetables.components.editors.TimeTableEditor.Companion.ViewMode.EDIT
-import me.dzikimlecz.timetables.components.editors.TimeTableEditor.Companion.ViewMode.VIEW
+import me.dzikimlecz.timetables.components.fragments.editors.TimeTableEditor.Companion.ViewMode.EDIT
+import me.dzikimlecz.timetables.components.fragments.editors.TimeTableEditor.Companion.ViewMode.VIEW
 import me.dzikimlecz.timetables.components.fragments.toolbars.EditToolBar
 import me.dzikimlecz.timetables.components.fragments.toolbars.ViewToolBar
 import me.dzikimlecz.timetables.components.get

@@ -9,7 +9,7 @@ import javafx.scene.layout.BorderPane
 import javafx.scene.layout.VBox
 import javafx.scene.paint.Color
 import me.dzikimlecz.lecturers.Lecturer
-import me.dzikimlecz.timetables.components.fragments.TimeTableEditor
+import me.dzikimlecz.timetables.components.fragments.editors.TimeTableEditor
 import me.dzikimlecz.timetables.managers.MainViewManager
 import me.dzikimlecz.timetables.timetable.TimeTable
 import tornadofx.*

@@ -3,8 +3,8 @@ package me.dzikimlecz.timetables.components.fragments.toolbars
 import javafx.application.Platform
 import javafx.geometry.Orientation
 import javafx.scene.control.ChoiceBox
-import me.dzikimlecz.timetables.components.fragments.TimeTableEditor.Companion.ViewMode.VIEW
-import me.dzikimlecz.timetables.components.fragments.toolbars.EditToolBar.Companion.Applicable.*
+import me.dzikimlecz.timetables.components.fragments.editors.TimeTableEditor
+import me.dzikimlecz.timetables.components.fragments.toolbars.EditToolBar.Companion.ApplicableTo.*
 import me.dzikimlecz.timetables.components.fragments.toolbars.EditToolBar.Companion.ChangedValue.*
 import me.dzikimlecz.timetables.components.fragments.toolbars.EditToolBar.Companion.ChangedValue.Companion.toChangedValue
 import me.dzikimlecz.timetables.components.views.dialogs.DetailsView

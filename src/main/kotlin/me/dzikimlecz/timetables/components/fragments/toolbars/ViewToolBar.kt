@@ -1,6 +1,6 @@
 package me.dzikimlecz.timetables.components.fragments.toolbars
 
-import me.dzikimlecz.timetables.components.fragments.TimeTableEditor.Companion.ViewMode.EDIT
+import me.dzikimlecz.timetables.components.fragments.editors.TimeTableEditor
 import me.dzikimlecz.timetables.components.views.MainView
 import tornadofx.action
 import tornadofx.button
@@ -26,7 +26,7 @@ class ViewToolBar : TimeTableEditorToolBar()  {
         }
         separator()
         button("Edytuj").setOnAction {
-            parentEditor.viewMode = EDIT
+            parentEditor.viewMode = TimeTableEditor.Companion.ViewMode.EDIT
         }
         separator()
         button("Zamknij").setOnAction { parentEditor.closePane() }
