@@ -1,4 +1,4 @@
-package me.dzikimlecz.timetables.components.fragments
+package me.dzikimlecz.timetables.components.editors
 
 import javafx.beans.property.SimpleObjectProperty
 import javafx.collections.ListChangeListener.Change
@@ -19,8 +19,8 @@ import javafx.scene.layout.StackPane
 import javafx.scene.text.TextAlignment
 import javafx.scene.transform.Transform
 import javafx.stage.StageStyle
-import me.dzikimlecz.timetables.components.fragments.TimeTableEditor.Companion.ViewMode.EDIT
-import me.dzikimlecz.timetables.components.fragments.TimeTableEditor.Companion.ViewMode.VIEW
+import me.dzikimlecz.timetables.components.editors.TimeTableEditor.Companion.ViewMode.EDIT
+import me.dzikimlecz.timetables.components.editors.TimeTableEditor.Companion.ViewMode.VIEW
 import me.dzikimlecz.timetables.components.fragments.toolbars.EditToolBar
 import me.dzikimlecz.timetables.components.fragments.toolbars.ViewToolBar
 import me.dzikimlecz.timetables.components.get
@@ -113,7 +113,7 @@ class TimeTableEditor : Fragment() {
                 }
             }
             while (editors.size > newValue) {
-                tablePane.removeRow(tablePane.get(editors.last().size - 1, editors.size)!!)
+                tablePane.removeRow(tablePane[editors.last().size - 1, editors.size]!!)
                 editors.last().forEach { it.cell.clean() }
                 editors.removeLast()
             }
@@ -165,7 +165,7 @@ class TimeTableEditor : Fragment() {
     private fun addTitle(x: Int) {
         val columnIndex = x + 1
         if (columnIndex < 0) throw IndexOutOfBoundsException("$columnIndex")
-        val stackPane = tablePane.get(columnIndex, 0) as StackPane
+        val stackPane = tablePane[columnIndex, 0] as StackPane
         with(stackPane) {
             maxWidthProperty().bind(
                 tablePane.maxWidthProperty() / (timeTable.columnsProperty + 1)
@@ -190,7 +190,7 @@ class TimeTableEditor : Fragment() {
     private fun addTimeSpans(column: Int) {
         val columnIndex = column + 1
         if (columnIndex < 0) throw IndexOutOfBoundsException("$columnIndex")
-        val stackPane = tablePane.get(columnIndex, 0) as StackPane
+        val stackPane = tablePane[columnIndex, 0] as StackPane
         with(stackPane) {
             maxWidthProperty().bind(
                 tablePane.maxWidthProperty() / (timeTable.columnsProperty + 1)

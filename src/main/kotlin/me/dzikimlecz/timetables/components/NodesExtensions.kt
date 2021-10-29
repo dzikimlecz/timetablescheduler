@@ -8,14 +8,14 @@ import javafx.scene.layout.GridPane
 /**
  * Returns node of the given location constraints located in the applied GridPane
  */
-fun GridPane.get(x: Int, y: Int) =
+operator fun GridPane.get(x: Int, y: Int) =
     children.firstOrNull { GridPane.getColumnIndex(it) == x && GridPane.getRowIndex(it) == y }
 
 /**
  * Removes node of the given location constraints located in the applied GridPane
  */
 fun GridPane.remove(x: Int, y: Int) =
-    children.remove(get(x, y))
+    children.remove(this[x, y])
 
 /**
  * Returns GridPane location constrains of the given [node] in o form of a Pair of 2 ints.

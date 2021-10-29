@@ -1,4 +1,4 @@
-package me.dzikimlecz.timetables.components.fragments
+package me.dzikimlecz.timetables.components.editors
 
 import javafx.beans.property.ObjectProperty
 import javafx.beans.property.SimpleStringProperty
@@ -8,9 +8,9 @@ import javafx.scene.control.Control
 import javafx.scene.control.Label
 import javafx.scene.control.TextArea
 import javafx.scene.paint.Color
-import me.dzikimlecz.timetables.components.fragments.TimeTableEditor.Companion.ViewMode
-import me.dzikimlecz.timetables.components.fragments.TimeTableEditor.Companion.ViewMode.EDIT
-import me.dzikimlecz.timetables.components.fragments.TimeTableEditor.Companion.ViewMode.VIEW
+import me.dzikimlecz.timetables.components.editors.TimeTableEditor.Companion.ViewMode
+import me.dzikimlecz.timetables.components.editors.TimeTableEditor.Companion.ViewMode.EDIT
+import me.dzikimlecz.timetables.components.editors.TimeTableEditor.Companion.ViewMode.VIEW
 import me.dzikimlecz.timetables.timetable.Cell
 import tornadofx.*
 import tornadofx.Dimension.LinearUnits.px
