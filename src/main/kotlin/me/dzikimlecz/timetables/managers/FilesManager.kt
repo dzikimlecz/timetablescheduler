@@ -22,10 +22,11 @@ import javax.imageio.ImageIO
 import kotlin.streams.toList
 
 class FilesManager(private val defaultSavePath: String = DefaultPaths.SAVE.value!!) {
-    val jsonFiles: ObservableList<File> = FXCollections.observableArrayList()
+    private val _jsonFiles: ObservableList<File> = FXCollections.observableArrayList()
+    val jsonFiles: ObservableList<File>
         get() {
             refreshJsonFiles()
-            return field
+            return _jsonFiles
         }
 
     init {
@@ -58,7 +59,6 @@ class FilesManager(private val defaultSavePath: String = DefaultPaths.SAVE.value
         else file.tryToWrite(serializedString)
     }
 
-
     fun readTable(file: File) : TimeTable {
         if (!file.exists()) throw FileNotFoundException("Plik \"$file\" nie istnieje.")
         return file.readText().decodeTable()
@@ -67,9 +67,9 @@ class FilesManager(private val defaultSavePath: String = DefaultPaths.SAVE.value
     }
 
     fun refreshJsonFiles() {
-        jsonFiles.clear()
-        jsonFiles += jsonFilesInDirectory(defaultSavePath)
-        jsonFiles.sortByDescending { it.lastModified() }
+        _jsonFiles.clear()
+        _jsonFiles += jsonFilesInDirectory(defaultSavePath)
+        _jsonFiles.sortByDescending { it.lastModified() }
     }
 
     fun saveImage(name: String, image: BufferedImage) {
