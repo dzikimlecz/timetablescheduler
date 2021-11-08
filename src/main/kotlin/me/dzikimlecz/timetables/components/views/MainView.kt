@@ -2,6 +2,7 @@ package me.dzikimlecz.timetables.components.views
 
 import javafx.scene.Node
 import javafx.scene.control.Button
+import javafx.scene.control.ButtonType
 import javafx.scene.control.Tab
 import javafx.scene.control.TabPane
 import javafx.scene.image.Image
@@ -20,8 +21,25 @@ import me.dzikimlecz.timetables.components.views.DataBaseControlPanelView as Dat
 class MainView : View(defaultTitle) {
 
     val manager = MainViewManager()
+    private val editors = mutableListOf<TimeTableEditor>()
 
-    init { addIcons() }
+    init {
+        addIcons()
+        primaryStage.setOnCloseRequest {
+            val countOfUnsaved = editors.count { editor -> editor.isUnsaved }
+            if (countOfUnsaved != 0) {
+                confirm(
+                    title = "Niezapisane Plany",
+                    header = "Niektóre plany ($countOfUnsaved) są niezapisane!",
+                    content = "Zamknąć?",
+                    confirmButton = ButtonType.YES,
+                    cancelButton = ButtonType.CANCEL,
+                    owner = primaryStage,
+                ) { return@setOnCloseRequest }
+                it.consume()
+            }
+        }
+    }
 
     override val root: BorderPane =
         borderpane {
@@ -104,12 +122,28 @@ class MainView : View(defaultTitle) {
     private fun findTab(id: String): Tab? =
         applyOnTabPane { tabs.firstOrNull { it.id == id } }
 
-    private fun Tab.injectEditorOf(table: TimeTable, displayEditing: Boolean) =
-        find<TimeTableEditor>(params = mapOf(TimeTableEditor::timeTable to table, TimeTableEditor::tab to this))
-            .apply {
-                if (displayEditing)
-                    viewMode = EDIT
+    private fun Tab.injectEditorOf(table: TimeTable, displayEditing: Boolean) {
+        val editor = find<TimeTableEditor>(params = mapOf(
+            TimeTableEditor::timeTable to table,
+            TimeTableEditor::tab to this
+        ))
+        if (displayEditing) editor.viewMode = EDIT
+        editors += editor
+        setOnCloseRequest {
+            if (editor.isUnsaved) {
+                confirm(
+                    title = "Niezapisany Plan",
+                    header = "Plan nie jest zapisany!",
+                    content = "Zamknąć?",
+                    confirmButton = ButtonType.YES,
+                    cancelButton = ButtonType.CANCEL,
+                    owner = primaryStage,
+                ) { return@setOnCloseRequest }
+                it.consume()
             }
+        }
+        setOnClosed { editors -= editor }
+    }
 
     private fun Tab.addToTabs(): Tab =
         applyOnTabPane {
