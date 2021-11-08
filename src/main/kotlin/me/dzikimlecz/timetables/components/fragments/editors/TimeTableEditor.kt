@@ -46,7 +46,8 @@ class TimeTableEditor : Fragment() {
 
     init {
         tab.content = root
-        tab.text = "${timeTable.name} : ${timeTable.date}"
+        tabTitleProperty.set("${timeTable.name} : ${timeTable.date}")
+        tab.textProperty().bind(tabTitleProperty)
         initListeners()
     }
 
