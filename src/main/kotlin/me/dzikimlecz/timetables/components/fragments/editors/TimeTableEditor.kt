@@ -98,7 +98,9 @@ class TimeTableEditor : Fragment() {
         openInternalWindow<DetailsView>(params = mapOf(DetailsView::table to timeTable))
 
     private fun initListeners() {
-
+        isUnsavedProperty.addListener { _, _, newVal -> tabTitleProperty.set(
+            "${if (newVal) "[*] " else ""}${timeTable.name} : ${timeTable.date}"
+        ) }
         viewModeProperty.addListener { _, _, newVal ->
             root.top = toolBars[newVal]
             tableSection.changeViewMode(newVal)
