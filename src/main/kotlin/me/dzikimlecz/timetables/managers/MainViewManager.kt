@@ -35,7 +35,7 @@ class MainViewManager {
     fun openTable() {
         val table = importTable() ?: return
         activeTable = table
-        displayTable(table, false)
+        displayTable(table)
     }
 
     fun importTable(): TimeTable? {
@@ -62,7 +62,7 @@ class MainViewManager {
         filesManager.saveImage(name, image)
     }
 
-    fun displayTable(table: TimeTable, displayEditing: Boolean) {
+    fun displayTable(table: TimeTable, displayEditing: Boolean = false) {
         find<MainView>().displayTable(table, displayEditing)
         activeTable = table
     }
