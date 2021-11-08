@@ -10,6 +10,7 @@ import javafx.scene.layout.VBox
 import javafx.scene.paint.Color
 import me.dzikimlecz.lecturers.Lecturer
 import me.dzikimlecz.timetables.components.fragments.editors.TimeTableEditor
+import me.dzikimlecz.timetables.components.fragments.editors.TimeTableEditor.Companion.ViewMode.EDIT
 import me.dzikimlecz.timetables.managers.MainViewManager
 import me.dzikimlecz.timetables.timetable.TimeTable
 import tornadofx.*
@@ -107,7 +108,7 @@ class MainView : View(defaultTitle) {
         find<TimeTableEditor>(params = mapOf(TimeTableEditor::timeTable to table, TimeTableEditor::tab to this))
             .apply {
                 if (displayEditing)
-                    viewMode = TimeTableEditor.Companion.ViewMode.EDIT
+                    viewMode = EDIT
             }
 
     private fun Tab.addToTabs(): Tab =
