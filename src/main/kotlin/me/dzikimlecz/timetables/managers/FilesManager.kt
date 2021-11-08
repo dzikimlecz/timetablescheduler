@@ -49,7 +49,8 @@ class FilesManager(private val defaultSavePath: String = DefaultPaths.SAVE.value
     }
 
     private fun serialize(timeTable: TimeTable, file: File) : ExportResult {
-        if (file.creatingFailed()) return SAVING_ERROR
+        if (file.creatingFailed())
+            return SAVING_ERROR
         val serializedString = try {
             timeTable.serialize()
         } catch (e: SerializationException) {
@@ -146,9 +147,9 @@ class FilesManager(private val defaultSavePath: String = DefaultPaths.SAVE.value
         fun File.creatingFailed(): Boolean =
             try {
                 createNewFile()
-                true
-            } catch (e: IOException) {
                 false
+            } catch (e: IOException) {
+                true
             }
 
         fun File.tryToWrite(serialized: String) =
