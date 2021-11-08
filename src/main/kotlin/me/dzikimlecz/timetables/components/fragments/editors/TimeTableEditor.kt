@@ -1,6 +1,8 @@
 package me.dzikimlecz.timetables.components.fragments.editors
 
+import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleObjectProperty
+import javafx.beans.property.SimpleStringProperty
 import javafx.geometry.Orientation
 import javafx.scene.SnapshotParameters
 import javafx.scene.control.Tab
@@ -17,8 +19,11 @@ import tornadofx.*
 class TimeTableEditor : Fragment() {
     val timeTable by param<TimeTable>()
     val tab by param<Tab>()
-    private val viewModeProperty = SimpleObjectProperty(VIEW)
+    private val viewModeProperty = SimpleObjectProperty<ViewMode>(VIEW)
     var viewMode: ViewMode by viewModeProperty
+    private val isUnsavedProperty = SimpleBooleanProperty(false)
+    val isUnsaved by isUnsavedProperty
+    private val tabTitleProperty = SimpleStringProperty()
 
     private val viewToolBar = find<ViewToolBar>(params = mapOf(ViewToolBar::parentEditor to this))
     private val editToolBar: EditToolBar by lazy {
@@ -91,11 +96,27 @@ class TimeTableEditor : Fragment() {
     fun openDetailsWindow() =
         openInternalWindow<DetailsView>(params = mapOf(DetailsView::table to timeTable))
 
-    private fun initListeners() =
+    private fun initListeners() {
+
         viewModeProperty.addListener { _, _, newVal ->
             root.top = toolBars[newVal]
             tableSection.changeViewMode(newVal)
+            if (newVal == EDIT)
+                isUnsavedProperty.set(true)
         }
+    }
+
+    fun saveTable() {
+        find<MainView>().manager.saveTable()
+        isUnsavedProperty.set(false)
+    }
+
+
+    fun describedSaving() {
+        find<MainView>().manager.describedSaving()
+        isUnsavedProperty.set(false)
+    }
+
 
     companion object {
         enum class ViewMode {
