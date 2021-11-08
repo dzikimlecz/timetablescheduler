@@ -44,9 +44,9 @@ class MainView : View(defaultTitle) {
         primaryStage.isMaximized = true
     }
 
-    fun displayTable(table: TimeTable) =
+    fun displayTable(table: TimeTable, displayEditing: Boolean) =
         Tab().apply {
-            injectEditorOf(table)
+            injectEditorOf(table, displayEditing)
             addToTabs()
             select()
         }
@@ -103,8 +103,12 @@ class MainView : View(defaultTitle) {
     private fun findTab(id: String): Tab? =
         applyOnTabPane { tabs.firstOrNull { it.id == id } }
 
-    private fun Tab.injectEditorOf(table: TimeTable) =
+    private fun Tab.injectEditorOf(table: TimeTable, displayEditing: Boolean) =
         find<TimeTableEditor>(params = mapOf(TimeTableEditor::timeTable to table, TimeTableEditor::tab to this))
+            .apply {
+                if (displayEditing)
+                    viewMode = TimeTableEditor.Companion.ViewMode.EDIT
+            }
 
     private fun Tab.addToTabs(): Tab =
         applyOnTabPane {

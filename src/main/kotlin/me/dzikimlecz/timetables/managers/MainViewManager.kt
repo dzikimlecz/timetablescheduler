@@ -35,7 +35,7 @@ class MainViewManager {
     fun openTable() {
         val table = importTable() ?: return
         activeTable = table
-        displayTable(table)
+        displayTable(table, false)
     }
 
     fun importTable(): TimeTable? {
@@ -48,7 +48,7 @@ class MainViewManager {
         val tableSetUpView = find<TimeTableSetUpView>()
         tableSetUpView.openModal(UTILITY, resizable = false, block = true)
         val table = tableSetUpView.buildTable ?: return
-        displayTable(table)
+        displayTable(table, true)
     }
 
     fun openDatabasePanel() = runAsync {
@@ -62,8 +62,8 @@ class MainViewManager {
         filesManager.saveImage(name, image)
     }
 
-    fun displayTable(table: TimeTable) {
-        find<MainView>().displayTable(table)
+    fun displayTable(table: TimeTable, displayEditing: Boolean) {
+        find<MainView>().displayTable(table, displayEditing)
         activeTable = table
     }
 
