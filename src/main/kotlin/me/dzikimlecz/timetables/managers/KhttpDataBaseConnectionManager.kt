@@ -38,7 +38,7 @@ class KhttpDataBaseConnectionManager: DataBaseConnectionManager {
             headers = mapOf("Content-Type" to "application/json"),
             data = data
         )
-        if (postResponse.statusCode == 424) throw ServerAccessException("Missing Lecturers", 424, postResponse.text)
+        if (postResponse.statusCode == 424) throw ResponseException("Missing Lecturers", 424, postResponse.text)
         else if (!postResponse.isOk()) {
             val patchResponse = patch(
                 "$address/timetables",
@@ -83,7 +83,7 @@ class KhttpDataBaseConnectionManager: DataBaseConnectionManager {
                 data = Json.encodeToString(lecturerSerializer, lecturer)
             )
             patchResponse.checkSuccess {
-                """Could not create new, nor update an existing table.
+                """Could not create new, nor update an existing lecturer.
                     post: ${postResponse.text}
                     patch: ${patchResponse.text}""".trimIndent()
             }
@@ -96,7 +96,7 @@ class KhttpDataBaseConnectionManager: DataBaseConnectionManager {
 }
 
 inline fun Response.checkSuccess(msg: () -> String = { "Connection problem" }) {
-    if (!isOk()) throw ServerAccessException(msg(), statusCode, text)
+    if (!isOk()) throw ResponseException(msg(), statusCode, text)
 }
 
 fun Response.isOk() = statusCode in 200..299

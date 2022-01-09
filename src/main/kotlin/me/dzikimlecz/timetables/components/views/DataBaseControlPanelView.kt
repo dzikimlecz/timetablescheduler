@@ -149,7 +149,7 @@ class DataBaseControlPanelView: View() {
 
     private fun sendTable(data: TimeTable) = try {
         db.sendTable(data)
-    } catch (e: ServerAccessException) {
+    } catch (e: ResponseException) {
         if (e.code == 424) {
             val text = e.reason
             val missingCodes = Json.decodeFromString(ListSerializer(String.serializer()), text).distinct()
@@ -181,7 +181,7 @@ class DataBaseControlPanelView: View() {
         }
         try {
             db.sendLecturer(lecturer)
-        } catch (e: ServerAccessException) {
+        } catch (e: ResponseException) {
             runLater { e.handle("Nie udało się przesłać wykładowcy!") }
         } catch (e: Exception) {
             runLater { alert(ERROR, "Nie można dodać wykładowcy $lecturer", e.message) }
@@ -201,7 +201,7 @@ class DataBaseControlPanelView: View() {
 
     private fun tryToDeleteLecturer(code: String) = try {
         db.removeLecturer(code)
-    } catch (e: ServerAccessException) {
+    } catch (e: ResponseException) {
         runLater { e.handle("Nie udało się usunąć wykładowcy!") }
     } catch (e: Exception) {
         runLater { alert(ERROR, "Nie można usunąć wykładowcy $code", e.message) }
@@ -209,13 +209,13 @@ class DataBaseControlPanelView: View() {
 
     private fun tryToDeleteTable(name: String) = try {
         db.removeTable(name)
-    } catch (e: ServerAccessException) {
+    } catch (e: ResponseException) {
         runLater { e.handle("Nie udało się usunąć planu!") }
     } catch (e: Exception) {
         runLater { alert(ERROR, "Nie można usunąć planu $name", e.message) }
     }
 
-    private fun ServerAccessException.handle(header: String) {
+    private fun ResponseException.handle(header: String) {
         alert(
             ERROR,
             header,

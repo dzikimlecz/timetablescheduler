@@ -11,7 +11,7 @@ import org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS
 @TestInstance(PER_CLASS)
 internal class DataBaseConnectionManagerTest {
     val manager: DataBaseConnectionManager =
-        KhttpDataBaseConnectionManager()
+        CvurlConnectionManager()
 
     @BeforeAll
     fun waitForServerToStart() = Thread.sleep(7_000)
@@ -96,7 +96,7 @@ internal class DataBaseConnectionManagerTest {
             // when
             assertNull(manager.lookForTable(name))
             // then
-            assertThrows<ServerAccessException> { manager.removeTable(name) }
+            assertThrows<ResponseException> { manager.removeTable(name) }
         }
     }
     
@@ -174,7 +174,7 @@ internal class DataBaseConnectionManagerTest {
             manager.removeLecturer(code)
             assertNull(manager.lookForLecturer(code))
             // then
-            assertThrows<ServerAccessException> { manager.removeLecturer(code) }
+            assertThrows<ResponseException> { manager.removeLecturer(code) }
         }
     }
     
