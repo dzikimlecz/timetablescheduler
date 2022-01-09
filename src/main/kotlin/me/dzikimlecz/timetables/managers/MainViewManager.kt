@@ -52,9 +52,8 @@ fun setUpTable() {
 }
 
 fun openDatabasePanel() = runAsync {
-    val failedToConnect = !tryToConnect()
-    if (failedToConnect) return@runAsync
-    runLater(::displayDatabasePanel)
+    if (tryToConnect())
+        runLater(::displayDatabasePanel)
 }
 
 fun exportTableImage(img: Image, name: String) = runAsync {
