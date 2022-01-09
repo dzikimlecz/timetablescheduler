@@ -18,9 +18,7 @@ import me.dzikimlecz.lecturers.Lecturer
 import me.dzikimlecz.timetables.components.NoSelectionModel
 import me.dzikimlecz.timetables.components.views.dialogs.LecturerSetUpView
 import me.dzikimlecz.timetables.components.views.dialogs.MissingLecturers
-import me.dzikimlecz.timetables.managers.DataBaseConnectionManager
-import me.dzikimlecz.timetables.managers.MainViewManager
-import me.dzikimlecz.timetables.managers.ServerAccessException
+import me.dzikimlecz.timetables.managers.*
 import me.dzikimlecz.timetables.timetable.TimeTable
 import tornadofx.*
 import java.lang.Thread.sleep
@@ -31,7 +29,6 @@ import javafx.util.Callback as Factory
 class DataBaseControlPanelView: View() {
     private var lecturersList by singleAssign<ListView<Lecturer>>()
     private var tablesList by singleAssign<ListView<TimeTable>>()
-    private val manager: MainViewManager = find<MainView>().manager
     val db by param<DataBaseConnectionManager>()
 
     override val root = borderpane {
@@ -111,14 +108,14 @@ class DataBaseControlPanelView: View() {
                 vgap = 10.0
                 button("Otwórz Plan").setOnAction {
                     withSelectedTable {
-                        manager.displayTable(it)
+                        displayTable(it)
                         refresh()
                     }
                 }
                 button("Pobierz Plan").setOnAction {
                     withSelectedTable {
-                        manager.activeTable = it
-                        manager.saveTable()
+                        activeTable = it
+                        saveTable()
                         refresh()
                     }
                 }
@@ -129,7 +126,7 @@ class DataBaseControlPanelView: View() {
                     }
                 }
                 button("Dodaj Plan").setOnAction {
-                    val table = manager.importTable() ?: return@setOnAction
+                    val table = importTable() ?: return@setOnAction
                     runAsync { sendTable(table) }
                     refresh(250)
                 }
@@ -233,5 +230,3 @@ class DataBaseControlPanelView: View() {
         private val listFont = font(14.0)
     }
 }
-
-

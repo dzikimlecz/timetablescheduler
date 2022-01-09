@@ -16,92 +16,90 @@ import tornadofx.find
 import tornadofx.runAsync
 import java.io.File
 
-class MainViewManager {
-    lateinit var activeTable : TimeTable
-    private val filesManager = FilesManager()
-    private val dataBaseConnectionManager: DataBaseConnectionManager = KhttpDataBaseConnectionManager()
 
-    fun saveTable() =
-        try { filesManager.saveTable(activeTable) }
-        catch (e: FileAlreadyExistsException) { describedSaving() }
-        catch (e: Exception) { alert(ERROR,"Błąd Zapisu", e.message) }
+lateinit var activeTable : TimeTable
+private val filesManager = FilesManager()
+private val dataBaseConnectionManager: DataBaseConnectionManager = KhttpDataBaseConnectionManager()
 
-    fun describedSaving() {
-        val exportView = find<ExportView>()
-        exportView.openModal(stageStyle = UTILITY, block = true, resizable = false)
-        saveWithGivenData(exportView.fileData)
+fun saveTable() =
+    try { filesManager.saveTable(activeTable) }
+    catch (e: FileAlreadyExistsException) { describedSaving() }
+    catch (e: Exception) { alert(ERROR,"Błąd Zapisu", e.message) }
+
+fun describedSaving() {
+    val exportView = find<ExportView>()
+    exportView.openModal(stageStyle = UTILITY, block = true, resizable = false)
+    saveWithGivenData(exportView.fileData)
+}
+
+fun openTable() {
+    val table = importTable() ?: return
+    activeTable = table
+    displayTable(table)
+}
+
+fun importTable(): TimeTable? {
+    val importView = find<ImportView>(params = mapOf(ImportView::filesManager to filesManager))
+    importView.openModal(stageStyle = UTILITY, block = true, resizable = false)
+    return readTable(importView.chosenFile)
+}
+
+fun setUpTable() {
+    val tableSetUpView = find<TimeTableSetUpView>()
+    tableSetUpView.openModal(UTILITY, resizable = false, block = true)
+    val table = tableSetUpView.buildTable ?: return
+    displayTable(table, true)
+}
+
+fun openDatabasePanel() = runAsync {
+    val failedToConnect = !tryToConnect()
+    if (failedToConnect) return@runAsync
+    runLater(::displayDatabasePanel)
+}
+
+fun exportTableImage(img: Image, name: String) = runAsync {
+    val image = SwingFXUtils.fromFXImage(img, null)
+    filesManager.saveImage(name, image)
+}
+
+fun displayTable(table: TimeTable, displayEditing: Boolean = false) {
+    find<MainView>().displayTable(table, displayEditing)
+    activeTable = table
+}
+
+private fun saveWithGivenData(saveData: Pair<String?, String?>?) {
+    val (path, name) = saveData ?: return
+    if (name !== null && path !== null)
+        filesManager.saveTable(activeTable, path, true, name)
+    else if (path !== null)
+        filesManager.saveTable(activeTable, path, true)
+    else if (name !== null)
+        filesManager.saveTable(activeTable, enforce = true, name = name)
+    else filesManager.saveTable(activeTable, enforce = true)
+}
+
+private fun readTable(chosenFile: File?): TimeTable? =
+    if (chosenFile === null) null
+    else try {
+        filesManager.readTable(chosenFile)
+    } catch (e: Exception) {
+        alert(ERROR, "Błąd odczytu", e.message)
+        null
     }
 
-    fun openTable() {
-        val table = importTable() ?: return
-        activeTable = table
-        displayTable(table)
+private fun tryToConnect(): Boolean =
+    try {
+        dataBaseConnectionManager.tryToConnect()
+        true
+    } catch (e: Exception) {
+        runLater { alert(ERROR, "Błąd Połączenia!", e.message) }
+        false
     }
 
-    fun importTable(): TimeTable? {
-        val importView = find<ImportView>(params = mapOf(ImportView::filesManager to filesManager))
-        importView.openModal(stageStyle = UTILITY, block = true, resizable = false)
-        return readTable(importView.chosenFile)
+private fun displayDatabasePanel() {
+    find<MainView>().showDataBaseControlPane {
+        find<DataBaseControlPanelView>(
+            params = mapOf(DataBaseControlPanelView::db to dataBaseConnectionManager)
+        ).apply { refresh() }
     }
-
-    fun setUpTable() {
-        val tableSetUpView = find<TimeTableSetUpView>()
-        tableSetUpView.openModal(UTILITY, resizable = false, block = true)
-        val table = tableSetUpView.buildTable ?: return
-        displayTable(table, true)
-    }
-
-    fun openDatabasePanel() = runAsync {
-        val failedToConnect = !tryToConnect()
-        if (failedToConnect) return@runAsync
-        runLater(::displayDatabasePanel)
-    }
-
-    fun exportTableImage(img: Image, name: String) = runAsync {
-        val image = SwingFXUtils.fromFXImage(img, null)
-        filesManager.saveImage(name, image)
-    }
-
-    fun displayTable(table: TimeTable, displayEditing: Boolean = false) {
-        find<MainView>().displayTable(table, displayEditing)
-        activeTable = table
-    }
-
-    private fun saveWithGivenData(saveData: Pair<String?, String?>?) {
-        val (path, name) = saveData ?: return
-        if (name !== null && path !== null)
-            filesManager.saveTable(activeTable, path, true, name)
-        else if (path !== null)
-            filesManager.saveTable(activeTable, path, true)
-        else if (name !== null)
-            filesManager.saveTable(activeTable, enforce = true, name = name)
-        else filesManager.saveTable(activeTable, enforce = true)
-    }
-
-    private fun readTable(chosenFile: File?): TimeTable? =
-        if (chosenFile === null) null
-        else try {
-            filesManager.readTable(chosenFile)
-        } catch (e: Exception) {
-            alert(ERROR, "Błąd odczytu", e.message)
-            null
-        }
-
-    private fun tryToConnect(): Boolean =
-        try {
-            dataBaseConnectionManager.tryToConnect()
-            true
-        } catch (e: Exception) {
-            runLater { alert(ERROR, "Błąd Połączenia!", e.message) }
-            false
-        }
-
-    private fun displayDatabasePanel() {
-        find<MainView>().showDataBaseControlPane {
-            find<DataBaseControlPanelView>(
-                params = mapOf(DataBaseControlPanelView::db to dataBaseConnectionManager)
-            ).apply { refresh() }
-        }
-    }
-
 }

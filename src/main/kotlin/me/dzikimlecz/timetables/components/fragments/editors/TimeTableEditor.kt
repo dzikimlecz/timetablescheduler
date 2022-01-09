@@ -11,15 +11,17 @@ import me.dzikimlecz.timetables.components.fragments.editors.TimeTableEditor.Com
 import me.dzikimlecz.timetables.components.fragments.editors.TimeTableEditor.Companion.ViewMode.VIEW
 import me.dzikimlecz.timetables.components.fragments.toolbars.EditToolBar
 import me.dzikimlecz.timetables.components.fragments.toolbars.ViewToolBar
-import me.dzikimlecz.timetables.components.views.MainView
 import me.dzikimlecz.timetables.components.views.dialogs.DetailsView
+import me.dzikimlecz.timetables.managers.exportTableImage
 import me.dzikimlecz.timetables.timetable.TimeTable
 import tornadofx.*
+import me.dzikimlecz.timetables.managers.describedSaving as describedSave
+import me.dzikimlecz.timetables.managers.saveTable as save
 
 class TimeTableEditor : Fragment() {
     val timeTable by param<TimeTable>()
     val tab by param<Tab>()
-    private val viewModeProperty = SimpleObjectProperty<ViewMode>(VIEW)
+    private val viewModeProperty = SimpleObjectProperty(VIEW)
     var viewMode: ViewMode by viewModeProperty
     private val isUnsavedProperty = SimpleBooleanProperty(false)
     val isUnsaved by isUnsavedProperty
@@ -66,7 +68,7 @@ class TimeTableEditor : Fragment() {
             transform = Transform.scale(exportScale, exportScale)
         }
         val img = tableSection.root.snapshot(params, null)
-        find<MainView>().manager.exportTableImage(img, timeTable.name)
+        exportTableImage(img, timeTable.name)
     }
 
     fun adjustTimeSpans() =
@@ -110,13 +112,13 @@ class TimeTableEditor : Fragment() {
     }
 
     fun saveTable() {
-        find<MainView>().manager.saveTable()
+        save()
         isUnsavedProperty.set(false)
     }
 
 
     fun describedSaving() {
-        find<MainView>().manager.describedSaving()
+        describedSave()
         isUnsavedProperty.set(false)
     }
 

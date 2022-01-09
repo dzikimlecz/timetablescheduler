@@ -12,7 +12,9 @@ import javafx.scene.paint.Color
 import me.dzikimlecz.lecturers.Lecturer
 import me.dzikimlecz.timetables.components.fragments.editors.TimeTableEditor
 import me.dzikimlecz.timetables.components.fragments.editors.TimeTableEditor.Companion.ViewMode.EDIT
-import me.dzikimlecz.timetables.managers.MainViewManager
+import me.dzikimlecz.timetables.managers.openDatabasePanel
+import me.dzikimlecz.timetables.managers.openTable
+import me.dzikimlecz.timetables.managers.setUpTable
 import me.dzikimlecz.timetables.timetable.TimeTable
 import tornadofx.*
 import me.dzikimlecz.timetables.components.views.DataBaseControlPanelView as DataBasePanel
@@ -20,7 +22,6 @@ import me.dzikimlecz.timetables.components.views.DataBaseControlPanelView as Dat
 // Main scene of the app
 class MainView : View(defaultTitle) {
 
-    val manager = MainViewManager()
     private val editors = mutableListOf<TimeTableEditor>()
 
     init {
@@ -45,11 +46,11 @@ class MainView : View(defaultTitle) {
         borderpane {
             left = vbox {
                 button("Nowy Plan")
-                    .setOnAction { manager.setUpTable() }
+                    .setOnAction { setUpTable() }
                 button("Otwórz Plan")
-                    .setOnAction { manager.openTable() }
+                    .setOnAction { openTable() }
                 button("Otwórz Bazę Godzin")
-                    .setOnAction { manager.openDatabasePanel() }
+                    .setOnAction { openDatabasePanel() }
                 style()
             }
             center = tabpane {
