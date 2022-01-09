@@ -28,6 +28,12 @@ dependencies {
     implementation(kotlin("stdlib-jdk8"))
     implementation("com.github.jkcclemens:khttp:-SNAPSHOT")
     implementation(files("C:\\libs\\transferred-1.jar"))
+
+    implementation("com.github.corese4rch:cvurl-io:1.5")
+    implementation("com.fasterxml.jackson.core:jackson-core:2.13.1")
+    implementation("com.fasterxml.jackson.core:jackson-annotations:2.13.1")
+    implementation("com.fasterxml.jackson.core:jackson-databind:2.13.1")
+    implementation("com.fasterxml.jackson.datatype:jackson-datatype-jsr310")
 }
 
 javafx {
