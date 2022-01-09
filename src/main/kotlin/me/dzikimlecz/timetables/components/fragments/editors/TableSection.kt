@@ -33,7 +33,10 @@ class TableSection: Fragment() {
     override val root = gridpane {
         maxWidthProperty().bind(primaryStage.widthProperty() - 230)
         maxHeightProperty().bind(primaryStage.heightProperty() - 230)
-        initStyle()
+        margin = Insets(90.0, 25.0, 120.0, 25.0)
+        paddingTop = 20
+        alignment = Pos.TOP_CENTER
+        isGridLinesVisible = true
     }
 
     init {
@@ -46,11 +49,116 @@ class TableSection: Fragment() {
         initListeners()
     }
 
-    private fun GridPane.initStyle() {
-        margin = Insets(90.0, 25.0, 120.0, 25.0)
-        paddingTop = 20
-        alignment = Pos.TOP_CENTER
-        isGridLinesVisible = true
+    private fun initListeners() {
+
+        timeTable.rowsProperty.addListener { _, _, newVal ->
+            val newValue = newVal.toInt()
+            for (i in editors.size until newValue) {
+                editors.add(ArrayList())
+                for (x in 0 until timeTable.columns) {
+                    val y = editors.size - 1
+                    root.addCell(x, y, timeTable[y][x])
+                }
+                root.addDate(i)
+            }
+            while (editors.size > newValue) {
+                root.removeRow(root[editors.last().size - 1, editors.size]!!)
+                editors.last().forEach { it.cell.clean() }
+                editors.removeLast()
+            }
+        }
+
+        timeTable.columnsProperty.addListener { _, _, newVal ->
+            //fixme exception thrown on columns 0->1
+            val newValue = newVal.toInt()
+            while (editors.last().size < newValue) {
+                for (y in 0 until editors.size) {
+                    root.addCell(editors.last().size, y, timeTable[y][editors.last().size])
+                }
+                val columnIndex = editors.first().lastIndex
+                root.stackpane { borderpane(); gridpaneConstraints { columnRowIndex(columnIndex + 1, 0) } }
+                loadTimeSpans(columnIndex)
+                addTitle(columnIndex)
+            }
+            while (editors.last().size > newValue) {
+                root.remove(editors.last().size, 0 )
+                for (y in 0 until timeTable.rows) {
+                    root.remove(editors.last().size, y + 1)
+                    editors[y].last().cell.clean()
+                    editors[y].removeLast()
+                }
+            }
+        }
+    }
+
+    fun cleanCells() = handleCellsOverlayingAction { clean() }
+
+    fun divideCells(direction: Orientation) = handleCellsOverlayingAction { divisionDirection = direction }
+
+    fun cleanRows() {
+        val buttons = overlayCells()
+        for (button in buttons.keys) {
+            button.setOnAction {
+                val rowIndex = GridPane.getRowIndex(button.parent)
+                for ((index, editor) in editors[rowIndex].withIndex()) {
+                    editor.cell.clean()
+                    (getCell(index, rowIndex) as? StackPane)?.children?.removeIf { it is Button }
+                }
+                button.removeFromParent()
+            }
+        }
+    }
+
+    fun cleanColumns() {
+        val buttons = overlayCells()
+        for (button in buttons.keys) {
+            button.setOnAction {
+                val columnIndex = GridPane.getColumnIndex(button.parent)
+                for (row in 0 until editors.size) {
+                    editors[row][columnIndex].cell.clean()
+                    (getCell(columnIndex, row) as? StackPane)?.children?.removeIf { it is Button }
+                }
+                button.removeFromParent()
+            }
+        }
+    }
+
+    fun adjustTimeSpans() {
+        val buttons = overlayGrid {
+            val (y, x) = locate(it)
+            x != 0 && y == 0
+        }
+        for ((i, button) in buttons.keys.withIndex()) button.setOnAction {
+            find<TimeSpanAdjustView>(
+                params = mapOf(
+                    TimeSpanAdjustView::column to i,
+                    TimeSpanAdjustView::table to timeTable,
+                )
+            ).openModal(stageStyle = StageStyle.UTILITY, resizable = false)
+            button.removeFromParent()
+        }
+    }
+
+    fun adjustTitles() {
+        val buttons = overlayGrid {
+            val (y, x) = locate(it)
+            x != 0 && y == 0
+        }
+        for ((i, button) in buttons.keys.withIndex())
+            button.action {
+                TextInputDialog().apply {
+                    headerText = "Zmiana nazwy zajęć"
+                    contentText = "Podaj nazwę zajęć dla tej kolumny"
+                }.showAndWait().ifPresent {
+                    timeTable.titles[i].set(it)
+                    button.removeFromParent()
+                }
+            }
+    }
+
+    fun changeViewMode(viewMode: TimeTableEditor.Companion.ViewMode) {
+        for (list in editors) list.forEach { it.refreshView(viewMode) }
+        removeOverlayFromCells()
     }
 
     private fun GridPane.addDate(y: Int) {
@@ -82,47 +190,6 @@ class TableSection: Fragment() {
         editors += ArrayList<CellEditor>()
         for (x in 0 until timeTable.columns)
             root.addCell(x, y, timeTable[y][x])
-    }
-
-    private fun initListeners() {
-
-        timeTable.rowsProperty.addListener { _, _, newVal ->
-            val newValue = newVal.toInt()
-            for (i in editors.size until newValue) {
-                editors.add(ArrayList())
-                for (x in 0 until timeTable.columns) {
-                    val y = editors.size - 1
-                    root.addCell(x, y, timeTable[y][x])
-                }
-            }
-            while (editors.size > newValue) {
-                root.removeRow(root[editors.last().size - 1, editors.size]!!)
-                editors.last().forEach { it.cell.clean() }
-                editors.removeLast()
-            }
-        }
-
-        timeTable.columnsProperty.addListener { _, _, newVal ->
-            //fixme exception thrown on columns 0->1
-            val newValue = newVal.toInt()
-            while (editors.last().size < newValue) {
-                for (y in 0 until editors.size) {
-                    root.addCell(editors.last().size, y, timeTable[y][editors.last().size])
-                }
-                val columnIndex = editors.first().lastIndex
-                root.stackpane { borderpane(); gridpaneConstraints { columnRowIndex(columnIndex + 1, 0) } }
-                loadTimeSpans(columnIndex)
-                addTitle(columnIndex)
-            }
-            while (editors.last().size > newValue) {
-                root.remove(editors.last().size, 0 )
-                for (y in 0 until timeTable.rows) {
-                    root.remove(editors.last().size, y + 1)
-                    editors[y].last().cell.clean()
-                    editors[y].removeLast()
-                }
-            }
-        }
     }
 
     private fun GridPane.addCell(x: Int, y: Int, cell: Cell) {
@@ -180,38 +247,6 @@ class TableSection: Fragment() {
             }
     }
 
-    fun cleanCells() = handleCellsOverlayingAction { clean() }
-
-    fun divideCells(direction: Orientation) = handleCellsOverlayingAction { divisionDirection = direction }
-
-    fun cleanRows() {
-        val buttons = overlayCells()
-        for (button in buttons.keys) {
-            button.setOnAction {
-                val rowIndex = GridPane.getRowIndex(button.parent)
-                for ((index, editor) in editors[rowIndex].withIndex()) {
-                    editor.cell.clean()
-                    (getCell(index, rowIndex) as? StackPane)?.children?.removeIf { it is Button }
-                }
-                button.removeFromParent()
-            }
-        }
-    }
-
-    fun cleanColumns() {
-        val buttons = overlayCells()
-        for (button in buttons.keys) {
-            button.setOnAction {
-                val columnIndex = GridPane.getColumnIndex(button.parent)
-                for (row in 0 until editors.size) {
-                    editors[row][columnIndex].cell.clean()
-                    (getCell(columnIndex, row) as? StackPane)?.children?.removeIf { it is Button }
-                }
-                button.removeFromParent()
-            }
-        }
-    }
-
     private fun handleCellsOverlayingAction(action: Cell.() -> Unit) {
         val buttons = overlayCells()
         for (button in buttons.keys) {
@@ -224,7 +259,10 @@ class TableSection: Fragment() {
     }
 
     private fun overlayCells(): Map<Button, CellEditor> {
-        val map = overlayGrid { (GridPane.getRowIndex(it) ?: -1) > 0 && (GridPane.getColumnIndex(it) ?: -1) > 0 }
+        val map = overlayGrid {
+            val (y, x) = locate(it)
+            (y ?: -1) > 0 && (x ?: -1) > 0
+        }
             .mapValues { (_, location) ->
                 val (y, x) = location
                 editors[y - 1][x - 1]
@@ -254,44 +292,6 @@ class TableSection: Fragment() {
             pane.children.removeIf { it is Button }
         }
         parentEditor.hideConfirmationButton()
-    }
-
-    fun adjustTimeSpans() {
-        val buttons = overlayGrid {
-            val (y, x) = locate(it)
-            x != 0 && y == 0
-        }
-        for ((i, button) in buttons.keys.withIndex()) button.setOnAction {
-            find<TimeSpanAdjustView>(
-                params = mapOf(
-                    TimeSpanAdjustView::column to i,
-                    TimeSpanAdjustView::table to timeTable,
-                )
-            ).openModal(stageStyle = StageStyle.UTILITY, resizable = false)
-            button.removeFromParent()
-        }
-    }
-
-    fun adjustTitles() {
-        val buttons = overlayGrid {
-            val (y, x) = locate(it)
-            x != 0 && y == 0
-        }
-        for ((i, button) in buttons.keys.withIndex())
-            button.action {
-                TextInputDialog().apply {
-                    headerText = "Zmiana nazwy zajęć"
-                    contentText = "Podaj nazwę zajęć dla tej kolumny"
-                }.showAndWait().ifPresent {
-                    timeTable.titles[i].set(it)
-                    button.removeFromParent()
-                }
-            }
-    }
-
-    fun changeViewMode(viewMode: TimeTableEditor.Companion.ViewMode) {
-        for (list in editors) list.forEach { it.refreshView(viewMode) }
-        removeOverlayFromCells()
     }
 
     private fun getCell(x: Int, y: Int): Node? =
