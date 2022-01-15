@@ -69,16 +69,13 @@ class TableSection: Fragment() {
         }
 
         timeTable.columnsProperty.addListener { _, _, newVal ->
-            //fixme exception thrown on columns 0->1
             val newValue = newVal.toInt()
             while (editors.last().size < newValue) {
                 for (y in 0 until editors.size) {
                     root.addCell(editors.last().size, y, timeTable[y][editors.last().size])
                 }
                 val columnIndex = editors.first().lastIndex
-                root.stackpane { borderpane(); gridpaneConstraints { columnRowIndex(columnIndex + 1, 0) } }
-                loadTimeSpans(columnIndex)
-                addTitle(columnIndex)
+                root.addLabels(columnIndex + 1)
             }
             while (editors.last().size > newValue) {
                 root.remove(editors.last().size, 0 )
