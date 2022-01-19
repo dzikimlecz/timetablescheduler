@@ -1,5 +1,6 @@
 package me.dzikimlecz.timetables.managers
 
+import me.dzikimlecz.lecturers.Lecturer
 import me.dzikimlecz.timetables.timetable.TimeTable
 import org.junit.jupiter.api.*
 import org.junit.jupiter.api.Assertions.*
@@ -8,13 +9,33 @@ import org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS
 //  -------------- SERVER MUST BE RUNNING FOR THESE TO PASS! -----------------------------------------------------------
 //  -------------- IF DATA SOURCES ARE MOCKED/ALMOST EMPTY, YOU SHOULD RESTART SERVER EVERY TIME -----------------------
 
-@TestInstance(PER_CLASS)
 internal class DataBaseConnectionManagerTest {
     val manager: DataBaseConnectionManager =
         CvurlConnectionManager()
 
-    @BeforeAll
-    fun waitForServerToStart() = Thread.sleep(7_000)
+
+    @BeforeEach
+    internal fun setUp() {
+        val lecturer = Lecturer("Marcin Najman", "MN", mapOf())
+        val table = TimeTable(2, 2, name = "test")
+
+        try {
+            manager.sendTable(table)
+            manager.sendLecturer(lecturer)
+        } catch (ignore: Exception) {}
+    }
+
+    @AfterEach
+    internal fun tearDown() {
+        try {
+            manager.removeLecturer("MN")
+            manager.removeLecturer("T")
+            manager.removeLecturer("P")
+            manager.removeTable("test")
+            manager.removeTable("poster")
+            manager.removeTable("patcher")
+        } catch (ignore: Exception) {}
+    }
 
     @Nested
     @DisplayName("Connection to the server")
