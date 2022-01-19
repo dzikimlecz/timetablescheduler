@@ -83,15 +83,18 @@ internal class DataBaseConnectionManagerTest {
         @Test
         fun `should post a new table`() {
             // when
-            val table = TimeTable(2, 2, name = "patcher")
+            val table = TimeTable(2, 2, name = "poster")
             //then
             assertDoesNotThrow { manager.sendTable(table) }
         }
 
         @Test
         fun `should patch existing table`() {
+            // given
+            var table: TimeTable? = TimeTable(2, 2, name = "patcher")
+            manager.sendTable(table!!)
             // when
-            val table = TimeTable(2, 2, name = "patcher")
+            table = TimeTable(2, 2, name = "patcher")
             //then
             assertDoesNotThrow { manager.sendTable(table) }
         }
@@ -151,7 +154,7 @@ internal class DataBaseConnectionManagerTest {
             assertNull(lecturer)
         }
     }
-    
+
     @Nested
     @DisplayName("Sending a lecturer")
     @TestInstance(PER_CLASS)
