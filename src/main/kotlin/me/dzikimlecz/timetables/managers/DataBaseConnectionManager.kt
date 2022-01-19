@@ -24,14 +24,15 @@ interface DataBaseConnectionManager {
 
     fun getLecturers(): List<Lecturer>
 
-    fun lookForLecturer(name: String): Lecturer?
+    fun lookForLecturer(code: String): Lecturer?
 
     fun sendLecturer(lecturer: Lecturer)
 
-    fun removeLecturer(name: String)
+    fun removeLecturer(code: String)
 
     companion object {
-        val address = DefaultPaths.SERVER_ADDRESS.value
+        val address: String
+            get() = DefaultPaths.SERVER_ADDRESS.value!!
         val timetableSerializer = TimeTable.serializer()
         val lecturerSerializer = object: KSerializer<Lecturer> {
             override fun deserialize(decoder: Decoder): Lecturer =

@@ -62,8 +62,8 @@ class KhttpDataBaseConnectionManager: DataBaseConnectionManager {
         return response.jsonArray.map { Json.decodeFromString(lecturerSerializer, it.toString()) }
     }
 
-    override fun lookForLecturer(name: String): Lecturer? {
-        val response = get("$address/lecturers/$name")
+    override fun lookForLecturer(code: String): Lecturer? {
+        val response = get("$address/lecturers/$code")
         return if (response.isOk())
             Json { ignoreUnknownKeys = true }.decodeFromString(lecturerSerializer, response.jsonObject.toString())
         else null
@@ -90,8 +90,8 @@ class KhttpDataBaseConnectionManager: DataBaseConnectionManager {
         }
     }
 
-    override fun removeLecturer(name: String) =
-        delete("$address/lecturers/$name").checkSuccess()
+    override fun removeLecturer(code: String) =
+        delete("$address/lecturers/$code").checkSuccess()
 
 }
 
