@@ -1,10 +1,10 @@
 package me.dzikimlecz.timetables
 
+import coresearch.cvurl.io.request.CVurl
 import me.dzikimlecz.timetables.components.views.MainView
 
 import tornadofx.launch
 import java.io.File
-import java.net.ConnectException
 
 fun main() {
     checkPaths()
@@ -35,9 +35,9 @@ private fun checkPaths() =
 private fun initServer(): Boolean {
     val file = File(DefaultPaths.SERVER_EXECUTABLE.value ?: return false)
     return try {
-        khttp.get(DefaultPaths.SERVER_ADDRESS.value ?: return false)
+        CVurl().get(DefaultPaths.SERVER_ADDRESS.value ?: return false).asString().get()
         true
-    } catch (e: ConnectException) {
+    } catch (e: Throwable) {
         // runs server's executable if connecting to it wasn't possible.
         file.execute()
     }
