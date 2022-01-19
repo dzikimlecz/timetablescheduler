@@ -25,6 +25,7 @@ dependencies {
     implementation(files("C:\\libs\\transferred-1.jar"))
 
     runtimeOnly("org.slf4j:slf4j-api:1.7.32")
+    runtimeOnly("org.slf4j:slf4j-simple:1.7.32")
     implementation("com.github.corese4rch:cvurl-io:1.5.1")
     implementation("com.fasterxml.jackson.core:jackson-core:2.13.1")
     implementation("com.fasterxml.jackson.core:jackson-annotations:2.13.1")
