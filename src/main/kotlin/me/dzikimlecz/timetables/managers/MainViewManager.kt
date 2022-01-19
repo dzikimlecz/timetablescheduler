@@ -19,7 +19,7 @@ import java.io.File
 
 lateinit var activeTable : TimeTable
 private val filesManager = FilesManager()
-private val dataBaseConnectionManager: DataBaseConnectionManager = KhttpDataBaseConnectionManager()
+private val dataBaseConnectionManager: DataBaseConnectionManager = CvurlConnectionManager()
 
 fun saveTable() =
     try { filesManager.saveTable(activeTable) }
